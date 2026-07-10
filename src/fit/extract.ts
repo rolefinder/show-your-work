@@ -1,21 +1,14 @@
 import type { FitPriority } from "./types";
+import {
+  type FitMatchConfig,
+  resolveStopSet,
+  resolveSynonyms,
+} from "./config";
 
 export type ExtractedRequirement = {
   text: string;
   priority: FitPriority;
 };
-
-const STOP = new Set([
-  "a", "an", "the", "and", "or", "to", "of", "in", "on", "for", "with", "at",
-  "by", "from", "as", "is", "are", "be", "been", "being", "this", "that",
-  "these", "those", "we", "you", "our", "your", "their", "will", "can",
-  "must", "should", "have", "has", "had", "do", "does", "did", "not",
-  "experience", "experienced", "years", "year", "ability", "able", "strong",
-  "working", "knowledge", "understanding", "familiarity", "proficient",
-  "using", "use", "used", "including", "etc", "etc.", "role", "job",
-  "position", "team", "company", "requirements", "responsibilities",
-  "qualifications", "preferred", "required", "nice", "plus",
-]);
 
 /** Pull requirement-like lines from a JD. Deterministic, no LLM. */
 export function extractRequirements(jd: string): ExtractedRequirement[] {
@@ -63,27 +56,18 @@ export function extractRequirements(jd: string): ExtractedRequirement[] {
   return out.slice(0, 24);
 }
 
-export function tokenize(raw: string): string[] {
+export function tokenize(raw: string, cfg?: FitMatchConfig): string[] {
+  const stops = resolveStopSet(cfg);
   return String(raw || "")
     .toLowerCase()
     .replace(/[^a-z0-9+/#.\s-]/g, " ")
     .split(/[\s,/]+/)
     .map((t) => t.trim())
-    .filter((t) => t.length >= 2 && !STOP.has(t));
+    .filter((t) => t.length >= 2 && !stops.has(t));
 }
 
-export function expandTerms(terms: string[]): string[] {
-  const syn: Record<string, string[]> = {
-    cicd: ["ci/cd", "ci", "cd", "github actions", "pipelines", "pipeline"],
-    "ci/cd": ["cicd", "github actions", "pipelines", "pipeline", "continuous integration"],
-    k8s: ["kubernetes"],
-    kubernetes: ["kubernetes", "k8s"],
-    iac: ["terraform", "infrastructure as code"],
-    terraform: ["iac", "infrastructure as code"],
-    js: ["javascript"],
-    ts: ["typescript"],
-    aws: ["amazon web services"],
-  };
+export function expandTerms(terms: string[], cfg?: FitMatchConfig): string[] {
+  const syn = resolveSynonyms(cfg);
   const out = new Set<string>();
   for (const t of terms) {
     out.add(t);

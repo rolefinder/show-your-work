@@ -1,0 +1,23 @@
+# Tenant Fit matcher overrides for the Avery Quill demo.
+# Core English stops + generic tech synonyms live in src/fit/config.ts.
+# Person-name stops and skill weighting belong here — never hardcoded in fit-core.
+
+extraStops:
+  - avery
+  - quill
+
+# Optional synonym additions / overrides (merged over defaults).
+synonyms: {}
+
+# Optional per-skill multipliers (lowercased skill label → factor on skill hits).
+skillWeights:
+  ci/cd: 1.2
+  typescript: 1.1
+
+weights:
+  skill: 14
+  corpus: 6
+  title: 8
+  minHit: 6
+  alignedMin: 20
+  partialMin: 10
