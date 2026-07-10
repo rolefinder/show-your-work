@@ -1,0 +1,27 @@
+/* Portfolio graph theme tokens (pg-*). Overridable per tenant. */
+:root {
+  --pg-canvas-bg: #1a1b26;
+  --pg-node: #c0caf5;
+  --pg-pro: #7aa2f7;
+  --pg-personal: #9ece6a;
+  --pg-skill: #e0af68;
+  --pg-post: #bb9af7;
+  --pg-here: #f7768e;
+  --pg-orphan: #565f89;
+  --pg-link: #414868;
+}
+
+.pg-page .pg-host,
+.work-graph-viewport.pg-host {
+  width: 100%;
+  height: min(70vh, 560px);
+  min-height: 320px;
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--line, #ddd5c8);
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.pg-host canvas {
+  display: block;
+}

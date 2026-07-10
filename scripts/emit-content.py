@@ -19,6 +19,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "src" / "app.tsx"
 ABOUT = ROOT / "content" / "about" / "profile.yaml"
+SKILLS_CFG = ROOT / "content" / "config" / "skills.yaml"
 WORK_DIR = ROOT / "content" / "work"
 BLOG_DIR = ROOT / "content" / "blog"
 
@@ -28,6 +29,9 @@ BEGIN_RE = {
     ),
     "WORK": re.compile(r"/\* BEGIN WORK \*/.*?/\* END WORK \*/", re.DOTALL),
     "BLOG": re.compile(r"/\* BEGIN BLOG \*/.*?/\* END BLOG \*/", re.DOTALL),
+    "SKILL_CATEGORIES": re.compile(
+        r"/\* BEGIN SKILL_CATEGORIES \*/.*?/\* END SKILL_CATEGORIES \*/", re.DOTALL
+    ),
 }
 
 
@@ -111,6 +115,26 @@ def emit_blog(items: list[dict[str, Any]]) -> str:
     )
 
 
+def emit_skill_categories(data: dict[str, Any]) -> str:
+    order = list(data.get("order") or ["Other"])
+    fallback = str(data.get("fallback") or "Other")
+    raw_map = data.get("map") or {}
+    map_lines = ",\n".join(
+        f"    {ts_string(k)}: {ts_string(str(v))}" for k, v in raw_map.items()
+    )
+    return (
+        "/* BEGIN SKILL_CATEGORIES */\n"
+        "const SKILL_CATEGORIES: SkillCategoryConfig = {\n"
+        f"  fallback: {ts_string(fallback)},\n"
+        f"  order: {ts_string_array(order)},\n"
+        "  map: {\n"
+        f"{map_lines}\n"
+        "  },\n"
+        "};\n"
+        "/* END SKILL_CATEGORIES */"
+    )
+
+
 def load_work() -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for path in sorted(WORK_DIR.glob("*.yaml")):
@@ -137,6 +161,11 @@ def main() -> int:
     args = parser.parse_args()
 
     profile = yaml.safe_load(ABOUT.read_text(encoding="utf-8")) or {}
+    skills_cfg = (
+        yaml.safe_load(SKILLS_CFG.read_text(encoding="utf-8")) or {}
+        if SKILLS_CFG.exists()
+        else {"order": ["Other"], "map": {}, "fallback": "Other"}
+    )
     work = load_work()
     blog = load_blog()
 
@@ -145,6 +174,7 @@ def main() -> int:
         "SITE_PROFILE": emit_profile(profile),
         "WORK": emit_work(work),
         "BLOG": emit_blog(blog),
+        "SKILL_CATEGORIES": emit_skill_categories(skills_cfg),
     }
     for key, block in replacements.items():
         if not BEGIN_RE[key].search(text):
@@ -156,7 +186,10 @@ def main() -> int:
         return 0
 
     APP.write_text(text, encoding="utf-8", newline="\n")
-    print(f"emitted profile + {len(work)} work + {len(blog)} blog -> {APP.relative_to(ROOT)}")
+    print(
+        f"emitted profile + {len(work)} work + {len(blog)} blog "
+        f"+ skill categories -> {APP.relative_to(ROOT)}"
+    )
     return 0
 
 
