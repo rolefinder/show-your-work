@@ -5,8 +5,9 @@ summary: >
 body: >
   Recruiters need requirement-to-evidence mapping, not a chatty bio bot.
   The cite-or-missing contract marks gaps honestly and links only to published
-  /work and /blog pages. Deterministic matchers are a safe v1; RAG can swap in
-  later behind the same JSON shape.
+  /work and /blog pages — for example {{work:harbor-gate|Harbor Gate}} and
+  {{work:quill-emit|Quill Emit}}. Deterministic matchers are a safe v1; RAG can
+  swap in later behind the same JSON shape.
 skills:
   - Fit
   - evidence

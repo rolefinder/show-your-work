@@ -38,6 +38,7 @@ can adopt pieces without becoming the public template.
      then flip visible and set `note.href` → `https://github.com/hhalperin/recruit-me`.
    - Do **not** paste Avery Quill demo copy into the live site as if it were
      Harrison’s work.
+   - First dogfood PR may land the hidden YAML only (no Fit/graph vendor yet).
 
 ## Explicit non-goals for the first dogfood PR
 
