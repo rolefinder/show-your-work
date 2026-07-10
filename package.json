@@ -1,6 +1,6 @@
 {
   "name": "recruit-me",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Open-source personal portfolio template + recruiter Fit (JD → cite-or-missing evidence brief).",
   "license": "Apache-2.0",
@@ -10,18 +10,24 @@
     "emit:evidence": "python scripts/emit-evidence.py",
     "emit:fit-config": "python scripts/emit-fit-config.py",
     "corpus:check": "python scripts/check-fictional-corpus.py",
+    "secrets:check": "python scripts/check-secrets.py",
     "typecheck": "tsc --noEmit",
+    "build:graph": "node scripts/build-graph-vendor.mjs",
     "bundle": "node scripts/build.mjs",
     "build:fit-worker": "node scripts/build-fit-worker.mjs",
-    "build": "npm run emit && npm run typecheck && npm run bundle && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker",
+    "build": "npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker",
     "preview": "node scripts/preview.mjs",
     "fit:smoke": "npx --yes tsx scripts/fit-smoke.ts",
-    "test": "npm run corpus:check && npm run build && npm run fit:smoke"
+    "graph:smoke": "node scripts/graph-smoke.mjs",
+    "test": "npm run corpus:check && npm run secrets:check && npm run build && npm run fit:smoke && npm run graph:smoke"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "esbuild": "^0.25.0",
+    "graphology": "^0.26.0",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "sigma": "^3.0.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }

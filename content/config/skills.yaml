@@ -1,0 +1,20 @@
+# Tenant skill-bank taxonomy (Avery Quill demo).
+# Adopters replace this file — core never hardcodes a person-specific map.
+fallback: Other
+order:
+  - Platform & delivery
+  - Languages & content
+  - Fit & evidence
+  - Other
+map:
+  CI/CD: Platform & delivery
+  GitHub Actions: Platform & delivery
+  Cloudflare Pages: Platform & delivery
+  pipelines: Platform & delivery
+  TypeScript: Languages & content
+  Python: Languages & content
+  YAML: Languages & content
+  content pipelines: Languages & content
+  YAML content pipelines: Languages & content
+  Fit: Fit & evidence
+  evidence: Fit & evidence

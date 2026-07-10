@@ -7,14 +7,22 @@ later vs keep site-only. Derived from `EXTRACTION_ANALYSIS.md` Phase 3.
 
 | Feature | Notes |
 |---------|-------|
-| Knowledge graph engine (CSP-safe IIFE) | After split + typed `opts.forces`; no `window.HHPG_*` API |
-| `buildKnowledgeGraph` / highlight BFS | Package **graph**; Fit highlight glue in starter |
-| Skill-bank UX + `?skill=` filter | Category map from tenant config, not a hardcoded vocabulary |
 | Search palette / token grammar | `{{work:}}` / `{{post:}}` patterns |
 | Architecture-kit figures | Single **core** package (do not ship a hand-fork design-system) |
 | Posts in Fit corpus (config flag) | Site scores projects only; OSS already includes blog |
 | Emit → generated module (not splice-only) | Content seam improvement |
-| Secret scanning / public-flip checklist | Dependabot already on; add scanning before marketing flip |
+| GitHub secret scanning + push protection | Local `secrets:check` done; org toggle before public flip |
+| Richer graph UX (layer toggles, compact lens) | Engine + `/graph` + `opts.forces` landed; lens polish later |
+
+## Landed this slice
+
+| Feature | Where |
+|---------|-------|
+| Knowledge graph engine (CSP-safe IIFE) | `graph/*` → `assets/graph-engine.js`; typed `opts.forces` |
+| `buildKnowledgeGraph` | `src/graph/buildKnowledgeGraph.ts` |
+| Skill-bank UX + `?skill=` filter | `src/skills/SkillBank.tsx` + `content/config/skills.yaml` |
+| Secret pattern scan in CI | `scripts/check-secrets.py` via `npm test` |
+| Dogfood path docs | `docs/architecture/DOGFOOD_PATH.md` |
 
 ## Keep site-only (never copy)
 
@@ -37,11 +45,13 @@ later vs keep site-only. Derived from `EXTRACTION_ANALYSIS.md` Phase 3.
 | `wrangler.example.toml` placeholders only | Present — no prod account IDs |
 | Fictional corpus gate | `scripts/check-fictional-corpus.py` (wired into `npm test`) |
 | Cite-or-missing Fit contract | Enforced in `matchFit` + fit-smoke |
-| Secret scanning / public flip | **Gap** — before making the repo public |
-| Graph package multi-instance `opts.forces` | **Gap** — no graph code in OSS yet |
+| Local secret pattern scan | `scripts/check-secrets.py` (wired into `npm test`) |
+| GitHub secret scanning / public flip | **Owner** — enable before making the repo public |
+| Graph package multi-instance `opts.forces` | **Done** — `graph/forces.mjs` + smoke |
 
 ## Explicit non-goals (still)
 
-- Vendoring recruit-me back into the dogfood site in the same pass
+- Vendoring recruit-me back into the dogfood site in the same pass (docs only: `DOGFOOD_PATH.md`)
 - LinkedIn scrapers / unofficial APIs
 - Widening CSP for third-party model CDNs
+- Agent flipping the GitHub repo from private → public

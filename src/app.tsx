@@ -1,6 +1,16 @@
 import type { BlogPost, SiteProfile, WorkItem } from "./types";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
+import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
+import { GraphPage } from "./graph/GraphPage";
+import {
+  buildSkillBankGroups,
+  collectSkillCounts,
+  searchFromSkills,
+  SkillBank,
+  skillsFromSearch,
+  type SkillCategoryConfig,
+} from "./skills/SkillBank";
 
 /* BEGIN SITE_PROFILE */
 const SITE_PROFILE: SiteProfile = {
@@ -50,6 +60,26 @@ const BLOG: BlogPost[] = [
 ];
 /* END BLOG */
 
+/* BEGIN SKILL_CATEGORIES */
+const SKILL_CATEGORIES: SkillCategoryConfig = {
+  fallback: "Other",
+  order: ["Platform & delivery", "Languages & content", "Fit & evidence", "Other"],
+  map: {
+    "CI/CD": "Platform & delivery",
+    "GitHub Actions": "Platform & delivery",
+    "Cloudflare Pages": "Platform & delivery",
+    "pipelines": "Platform & delivery",
+    "TypeScript": "Languages & content",
+    "Python": "Languages & content",
+    "YAML": "Languages & content",
+    "content pipelines": "Languages & content",
+    "YAML content pipelines": "Languages & content",
+    "Fit": "Fit & evidence",
+    "evidence": "Fit & evidence"
+  },
+};
+/* END SKILL_CATEGORIES */
+
 type View =
   | { name: "home" }
   | { name: "about" }
@@ -57,13 +87,15 @@ type View =
   | { name: "workDetail"; slug: string }
   | { name: "blog" }
   | { name: "blogDetail"; slug: string }
-  | { name: "fit" };
+  | { name: "fit" }
+  | { name: "graph" };
 
 function viewFor(path: string): View {
   const seg = path.split("/").filter(Boolean);
   if (!seg.length) return { name: "home" };
   if (seg[0] === "about") return { name: "about" };
   if (seg[0] === "fit") return { name: "fit" };
+  if (seg[0] === "graph") return { name: "graph" };
   if (seg[0] === "work" && seg[1]) return { name: "workDetail", slug: seg[1] };
   if (seg[0] === "work") return { name: "work" };
   if (seg[0] === "blog" && seg[1]) return { name: "blogDetail", slug: seg[1] };
@@ -74,6 +106,7 @@ function viewFor(path: string): View {
 function routeFor(view: View): string {
   if (view.name === "about") return "/about";
   if (view.name === "fit") return "/fit";
+  if (view.name === "graph") return "/graph";
   if (view.name === "work") return "/work";
   if (view.name === "workDetail") return "/work/" + view.slug;
   if (view.name === "blog") return "/blog";
@@ -83,6 +116,7 @@ function routeFor(view: View): string {
 
 function App() {
   const [path, setPath] = React.useState(() => window.location.pathname || "/");
+  const [search, setSearch] = React.useState(() => window.location.search || "");
   const view = viewFor(path);
   const visibleWork = WORK.filter((w) => w.visible !== false);
   const visibleBlog = BLOG.filter((b) => b.visible !== false);
@@ -90,18 +124,29 @@ function App() {
     () => buildEvidencePack(SITE_PROFILE, WORK, BLOG),
     [],
   );
+  const kg = React.useMemo(
+    () => buildKnowledgeGraph(WORK, BLOG),
+    [],
+  );
+  const activeSkills = React.useMemo(() => skillsFromSearch(search), [search]);
 
   React.useEffect(() => {
-    const onPop = () => setPath(window.location.pathname || "/");
+    const onPop = () => {
+      setPath(window.location.pathname || "/");
+      setSearch(window.location.search || "");
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   function navigate(next: string) {
-    if (window.location.pathname !== next) {
-      window.history.pushState(null, "", next);
+    const url = new URL(next, window.location.origin);
+    const full = url.pathname + url.search;
+    if (window.location.pathname + window.location.search !== full) {
+      window.history.pushState(null, "", full);
     }
-    setPath(next);
+    setPath(url.pathname);
+    setSearch(url.search);
     window.scrollTo(0, 0);
   }
 
@@ -120,6 +165,40 @@ function App() {
     );
   }
 
+  function setWorkSkills(next: string[]) {
+    navigate("/work" + searchFromSkills(next));
+  }
+
+  function toggleWorkSkill(label: string) {
+    const set = new Set(activeSkills);
+    if (set.has(label)) set.delete(label);
+    else set.add(label);
+    setWorkSkills([...set].sort());
+  }
+
+  const { allSkills, counts } = collectSkillCounts([...visibleWork, ...visibleBlog]);
+  const homeSkillGroups = buildSkillBankGroups(
+    allSkills,
+    counts,
+    [],
+    (label) => navigate("/work" + searchFromSkills([label])),
+    SKILL_CATEGORIES,
+  );
+  const workSkillGroups = buildSkillBankGroups(
+    allSkills,
+    counts,
+    activeSkills,
+    toggleWorkSkill,
+    SKILL_CATEGORIES,
+  );
+
+  const filteredWork =
+    activeSkills.length === 0
+      ? visibleWork
+      : visibleWork.filter((w) =>
+          activeSkills.every((s) => (w.skills || []).includes(s)),
+        );
+
   let body: React.ReactNode = null;
   if (view.name === "home") {
     body = React.createElement(
@@ -133,8 +212,13 @@ function App() {
         "div",
         { className: "cta-row" },
         React.createElement(Link, { href: "/work", className: "btn" }, "Work"),
+        React.createElement(Link, { href: "/graph", className: "btn secondary" }, "Graph"),
         React.createElement(Link, { href: "/fit", className: "btn secondary" }, "Try Fit"),
       ),
+      React.createElement(SkillBank, {
+        groups: homeSkillGroups,
+        intro: "Every skill across work and blog, grouped by tenant config. Click one to open Work filtered to that skill.",
+      }),
     );
   } else if (view.name === "about") {
     body = React.createElement(
@@ -154,18 +238,42 @@ function App() {
       "section",
       { className: "page" },
       React.createElement("h1", null, "Work"),
+      activeSkills.length
+        ? React.createElement(
+            "p",
+            { className: "muted" },
+            "Filtered by: ",
+            activeSkills.join(", "),
+            " · ",
+            React.createElement(
+              "button",
+              {
+                type: "button",
+                className: "linkish",
+                onClick: () => setWorkSkills([]),
+              },
+              "Clear",
+            ),
+          )
+        : null,
       React.createElement(
         "ul",
         { className: "card-list" },
-        visibleWork.map((w) =>
-          React.createElement(
-            "li",
-            { key: w.slug },
-            React.createElement(Link, { href: "/work/" + w.slug }, React.createElement("strong", null, w.title)),
-            React.createElement("p", null, w.summary),
-          ),
-        ),
+        filteredWork.length
+          ? filteredWork.map((w) =>
+              React.createElement(
+                "li",
+                { key: w.slug },
+                React.createElement(Link, { href: "/work/" + w.slug }, React.createElement("strong", null, w.title)),
+                React.createElement("p", null, w.summary),
+              ),
+            )
+          : React.createElement("li", null, React.createElement("p", { className: "muted" }, "No work matches these skills.")),
       ),
+      React.createElement(SkillBank, {
+        groups: workSkillGroups,
+        intro: "Click a skill to toggle the ?skill= filter on this list.",
+      }),
     );
   } else if (view.name === "workDetail") {
     const w = visibleWork.find((x) => x.slug === view.slug);
@@ -180,7 +288,13 @@ function App() {
           React.createElement(
             "ul",
             { className: "tags" },
-            w.skills.map((s) => React.createElement("li", { key: s }, s)),
+            w.skills.map((s) =>
+              React.createElement(
+                "li",
+                { key: s },
+                React.createElement(Link, { href: "/work" + searchFromSkills([s]) }, s),
+              ),
+            ),
           ),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
@@ -216,6 +330,12 @@ function App() {
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
   } else if (view.name === "fit") {
     body = React.createElement(FitPage, { docs, onNavigate: navigate });
+  } else if (view.name === "graph") {
+    body = React.createElement(GraphPage, {
+      nodes: kg.nodes,
+      edges: kg.edges,
+      onNavigate: navigate,
+    });
   }
 
   return React.createElement(
@@ -231,6 +351,7 @@ function App() {
         React.createElement(Link, { href: "/about" }, "About"),
         React.createElement(Link, { href: "/work" }, "Work"),
         React.createElement(Link, { href: "/blog" }, "Blog"),
+        React.createElement(Link, { href: "/graph" }, "Graph"),
         React.createElement(Link, { href: "/fit" }, "Fit"),
       ),
     ),
