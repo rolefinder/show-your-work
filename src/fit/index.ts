@@ -1,4 +1,6 @@
 import type { EvidenceDoc } from "./types";
+import type { FitMatchConfig } from "./config";
+import { resolveWeights } from "./config";
 import { expandTerms, tokenize } from "./extract";
 
 export type ScoredHit = {
@@ -8,11 +10,18 @@ export type ScoredHit = {
 };
 
 /** Score evidence docs against requirement terms (evidence index lookup). */
-export function retrieveEvidence(reqText: string, docs: EvidenceDoc[]): ScoredHit[] {
-  const terms = expandTerms(tokenize(reqText));
+export function retrieveEvidence(
+  reqText: string,
+  docs: EvidenceDoc[],
+  cfg?: FitMatchConfig,
+): ScoredHit[] {
+  const terms = expandTerms(tokenize(reqText, cfg), cfg);
   if (!terms.length) return [];
 
+  const weights = resolveWeights(cfg);
+  const skillWeights = cfg?.skillWeights || {};
   const hits: ScoredHit[] = [];
+
   for (const doc of docs) {
     const corpus = doc.text.toLowerCase();
     const skillLc = doc.skills.map((s) => s.toLowerCase());
@@ -20,24 +29,23 @@ export function retrieveEvidence(reqText: string, docs: EvidenceDoc[]): ScoredHi
     let quote = "";
 
     for (const term of terms) {
-      if (skillLc.some((s) => s === term || s.includes(term) || term.includes(s))) {
-        score += 14;
-        if (!quote) {
-          const sk = doc.skills.find((s) => {
-            const sl = s.toLowerCase();
-            return sl === term || sl.includes(term) || term.includes(sl);
-          });
-          quote = sk || term;
-        }
+      const skillMatch = doc.skills.find((s) => {
+        const sl = s.toLowerCase();
+        return sl === term || sl.includes(term) || term.includes(sl);
+      });
+      if (skillMatch) {
+        const mult = skillWeights[skillMatch.toLowerCase()] ?? 1;
+        score += weights.skill * mult;
+        if (!quote) quote = skillMatch;
       }
       if (corpus.includes(term)) {
-        score += 6;
+        score += weights.corpus;
         if (!quote) quote = snippetAround(doc.text, term);
       }
-      if (doc.title.toLowerCase().includes(term)) score += 8;
+      if (doc.title.toLowerCase().includes(term)) score += weights.title;
     }
 
-    if (score >= 6) {
+    if (score >= weights.minHit) {
       hits.push({
         doc,
         score,

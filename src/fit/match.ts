@@ -1,21 +1,25 @@
 import { extractRequirements } from "./extract";
 import { retrieveEvidence } from "./index";
+import type { FitMatchConfig } from "./config";
+import { resolveWeights } from "./config";
 import type { EvidenceDoc, FitBrief, FitEvidence, FitRequirement, FitStatus } from "./types";
 
 /**
  * Deterministic Fit matcher.
  * Hard rule: status "aligned" requires ≥1 citation.
+ * Optional cfg: tenant synonyms, extraStops, skillWeights, score thresholds.
  */
-export function matchFit(jd: string, docs: EvidenceDoc[]): FitBrief {
+export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig): FitBrief {
   const requirements = extractRequirements(jd);
   const role_read = inferRoleRead(jd);
+  const weights = resolveWeights(cfg);
   const mapped: FitRequirement[] = [];
   const strongest: FitEvidence[] = [];
   const gaps: string[] = [];
   const seenUrls = new Set<string>();
 
   for (const req of requirements) {
-    const hits = retrieveEvidence(req.text, docs);
+    const hits = retrieveEvidence(req.text, docs, cfg);
     let status: FitStatus;
     let why: string;
     const evidence: FitEvidence[] = hits.slice(0, 3).map((h) => ({
@@ -28,10 +32,10 @@ export function matchFit(jd: string, docs: EvidenceDoc[]): FitBrief {
       status = "not_evidenced_on_site";
       why = "No published site evidence matched this requirement.";
       gaps.push(req.text);
-    } else if (hits[0].score >= 20 && evidence.length >= 1) {
+    } else if (hits[0].score >= weights.alignedMin && evidence.length >= 1) {
       status = "aligned";
       why = `Matched published evidence (${hits[0].doc.title}).`;
-    } else if (hits[0].score >= 10) {
+    } else if (hits[0].score >= weights.partialMin) {
       status = "partial";
       why = `Partial overlap with ${hits[0].doc.title}; depth not fully evidenced.`;
     } else {

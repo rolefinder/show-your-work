@@ -13,6 +13,9 @@ Strategy and architecture for the OSS template + Fit product.
 
 ## Architecture
 
+- [Extraction analysis](architecture/EXTRACTION_ANALYSIS.md) (harrison-site → OSS lessons)
+- [Package boundaries](architecture/PACKAGE_BOUNDARIES.md)
+- [Site → OSS gap list](architecture/SITE_OSS_GAP_LIST.md)
 - [ADR 010 — Fit architecture](architecture/adr/010-recruiter-fit-architecture.md)
 - [ADR 011 — Fit quota](architecture/adr/011-recruiter-fit-quota.md)
 - [ADR 012 — Fit security & data](architecture/adr/012-recruiter-fit-security-data.md)
