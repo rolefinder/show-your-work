@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# recruit-me / Node
+node_modules/
+dist/
+functions/_lib/
+wrangler.toml
+.wrangler/
+*.tgz
+.env
+.env.*

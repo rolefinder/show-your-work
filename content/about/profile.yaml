@@ -1,0 +1,15 @@
+name: Avery Quill
+tagline: Platform engineer who ships evidence-backed portfolios
+location: Portland, OR (fictional demo)
+email: avery.quill@example.com
+summary: >
+  Avery Quill is a fictional demo persona for the recruit-me template.
+  They focus on CI/CD, Cloudflare Pages, and turning published work into
+  recruiter-ready evidence — never inventing employers or years.
+skills:
+  - CI/CD
+  - GitHub Actions
+  - Cloudflare Pages
+  - TypeScript
+  - Python
+  - YAML content pipelines
