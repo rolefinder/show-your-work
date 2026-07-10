@@ -21,11 +21,15 @@ so future splits stay honest.
 | `src/fit/*` | **fit** (pure matcher; no React in `match`/`extract`/`evidence`/`config`) |
 | `src/fit/FitPage.tsx` | **starter** (UI chrome; may stay colocated until package extract) |
 | `src/app.tsx` | **starter** |
+| `src/search/*` | **starter** (search palette + CSP-safe `richText` token grammar) |
 | `src/skills/*` | **starter** (skill-bank UI; taxonomy from tenant YAML) |
+| `src/generated/content.ts` | **content** emit output (typed module; do not hand-edit) |
 | `content/**` | **content** (Avery Quill demo only) |
 | `content/config/fit.yaml` | **starter/tenant** → passed into **fit** as `FitMatchConfig` |
 | `content/config/skills.yaml` | **starter/tenant** → skill-bank categories |
-| `scripts/emit-*.py`, `check-fictional-corpus.py`, `check-secrets.py` | **content** / safety tooling |
+| `packages/content/` | **content** emit library (`emit_site.py` → generated module) |
+| `scripts/emit-content.py` | thin CLI over `packages/content` |
+| `scripts/emit-evidence.py`, `emit-fit-config.py`, `check-fictional-corpus.py`, `check-secrets.py` | **content** / safety tooling |
 | `functions/api/fit.ts` | optional Fit worker / Pages Function (same matcher) |
 | `packages/ingest/` | ingest helpers (not Fit core) |
 | `graph/*` + `scripts/build-graph-vendor.mjs` | **graph** engine (typed `opts.forces`) |

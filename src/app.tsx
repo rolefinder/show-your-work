@@ -1,84 +1,18 @@
-import type { BlogPost, SiteProfile, WorkItem } from "./types";
+import { BLOG, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
 import { GraphPage } from "./graph/GraphPage";
+import { richText } from "./search/richText";
+import { buildSearchGraph, runSearch } from "./search/searchGraph";
+import { SearchPalette } from "./search/SearchPalette";
 import {
   buildSkillBankGroups,
   collectSkillCounts,
   searchFromSkills,
   SkillBank,
   skillsFromSearch,
-  type SkillCategoryConfig,
 } from "./skills/SkillBank";
-
-/* BEGIN SITE_PROFILE */
-const SITE_PROFILE: SiteProfile = {
-  name: "Avery Quill",
-  tagline: "Platform engineer who ships evidence-backed portfolios",
-  location: "Portland, OR (fictional demo)",
-  email: "avery.quill@example.com",
-  summary: "Avery Quill is a fictional demo persona for the recruit-me template. They focus on CI/CD, Cloudflare Pages, and turning published work into recruiter-ready evidence — never inventing employers or years.",
-  skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "YAML content pipelines"],
-};
-/* END SITE_PROFILE */
-
-/* BEGIN WORK */
-const WORK: WorkItem[] = [
-  {
-    slug: "harbor-gate",
-    title: "Harbor Gate",
-    summary: "A CI/CD gate that blocks merges until smoke checks and content emit pass on Cloudflare Pages.",
-    body: "Harbor Gate wires GitHub Actions to a Pages preview deploy, runs fit-smoke and build gates, and publishes a deterministic evidence pack. It demonstrates continuous integration, continuous delivery, and pipeline design without claiming Kubernetes or multi-cloud ops.",
-    skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "pipelines", "TypeScript"],
-    visible: true,
-    date: "2026-06",
-  },
-  {
-    slug: "quill-emit",
-    title: "Quill Emit",
-    summary: "YAML-to-SPA content emitter that keeps portfolio copy out of hand-edited bundles.",
-    body: "Quill Emit reads content/about, content/work, and content/blog YAML, validates slugs, and splices typed SITE_PROFILE / WORK / BLOG blocks into the TypeScript app. Humans edit YAML; the build owns the emitted markers.",
-    skills: ["Python", "YAML", "content pipelines", "TypeScript"],
-    visible: true,
-    date: "2026-05",
-  }
-];
-/* END WORK */
-
-/* BEGIN BLOG */
-const BLOG: BlogPost[] = [
-  {
-    slug: "cite-or-missing",
-    title: "Cite or missing: recruiter Fit without hallucination",
-    summary: "Why a JD fit brief should refuse aligned claims without citations.",
-    body: "Recruiters need requirement-to-evidence mapping, not a chatty bio bot. The cite-or-missing contract marks gaps honestly and links only to published /work and /blog pages. Deterministic matchers are a safe v1; RAG can swap in later behind the same JSON shape.",
-    skills: ["Fit", "evidence", "CI/CD"],
-    visible: true,
-    date: "2026-07",
-  }
-];
-/* END BLOG */
-
-/* BEGIN SKILL_CATEGORIES */
-const SKILL_CATEGORIES: SkillCategoryConfig = {
-  fallback: "Other",
-  order: ["Platform & delivery", "Languages & content", "Fit & evidence", "Other"],
-  map: {
-    "CI/CD": "Platform & delivery",
-    "GitHub Actions": "Platform & delivery",
-    "Cloudflare Pages": "Platform & delivery",
-    "pipelines": "Platform & delivery",
-    "TypeScript": "Languages & content",
-    "Python": "Languages & content",
-    "YAML": "Languages & content",
-    "content pipelines": "Languages & content",
-    "YAML content pipelines": "Languages & content",
-    "Fit": "Fit & evidence",
-    "evidence": "Fit & evidence"
-  },
-};
-/* END SKILL_CATEGORIES */
 
 type View =
   | { name: "home" }
@@ -117,6 +51,8 @@ function routeFor(view: View): string {
 function App() {
   const [path, setPath] = React.useState(() => window.location.pathname || "/");
   const [search, setSearch] = React.useState(() => window.location.search || "");
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const view = viewFor(path);
   const visibleWork = WORK.filter((w) => w.visible !== false);
   const visibleBlog = BLOG.filter((b) => b.visible !== false);
@@ -128,6 +64,14 @@ function App() {
     () => buildKnowledgeGraph(WORK, BLOG),
     [],
   );
+  const searchGraph = React.useMemo(
+    () => buildSearchGraph(WORK, BLOG),
+    [],
+  );
+  const searchResult = React.useMemo(
+    () => runSearch(searchQuery, searchGraph),
+    [searchQuery, searchGraph],
+  );
   const activeSkills = React.useMemo(() => skillsFromSearch(search), [search]);
 
   React.useEffect(() => {
@@ -137,6 +81,26 @@ function App() {
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      const tag = (t && t.tagName) || "";
+      const typing =
+        tag === "INPUT" || tag === "TEXTAREA" || (t && t.isContentEditable);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+        return;
+      }
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   function navigate(next: string) {
@@ -284,7 +248,7 @@ function App() {
           React.createElement(Link, { href: "/work", className: "muted" }, "← Work"),
           React.createElement("h1", null, w.title),
           React.createElement("p", { className: "lede" }, w.summary),
-          React.createElement("p", null, w.body),
+          React.createElement("p", null, richText(w.body, navigate)),
           React.createElement(
             "ul",
             { className: "tags" },
@@ -325,7 +289,7 @@ function App() {
           React.createElement(Link, { href: "/blog", className: "muted" }, "← Blog"),
           React.createElement("h1", null, b.title),
           React.createElement("p", { className: "lede" }, b.summary),
-          React.createElement("p", null, b.body),
+          React.createElement("p", null, richText(b.body, navigate)),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
   } else if (view.name === "fit") {
@@ -353,9 +317,28 @@ function App() {
         React.createElement(Link, { href: "/blog" }, "Blog"),
         React.createElement(Link, { href: "/graph" }, "Graph"),
         React.createElement(Link, { href: "/fit" }, "Fit"),
+        React.createElement(
+          "button",
+          {
+            type: "button",
+            className: "search-trigger",
+            onClick: () => setSearchOpen(true),
+            "aria-label": "Open search",
+          },
+          "Search",
+          React.createElement("kbd", null, "⌘K"),
+        ),
       ),
     ),
     React.createElement("main", null, body),
+    React.createElement(SearchPalette, {
+      open: searchOpen,
+      onClose: () => setSearchOpen(false),
+      onNavigate: navigate,
+      result: searchResult,
+      query: searchQuery,
+      onQueryChange: setSearchQuery,
+    }),
     React.createElement(
       "footer",
       { className: "site-footer" },

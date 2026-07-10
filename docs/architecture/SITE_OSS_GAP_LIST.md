@@ -7,10 +7,8 @@ later vs keep site-only. Derived from `EXTRACTION_ANALYSIS.md` Phase 3.
 
 | Feature | Notes |
 |---------|-------|
-| Search palette / token grammar | `{{work:}}` / `{{post:}}` patterns |
 | Architecture-kit figures | Single **core** package (do not ship a hand-fork design-system) |
 | Posts in Fit corpus (config flag) | Site scores projects only; OSS already includes blog |
-| Emit → generated module (not splice-only) | Content seam improvement |
 | GitHub secret scanning + push protection | Local `secrets:check` done; org toggle before public flip |
 | Richer graph UX (layer toggles, compact lens) | Engine + `/graph` + `opts.forces` landed; lens polish later |
 
@@ -18,6 +16,8 @@ later vs keep site-only. Derived from `EXTRACTION_ANALYSIS.md` Phase 3.
 
 | Feature | Where |
 |---------|-------|
+| Search palette + token grammar | `src/search/*` — `{{work:}}` / `{{blog:}}` (+ `{{post:}}` alias); Ctrl/⌘K |
+| Emit → generated module | `packages/content` → `src/generated/content.ts` (not splice-only) |
 | Knowledge graph engine (CSP-safe IIFE) | `graph/*` → `assets/graph-engine.js`; typed `opts.forces` |
 | `buildKnowledgeGraph` | `src/graph/buildKnowledgeGraph.ts` |
 | Skill-bank UX + `?skill=` filter | `src/skills/SkillBank.tsx` + `content/config/skills.yaml` |
