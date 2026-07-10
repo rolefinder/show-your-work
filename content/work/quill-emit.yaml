@@ -1,0 +1,15 @@
+slug: quill-emit
+title: Quill Emit
+summary: >
+  YAML-to-SPA content emitter that keeps portfolio copy out of hand-edited bundles.
+body: >
+  Quill Emit reads content/about, content/work, and content/blog YAML, validates
+  slugs, and splices typed SITE_PROFILE / WORK / BLOG blocks into the TypeScript
+  app. Humans edit YAML; the build owns the emitted markers.
+skills:
+  - Python
+  - YAML
+  - content pipelines
+  - TypeScript
+visible: true
+date: "2026-05"

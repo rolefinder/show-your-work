@@ -1,0 +1,6 @@
+/* Default theme tokens — override in adopter forks */
+:root {
+  --rm-brand: #0f5c4c;
+  --rm-bg: #f7f4ef;
+  --rm-fg: #1c1a17;
+}

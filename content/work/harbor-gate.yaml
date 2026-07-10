@@ -1,0 +1,18 @@
+slug: harbor-gate
+title: Harbor Gate
+summary: >
+  A CI/CD gate that blocks merges until smoke checks and content emit pass
+  on Cloudflare Pages.
+body: >
+  Harbor Gate wires GitHub Actions to a Pages preview deploy, runs fit-smoke
+  and build gates, and publishes a deterministic evidence pack. It demonstrates
+  continuous integration, continuous delivery, and pipeline design without
+  claiming Kubernetes or multi-cloud ops.
+skills:
+  - CI/CD
+  - GitHub Actions
+  - Cloudflare Pages
+  - pipelines
+  - TypeScript
+visible: true
+date: "2026-06"
