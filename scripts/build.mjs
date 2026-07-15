@@ -31,6 +31,8 @@ function copy(rel) {
 
 for (const rel of [
   "index.html",
+  "404.html",
+  "manifest.json",
   "styles.css",
   "_headers",
   "_redirects",

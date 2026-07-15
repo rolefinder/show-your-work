@@ -1,0 +1,5 @@
+# Adopter config: the absolute origin this site is deployed at.
+# Used for sitemap.xml, robots.txt, canonical/OG URLs, and JSON-LD.
+# This template has no fixed domain (Cloudflare Pages assigns one, or you
+# attach your own) — replace this before deploying somewhere real.
+origin: "https://example.com"
