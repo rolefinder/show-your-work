@@ -1,4 +1,4 @@
-import { BLOG, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { BLOG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
@@ -22,7 +22,8 @@ type View =
   | { name: "blog" }
   | { name: "blogDetail"; slug: string }
   | { name: "fit" }
-  | { name: "graph" };
+  | { name: "graph" }
+  | { name: "notfound"; path: string };
 
 function viewFor(path: string): View {
   const seg = path.split("/").filter(Boolean);
@@ -34,7 +35,7 @@ function viewFor(path: string): View {
   if (seg[0] === "work") return { name: "work" };
   if (seg[0] === "blog" && seg[1]) return { name: "blogDetail", slug: seg[1] };
   if (seg[0] === "blog") return { name: "blog" };
-  return { name: "home" };
+  return { name: "notfound", path };
 }
 
 function routeFor(view: View): string {
@@ -45,7 +46,26 @@ function routeFor(view: View): string {
   if (view.name === "workDetail") return "/work/" + view.slug;
   if (view.name === "blog") return "/blog";
   if (view.name === "blogDetail") return "/blog/" + view.slug;
+  if (view.name === "notfound") return view.path;
   return "/";
+}
+
+function titleFor(view: View): string {
+  if (view.name === "about") return `About — ${SITE_PROFILE.name}`;
+  if (view.name === "work") return `Work — ${SITE_PROFILE.name}`;
+  if (view.name === "workDetail") {
+    const w = WORK.find((x) => x.slug === view.slug);
+    if (w) return `${w.title} — ${SITE_PROFILE.name}`;
+  }
+  if (view.name === "blog") return `Blog — ${SITE_PROFILE.name}`;
+  if (view.name === "blogDetail") {
+    const b = BLOG.find((x) => x.slug === view.slug);
+    if (b) return `${b.title} — ${SITE_PROFILE.name}`;
+  }
+  if (view.name === "fit") return `Fit — ${SITE_PROFILE.name}`;
+  if (view.name === "graph") return `Graph — ${SITE_PROFILE.name}`;
+  if (view.name === "notfound") return `Page Not Found — ${SITE_PROFILE.name}`;
+  return `${SITE_PROFILE.name} — recruit-me demo`;
 }
 
 function App() {
@@ -82,6 +102,40 @@ function App() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
+
+  React.useEffect(() => {
+    document.title = titleFor(view);
+    let desc: string | null = null;
+    if (view.name === "workDetail") {
+      const w = WORK.find((x) => x.slug === view.slug);
+      if (w) desc = w.summary;
+    } else if (view.name === "blogDetail") {
+      const b = BLOG.find((x) => x.slug === view.slug);
+      if (b) desc = b.summary;
+    } else if (view.name === "notfound") {
+      desc = "The page you're looking for doesn't exist.";
+    }
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc || SITE_PROFILE.summary);
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", view.name === "notfound" ? "noindex" : "index, follow");
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    const canonicalUrl = SITE_ORIGIN + routeFor(view);
+    if (ogUrl) ogUrl.setAttribute("content", canonicalUrl);
+    else {
+      const tag = document.createElement("meta");
+      tag.setAttribute("property", "og:url");
+      tag.setAttribute("content", canonicalUrl);
+      document.head.appendChild(tag);
+    }
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement("link");
+      canonicalLink.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute("href", canonicalUrl);
+  }, [view]);
 
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -300,6 +354,24 @@ function App() {
       edges: kg.edges,
       onNavigate: navigate,
     });
+  } else if (view.name === "notfound") {
+    body = React.createElement(
+      "section",
+      { className: "page" },
+      React.createElement("p", { className: "eyebrow" }, "404"),
+      React.createElement("h1", null, "Page not found"),
+      React.createElement(
+        "p",
+        { className: "lede" },
+        "The page you're looking for doesn't exist. It may have moved or never existed at this address.",
+      ),
+      React.createElement(
+        "div",
+        { className: "cta-row" },
+        React.createElement(Link, { href: "/", className: "btn" }, "Home"),
+        React.createElement(Link, { href: "/work", className: "btn secondary" }, "Work"),
+      ),
+    );
   }
 
   return React.createElement(
