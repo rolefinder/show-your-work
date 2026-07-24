@@ -1,0 +1,146 @@
+/* ============================================================
+   recruit-me — Color tokens
+   Ink-on-cream with a single accent, light + dark, following the
+   system preference. Structure: raw palette → alpha ramps →
+   semantic aliases. Components only ever read the semantic
+   aliases, so an adopter can re-theme the whole site by
+   overriding the four ADOPTER vars below.
+   ============================================================ */
+
+:root {
+  /* Tells the UA to theme scrollbars and native controls with us. */
+  color-scheme: light dark;
+
+  /* ---------- ADOPTER OVERRIDES ----------
+     Fork and change these four; everything else derives. */
+  --rm-brand: #0f5c4c; /* accent — links, focus ring, active state */
+  --rm-brand-deep: #083d33; /* pressed / heavier accent */
+  --rm-bg: #f7f4ef; /* page background (light) */
+  --rm-fg: #1c1a17; /* primary ink (light) */
+
+  /* ---------- Raw palette ---------- */
+  --ink: var(--rm-fg);
+  --ink-800: #26231f; /* dark-mode card surface */
+  --ink-900: #131211; /* dark-mode page background */
+  --cream: var(--rm-bg);
+  --white: #fffdf9; /* elevated card surface (light) */
+
+  /* Ink alpha ramp — borders, faint fills, secondary/tertiary text.
+     Kept as explicit channels so alpha compositing stays predictable. */
+  --ink-05: rgb(28 26 23 / 0.05);
+  --ink-08: rgb(28 26 23 / 0.08);
+  --ink-10: rgb(28 26 23 / 0.1);
+  --ink-15: rgb(28 26 23 / 0.15);
+  --ink-40: rgb(28 26 23 / 0.4);
+  --ink-60: rgb(28 26 23 / 0.6);
+  --ink-70: rgb(28 26 23 / 0.7);
+
+  /* ---------- Brand ---------- */
+  --brand: var(--rm-brand);
+  --brand-deep: var(--rm-brand-deep);
+  --brand-soft: #e4efe9; /* tinted fill behind pressed chips / active rows */
+
+  /* ---------- Category palette (skill dots, tags — decorative only) ---------- */
+  --cat-1: #2563eb; /* blue-600   */
+  --cat-2: #4f46e5; /* indigo-600 */
+  --cat-3: #d97706; /* amber-600  */
+  --cat-4: #16a34a; /* green-600  */
+  --cat-5: #db2777; /* pink-600   */
+  --cat-6: #0891b2; /* cyan-600   */
+  --cat-7: #c2410c; /* orange-700 */
+  --cat-8: #64748b; /* slate-500  */
+
+  /* ---------- Semantic / state ----------
+     Each ink is darkened to clear 4.5:1 against its own -soft fill, because
+     the Fit status badges set it at 11px on exactly that pairing. */
+  --danger: #8b2e2e; /* 6.18:1 on --danger-soft */
+  --danger-soft: #f0d9d9;
+  --positive: #166534; /* 5.91:1 on --positive-soft */
+  --positive-soft: #d7f0df;
+  --caution: #7a5600; /* 5.37:1 on --caution-soft */
+  --caution-soft: #f3e6c8;
+
+  /* ---------- Semantic aliases (LIGHT — default) ---------- */
+  --bg: var(--cream);
+  --surface: var(--white);
+  --surface-sunk: var(--cream);
+  --surface-inverse: var(--ink);
+
+  --fg: var(--ink);
+  /* Long-form reading ink — a half-step below full ink so the lede keeps
+     its place in the hierarchy, comfortably above AA for body passages. */
+  --fg-reading: rgb(28 26 23 / 0.86);
+  /* Secondary text. Deliberately NOT --ink-60: that ramp step also paints
+     borders and fills, and at 0.60 it lands on 4.42:1 over cream — under
+     AA. 0.66 clears AA on both the cream page and the white card. */
+  --fg-muted: rgb(28 26 23 / 0.66);
+  /* Smallest readable text — ≥4.5:1 on both cream and card surfaces. */
+  --fg-subtle: rgb(28 26 23 / 0.62);
+  /* Decorative only (dots, separators) — fails AA for text. */
+  --fg-faint: var(--ink-40);
+  --fg-on-inverse: var(--cream);
+  --fg-on-brand: #ffffff;
+
+  --border: var(--ink-15);
+  --border-soft: var(--ink-10);
+  --border-hairline: var(--ink-05);
+
+  --accent: var(--brand);
+  --focus-ring: var(--brand);
+
+  /* Page wash — two very soft radial tints, one per corner. */
+  --wash-1: rgb(15 92 76 / 0.07);
+  --wash-2: rgb(188 108 37 / 0.07);
+
+  /* Modal scrim */
+  --scrim: rgb(28 26 23 / 0.4);
+}
+
+/* ---------- DARK (system preference) ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--ink-900);
+    --surface: var(--ink-800);
+    --surface-sunk: var(--ink-900);
+    --surface-inverse: #f0ece4;
+
+    --fg: #ece7dd;
+    --fg-reading: rgb(236 231 221 / 0.88);
+    --fg-muted: rgb(236 231 221 / 0.7);
+    --fg-subtle: rgb(236 231 221 / 0.62);
+    --fg-faint: rgb(236 231 221 / 0.42);
+    --fg-on-inverse: var(--ink-900);
+
+    /* Ink ramp re-expressed on cream so decorative fills and hovers stay
+       visible on dark surfaces (ink-on-ink composites to ~1:1). */
+    --ink-05: rgb(236 231 221 / 0.06);
+    --ink-08: rgb(236 231 221 / 0.09);
+    --ink-10: rgb(236 231 221 / 0.11);
+    --ink-15: rgb(236 231 221 / 0.16);
+    --ink-40: rgb(236 231 221 / 0.4);
+    --ink-60: rgb(236 231 221 / 0.6);
+    --ink-70: rgb(236 231 221 / 0.7);
+
+    /* The light-mode accent is too dark to read on an ink surface. */
+    --brand: #6fd0b4;
+    --brand-deep: #9ae3cd;
+    --brand-soft: rgb(111 208 180 / 0.16);
+    --fg-on-brand: var(--ink-900);
+
+    --border: rgb(236 231 221 / 0.16);
+    --border-soft: rgb(236 231 221 / 0.11);
+    --border-hairline: rgb(236 231 221 / 0.07);
+
+    --danger: #f2a3a3;
+    --danger-soft: rgb(242 163 163 / 0.16);
+    --positive: #7fd39a;
+    --positive-soft: rgb(127 211 154 / 0.16);
+    --caution: #e3c583;
+    --caution-soft: rgb(227 197 131 / 0.16);
+
+    --wash-1: rgb(111 208 180 / 0.06);
+    --wash-2: rgb(188 108 37 / 0.06);
+
+    --scrim: rgb(0 0 0 / 0.6);
+  }
+}

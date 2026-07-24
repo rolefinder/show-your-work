@@ -56,6 +56,7 @@ export function FitPage({ docs, onNavigate }: Props) {
   return React.createElement(
     "section",
     { className: "page fit-page" },
+    React.createElement("p", { className: "eyebrow" }, "Recruiter tool"),
     React.createElement("h1", null, "Fit"),
     React.createElement(
       "p",
@@ -103,7 +104,7 @@ function FitBriefView({
     "div",
     { className: "fit-brief" },
     React.createElement("h2", null, "Role read-back"),
-    React.createElement("p", null, brief.role_read),
+    React.createElement("p", { className: "prose" }, brief.role_read),
     React.createElement("h2", null, "Requirements"),
     React.createElement(
       "ul",

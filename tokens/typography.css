@@ -1,0 +1,52 @@
+/* ============================================================
+   recruit-me — Typography tokens
+   Three weights, a fluid display scale, and a cross-OS system
+   stack so the template renders correctly on macOS, Windows,
+   Linux, iOS and Android with zero network font requests
+   (the CSP is font-src 'self'). Adopters who want a webfont
+   self-host a woff2 and prepend it to --font-sans.
+   ============================================================ */
+
+:root {
+  /* ---------- Families (cross-OS fallback chains) ----------
+     "Inter" leads so dropping /assets/fonts/inter-latin.woff2 in with a
+     matching @font-face is the only change a webfont adopter needs. */
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono",
+    "Segoe UI Mono", "Roboto Mono", "Liberation Mono", monospace;
+
+  /* ---------- Weights (only three — never 700/800) ---------- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* ---------- Fluid type scale ----------
+     min @ 360px viewport → max @ 1280px viewport. Display sizes scale;
+     body and meta stay fixed so dense UI keeps its density. */
+  --text-display: clamp(2.25rem, 1.6rem + 2.9vw, 3.5rem); /* 36 → 56 */
+  --text-h1: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem); /* 28 → 40 */
+  --text-h2: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem); /* 22 → 28 */
+  --text-h3: 1.125rem; /* 18 — sub-heads / dialog title */
+  --text-lead: clamp(1.125rem, 1.05rem + 0.45vw, 1.1875rem); /* 18 → 19 */
+  --text-base: 1rem; /* 16 — long-form body */
+  --text-reading: clamp(1.0625rem, 1rem + 0.2vw, 1.125rem); /* 17 → 18 */
+  --text-body: 0.875rem; /* 14 — dense UI body */
+  --text-xs: 0.75rem; /* 12 — meta, hints, code */
+  --text-2xs: 0.6875rem; /* 11 — counts, footnotes */
+
+  /* ---------- Line height ---------- */
+  --line-tight: 1.15;
+  --line-snug: 1.3;
+  --line-body: 1.6;
+  --line-reading: 1.7;
+
+  /* ---------- Reading measure ---------- */
+  --measure-reading: 66ch;
+
+  /* ---------- Tracking ---------- */
+  --tracking-display: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-eyebrow: 0.12em; /* THE eyebrow signature */
+}

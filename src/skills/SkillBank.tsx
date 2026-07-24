@@ -20,21 +20,15 @@ export type SkillBankGroup = {
   items: SkillBankItem[];
 };
 
-const SKILL_PALETTE = [
-  "#0f5c4c",
-  "#2a6f97",
-  "#bc6c25",
-  "#6a4c93",
-  "#3d5a80",
-  "#9b2226",
-  "#52796f",
-  "#b56576",
-];
+/* Dots are decorative — the chip label always carries the meaning — so
+   these read the --cat-* category tokens instead of hardcoding hex. The
+   count is fixed at 8 to match tokens/colors.css. */
+const SKILL_PALETTE_SIZE = 8;
 
 export function skillColor(name: string): string {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
-  return SKILL_PALETTE[Math.abs(h) % SKILL_PALETTE.length];
+  return `var(--cat-${(Math.abs(h) % SKILL_PALETTE_SIZE) + 1})`;
 }
 
 export function skillCategory(
