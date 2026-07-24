@@ -686,6 +686,26 @@ a.tag:hover {
 }
 
 /* ------------------------------------------------------------
+   Knowledge lens — the compact graph embedded on content pages
+   ------------------------------------------------------------ */
+
+.knowledge-lens {
+  margin-top: var(--section-gap);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.knowledge-lens__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+}
+
+.knowledge-lens__hint {
+  font-size: var(--text-xs);
+}
+
+/* ------------------------------------------------------------
    Graph page controls
    ------------------------------------------------------------ */
 

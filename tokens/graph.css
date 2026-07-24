@@ -35,6 +35,14 @@
   background: var(--pg-canvas-bg);
 }
 
+/* Embedded lens on content pages — shorter than the full-page graph, and it
+   sits inside the reading column rather than taking over the viewport. */
+.pg-page .pg-host--lens,
+.work-graph-viewport.pg-host--lens {
+  height: min(42vh, 320px);
+  min-height: 220px;
+}
+
 .pg-host canvas {
   display: block;
 }

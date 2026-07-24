@@ -88,10 +88,60 @@ export function GraphCanvas(props: GraphCanvasProps) {
 
   return React.createElement("div", {
     ref: hostRef,
-    className: "pg-host work-graph-viewport",
+    className: props.compact
+      ? "pg-host pg-host--lens work-graph-viewport"
+      : "pg-host work-graph-viewport",
     role: "img",
     "aria-label": "Portfolio knowledge graph",
   });
+}
+
+/**
+ * Compact graph embedded on content pages — how the work connects, shown
+ * rather than described, with the full view one link away. Labels are
+ * suppressed at this size by the engine; the link carries the affordance.
+ *
+ * The prerenderer blocks graph-engine.js on non-/graph routes, so this
+ * snapshots as an empty host: crawlers get the heading and the link, not a
+ * half-initialized canvas.
+ */
+export function KnowledgeLens(props: {
+  nodes: KgNode[];
+  edges: KgEdge[];
+  onNavigate: (href: string) => void;
+}) {
+  if (!props.nodes.length) return null;
+  return React.createElement(
+    "section",
+    { className: "knowledge-lens" },
+    React.createElement("h2", { className: "knowledge-lens__title" }, "How the work connects"),
+    React.createElement(
+      "p",
+      { className: "muted knowledge-lens__hint" },
+      `${props.nodes.length} nodes · ${props.edges.length} edges · `,
+      React.createElement(
+        "a",
+        {
+          href: "/graph",
+          className: "prose-link",
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            props.onNavigate("/graph");
+          },
+        },
+        "open the full graph",
+      ),
+    ),
+    React.createElement(GraphCanvas, {
+      nodes: props.nodes,
+      edges: props.edges,
+      compact: true,
+      forces: { gravity: 0.75, scalingRatio: 30, hubPull: 0.4, macroRingBase: 140 },
+      onNavigate: (meta) => {
+        if (meta.href) props.onNavigate(meta.href);
+      },
+    }),
+  );
 }
 
 type GraphPageProps = {

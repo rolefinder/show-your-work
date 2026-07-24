@@ -3,7 +3,7 @@ import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } 
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
-import { GraphPage } from "./graph/GraphPage";
+import { GraphPage, KnowledgeLens } from "./graph/GraphPage";
 import { richText } from "./search/richText";
 import { buildSearchGraph, runSearch } from "./search/searchGraph";
 import { SearchPalette } from "./search/SearchPalette";
@@ -484,6 +484,11 @@ function App() {
               "No work matches these skills.",
             ),
       ),
+      React.createElement(KnowledgeLens, {
+        nodes: kg.nodes,
+        edges: kg.edges,
+        onNavigate: navigate,
+      }),
       React.createElement(SkillBank, {
         groups: workSkillGroups,
         intro: "Click a skill to toggle the ?skill= filter on this list.",
