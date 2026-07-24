@@ -28,9 +28,9 @@ reads it and writes the rest. If a step below asks you to edit a file under
 1. **Fork or copy the template.**
 2. **Replace the demo corpus.** Delete `content/work/*.yaml` and
    `content/blog/*.yaml`, write your own, and rewrite
-   `content/about/profile.yaml`. `npm run corpus:check` blocks real-person
-   fingerprints in the *demo* corpus — once it is your corpus, that gate's
-   `FORBIDDEN` list in `scripts/check-fictional-corpus.py` is yours to empty.
+   `content/about/profile.yaml`. `corpus:check` guards the *demo* corpus
+   against real-person fingerprints and turns itself off once you set
+   `demo: false` in step 3 — your corpus is supposed to name a real person.
 3. **Set your identity** in `content/config/site.yaml`: real `origin`,
    `title_suffix`, `description`, `short_name`, and **`demo: false`**.
 4. **Clear the demo disclaimer**: empty `extraCaveats` in

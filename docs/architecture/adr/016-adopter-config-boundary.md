@@ -61,7 +61,12 @@ one config file that *was* data was not wired to anything.
    the offline browser matcher return identical briefs.
 6. **`profile.yaml` gains `links`**, rendered with the email as one outlined
    contact strip on home and about.
-7. **`scripts/check-adopter-config.mjs` (new gate, in `npm test`)** inverts
+7. **`corpus:check` self-disables when `demo: false`.** It exists to keep the
+   shipped demo corpus fictional; on a fork the corpus is supposed to name a
+   real person, so the gate would fail on correct content and the adopter
+   would have to edit `FORBIDDEN` in a Python file — the exact class of change
+   this ADR removes everywhere else.
+8. **`scripts/check-adopter-config.mjs` (new gate, in `npm test`)** inverts
    the check instead of maintaining a blocklist: it reads the current identity
    out of `src/generated/content.ts` and fails if any of those strings appear
    under `src/`, `functions/`, `graph/`, `index.html`, `404.html`, or
