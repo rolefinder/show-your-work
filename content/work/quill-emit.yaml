@@ -13,5 +13,30 @@ skills:
   - YAML
   - content pipelines
   - TypeScript
+
+problem: >
+  Portfolio copy lived inside a hand-edited bundle, so editing a sentence meant
+  editing code and every content change carried the risk of a code change.
+outcome: >
+  Humans edit YAML and the build owns the emitted module, so a copy change can
+  no longer break the application.
+evidence:
+  - Slugs are validated against filenames, so a mistyped cross-link fails the build.
+  - The generated module is typed, so a content-shape change surfaces at compile time.
+  - Cross-links are rendered from tokens, keeping them CSP-safe with no inline HTML.
+decisions:
+  - >
+    Emit a typed module rather than splicing strings into the bundle, so the
+    compiler checks the content contract.
+  - >
+    Keep the generator in Python next to the YAML instead of adding a Node YAML
+    dependency to the site build.
+
+skill_notes:
+  Python: The generator reads and validates the YAML corpus.
+  YAML: YAML is the authoring surface humans actually edit.
+  content pipelines: Content moves through one emit step with an explicit contract.
+  TypeScript: The emitted module is typed, so content shape is compiler-checked.
+
 visible: true
 date: "2026-05"

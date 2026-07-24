@@ -41,6 +41,11 @@ export const WORK: WorkItem[] = [
     skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "pipelines", "TypeScript"],
     visible: true,
     date: "2026-06",
+    problem: "Content and config drifted from what was deployed. A green local build said nothing about whether the emitted site matched the YAML it came from.",
+    outcome: "Merges are blocked until the emitted content, the built bundle, and the deployed preview all agree, so a drifted build cannot reach production.",
+    evidence: ["Smoke checks and content emit run on every pull request, not on a schedule.", "The evidence pack is deterministic, so two runs on one commit are identical.", "A failed gate names the drifted file rather than reporting a generic failure."],
+    decisions: ["Gate on the emitted artifact, not the source, because drift shows up in what ships rather than in what was written.", "Keep the checks deterministic instead of adding a model, so a red build is always reproducible."],
+    skillNotes: { "CI/CD": "Delivery runs through merge gates rather than trusting a green local build.", "GitHub Actions": "Actions wires the preview deploy and runs the gates on each PR.", "Cloudflare Pages": "The gate checks a real Pages preview deploy, not a local server.", "pipelines": "The emit-build-verify sequence is one pipeline with explicit stages.", "TypeScript": "The gate scripts are typed, so a contract change fails at build." },
   },
   {
     slug: "quill-emit",
@@ -50,6 +55,11 @@ export const WORK: WorkItem[] = [
     skills: ["Python", "YAML", "content pipelines", "TypeScript"],
     visible: true,
     date: "2026-05",
+    problem: "Portfolio copy lived inside a hand-edited bundle, so editing a sentence meant editing code and every content change carried the risk of a code change.",
+    outcome: "Humans edit YAML and the build owns the emitted module, so a copy change can no longer break the application.",
+    evidence: ["Slugs are validated against filenames, so a mistyped cross-link fails the build.", "The generated module is typed, so a content-shape change surfaces at compile time.", "Cross-links are rendered from tokens, keeping them CSP-safe with no inline HTML."],
+    decisions: ["Emit a typed module rather than splicing strings into the bundle, so the compiler checks the content contract.", "Keep the generator in Python next to the YAML instead of adding a Node YAML dependency to the site build."],
+    skillNotes: { "Python": "The generator reads and validates the YAML corpus.", "YAML": "YAML is the authoring surface humans actually edit.", "content pipelines": "Content moves through one emit step with an explicit contract.", "TypeScript": "The emitted module is typed, so content shape is compiler-checked." },
   }
 ];
 
@@ -80,5 +90,17 @@ export const SKILL_CATEGORIES: SkillCategoryConfig = {
     "YAML content pipelines": "Languages & content",
     "Fit": "Fit & evidence",
     "evidence": "Fit & evidence"
+  },
+  descriptions: {
+    "CI/CD": "Delivery gated by automated checks rather than by a green local build.",
+    "GitHub Actions": "Workflow automation for builds, gates, and preview deploys.",
+    "Cloudflare Pages": "Static hosting with edge functions and preview deployments.",
+    "pipelines": "Multi-stage build and delivery flows with explicit contracts between stages.",
+    "TypeScript": "Typed application and tooling code.",
+    "Python": "Content generation and verification tooling.",
+    "YAML": "Structured, human-authored content and configuration.",
+    "content pipelines": "Turning authored content into typed, buildable artifacts.",
+    "Fit": "Matching a job description against published evidence.",
+    "evidence": "Claims that link back to something published rather than asserted."
   },
 };

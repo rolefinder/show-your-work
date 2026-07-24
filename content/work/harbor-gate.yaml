@@ -16,5 +16,36 @@ skills:
   - Cloudflare Pages
   - pipelines
   - TypeScript
+
+# Editorial contract. All four are optional — the brief renders what exists —
+# but `outcome` and `evidence` are also what Fit quotes, so a citation becomes
+# a whole statement instead of a fragment cut out of `body`.
+problem: >
+  Content and config drifted from what was deployed. A green local build said
+  nothing about whether the emitted site matched the YAML it came from.
+outcome: >
+  Merges are blocked until the emitted content, the built bundle, and the
+  deployed preview all agree, so a drifted build cannot reach production.
+evidence:
+  - Smoke checks and content emit run on every pull request, not on a schedule.
+  - The evidence pack is deterministic, so two runs on one commit are identical.
+  - A failed gate names the drifted file rather than reporting a generic failure.
+decisions:
+  - >
+    Gate on the emitted artifact, not the source, because drift shows up in what
+    ships rather than in what was written.
+  - >
+    Keep the checks deterministic instead of adding a model, so a red build is
+    always reproducible.
+
+# skill label → how it applied here. Pairs with descriptions in
+# content/config/skills.yaml to form the two halves of a skill tooltip.
+skill_notes:
+  CI/CD: Delivery runs through merge gates rather than trusting a green local build.
+  GitHub Actions: Actions wires the preview deploy and runs the gates on each PR.
+  Cloudflare Pages: The gate checks a real Pages preview deploy, not a local server.
+  pipelines: The emit-build-verify sequence is one pipeline with explicit stages.
+  TypeScript: The gate scripts are typed, so a contract change fails at build.
+
 visible: true
 date: "2026-06"

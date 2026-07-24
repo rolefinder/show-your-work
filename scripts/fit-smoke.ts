@@ -1,9 +1,10 @@
 /**
- * Fit smoke tests against Avery Quill demo corpus.
+ * Fit smoke tests against the demo corpus.
  * - CI/CD JD must cite Harbor Gate and produce ≥1 aligned with citation
  * - Kubernetes must NOT be aligned
  * - Empty / nonsense JD must not invent aligned claims
- * - Tenant fit-config loads (extraStops / weights)
+ * - Tenant fit-config loads (extraStops / weights / extraCaveats)
+ * - The browser's evidence pack and the Worker's dist/evidence.json agree
  */
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -11,71 +12,65 @@ import { fileURLToPath } from "node:url";
 import { buildEvidencePack } from "../src/fit/evidence";
 import { matchFit } from "../src/fit/match";
 import type { FitMatchConfig } from "../src/fit/config";
-import type { BlogPost, SiteProfile, WorkItem } from "../src/types";
+import type { EvidenceDoc } from "../src/types";
+import { BLOG, SITE_PROFILE, WORK } from "../src/generated/content";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-function loadYamlishFromApp(): { profile: SiteProfile; work: WorkItem[]; blog: BlogPost[] } {
-  const evidencePath = join(root, "dist", "evidence.json");
-  const pack = JSON.parse(readFileSync(evidencePath, "utf8")) as {
-    docs: Array<{ id: string; kind: string; title: string; url: string; text: string; skills: string[] }>;
-  };
-
-  const about = pack.docs.find((d) => d.kind === "about");
-  const profile: SiteProfile = {
-    name: "Avery Quill",
-    tagline: about?.text.slice(0, 80) || "",
-    location: "demo",
-    email: "avery.quill@example.com",
-    summary: about?.text || "",
-    skills: about?.skills || [],
-    links: [],
-  };
-
-  const work: WorkItem[] = pack.docs
-    .filter((d) => d.kind === "work")
-    .map((d) => ({
-      slug: d.id.replace(/^work:/, ""),
-      title: d.title,
-      summary: d.text.slice(0, 160),
-      body: d.text,
-      skills: d.skills,
-      visible: true,
-    }));
-
-  const blog: BlogPost[] = pack.docs
-    .filter((d) => d.kind === "blog")
-    .map((d) => ({
-      slug: d.id.replace(/^blog:/, ""),
-      title: d.title,
-      summary: d.text.slice(0, 160),
-      body: d.text,
-      skills: d.skills,
-      visible: true,
-    }));
-
-  return { profile, work, blog };
-}
-
-function loadFitConfig(): FitMatchConfig {
-  const path = join(root, "dist", "fit-config.json");
-  const raw = JSON.parse(readFileSync(path, "utf8")) as FitMatchConfig;
-  return raw;
+function loadJson<T>(...parts: string[]): T {
+  return JSON.parse(readFileSync(join(root, ...parts), "utf8")) as T;
 }
 
 function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg);
 }
 
-const { profile, work, blog } = loadYamlishFromApp();
+/* The browser builds its pack from the generated module; /api/fit fetches
+   dist/evidence.json, built independently by scripts/emit-evidence.py. Two
+   implementations of one contract, so compare them directly — otherwise the
+   two Fit paths can quietly answer differently for the same JD. */
+const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG);
+const workerPack = loadJson<{ docs: EvidenceDoc[] }>("dist", "evidence.json");
+
+assert(
+  workerPack.docs.length === docs.length,
+  `evidence drift: browser pack has ${docs.length} docs, dist/evidence.json has ${workerPack.docs.length}`,
+);
+for (const mine of docs) {
+  const theirs = workerPack.docs.find((d) => d.id === mine.id);
+  assert(theirs, `evidence drift: dist/evidence.json is missing ${mine.id}`);
+  for (const field of ["title", "url", "text"] as const) {
+    assert(
+      theirs[field] === mine[field],
+      `evidence drift on ${mine.id}.${field}:\n  browser: ${JSON.stringify(mine[field]).slice(0, 160)}\n  worker:  ${JSON.stringify(theirs[field]).slice(0, 160)}`,
+    );
+  }
+  assert(
+    JSON.stringify(theirs.claims || []) === JSON.stringify(mine.claims || []),
+    `evidence drift on ${mine.id}.claims`,
+  );
+  assert(
+    JSON.stringify(theirs.skillNotes || {}) === JSON.stringify(mine.skillNotes || {}),
+    `evidence drift on ${mine.id}.skillNotes`,
+  );
+}
+
+/* Structured outcome/evidence exist and reach the pack as quotable claims. */
+const claimDocs = docs.filter((d) => (d.claims || []).length);
+assert(
+  claimDocs.length >= 1,
+  "no work item contributed claims — the editorial contract (outcome/evidence) is not reaching the evidence pack",
+);
+
+function loadFitConfig(): FitMatchConfig {
+  return loadJson<FitMatchConfig>("dist", "fit-config.json");
+}
 const fitCfg = loadFitConfig();
 assert(Array.isArray(fitCfg.extraStops), "fit-config must include extraStops");
 assert(
   fitCfg.extraStops!.some((s) => s.toLowerCase() === "avery"),
   "demo fit-config should stop 'avery' (tenant, not core)",
 );
-
-const docs = buildEvidencePack(profile, work, blog);
 
 const cicdJd = `
 Senior Platform Engineer

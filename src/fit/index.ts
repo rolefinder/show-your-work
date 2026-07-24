@@ -26,7 +26,13 @@ export function retrieveEvidence(
     const corpus = doc.text.toLowerCase();
     const skillLc = doc.skills.map((s) => s.toLowerCase());
     let score = 0;
-    let quote = "";
+
+    // Quote preference, best first: a whole authored claim (outcome /
+    // evidence bullet) reads as a citation; a skill tag is a label; a text
+    // window is a fragment. Only the last is used if nothing better matched.
+    let claimQuote = "";
+    let skillQuote = "";
+    let snippetQuote = "";
 
     for (const term of terms) {
       const skillMatch = doc.skills.find((s) => {
@@ -36,14 +42,22 @@ export function retrieveEvidence(
       if (skillMatch) {
         const mult = skillWeights[skillMatch.toLowerCase()] ?? 1;
         score += weights.skill * mult;
-        if (!quote) quote = skillMatch;
+        // "Delivery runs through merge gates…" is evidence; "CI/CD" is a
+        // label. Quote the authored note about this skill when there is one.
+        if (!skillQuote) skillQuote = doc.skillNotes?.[skillMatch] || skillMatch;
+      }
+      if (!claimQuote) {
+        const claim = (doc.claims || []).find((c) => c.toLowerCase().includes(term));
+        if (claim) claimQuote = claim;
       }
       if (corpus.includes(term)) {
         score += weights.corpus;
-        if (!quote) quote = snippetAround(doc.text, term);
+        if (!snippetQuote) snippetQuote = snippetAround(doc.text, term);
       }
       if (doc.title.toLowerCase().includes(term)) score += weights.title;
     }
+
+    const quote = claimQuote || skillQuote || snippetQuote;
 
     if (score >= weights.minHit) {
       hits.push({

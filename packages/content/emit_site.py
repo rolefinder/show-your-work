@@ -71,6 +71,32 @@ def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
     )
 
 
+def opt_string(key: str, value: Any) -> str:
+    """Emit `key: "..."`, or nothing when the field is absent/blank."""
+    text = str(value or "").strip()
+    return f"    {key}: {ts_string(text)},\n" if text else ""
+
+
+def opt_string_list(key: str, value: Any) -> str:
+    items = [str(v).strip() for v in (value or []) if str(v).strip()]
+    return f"    {key}: {ts_string_array(items)},\n" if items else ""
+
+
+def opt_string_map(key: str, value: Any) -> str:
+    # Whitespace-collapsed, not just stripped: scripts/emit-evidence.py
+    # normalizes the same values for the Worker's pack, and fit-smoke compares
+    # the two. A folded YAML scalar must not produce different strings.
+    pairs = {
+        str(k): " ".join(str(v).split())
+        for k, v in (value or {}).items()
+        if str(v or "").strip()
+    }
+    if not pairs:
+        return ""
+    body = ", ".join(f"{ts_string(k)}: {ts_string(v)}" for k, v in pairs.items())
+    return f"    {key}: {{ {body} }},\n"
+
+
 def emit_work_item(w: dict[str, Any]) -> str:
     visible = "true" if w.get("visible", True) else "false"
     date = w.get("date")
@@ -84,6 +110,11 @@ def emit_work_item(w: dict[str, Any]) -> str:
         f"    skills: {ts_string_array(list(w.get('skills') or []))},\n"
         f"    visible: {visible},\n"
         f"{date_line}"
+        f"{opt_string('problem', w.get('problem'))}"
+        f"{opt_string('outcome', w.get('outcome'))}"
+        f"{opt_string_list('evidence', w.get('evidence'))}"
+        f"{opt_string_list('decisions', w.get('decisions'))}"
+        f"{opt_string_map('skillNotes', w.get('skill_notes'))}"
         "  }"
     )
 
@@ -122,6 +153,15 @@ def emit_skill_categories(data: dict[str, Any]) -> str:
     map_lines = ",\n".join(
         f"    {ts_string(k)}: {ts_string(str(v))}" for k, v in raw_map.items()
     )
+    descriptions = data.get("descriptions") or {}
+    desc_lines = ",\n".join(
+        f"    {ts_string(k)}: {ts_string(str(v).strip())}"
+        for k, v in descriptions.items()
+        if str(v or "").strip()
+    )
+    desc_block = (
+        "  descriptions: {\n" + desc_lines + "\n  },\n" if desc_lines else "  descriptions: {},\n"
+    )
     return (
         "export const SKILL_CATEGORIES: SkillCategoryConfig = {\n"
         f"  fallback: {ts_string(fallback)},\n"
@@ -129,6 +169,7 @@ def emit_skill_categories(data: dict[str, Any]) -> str:
         "  map: {\n"
         f"{map_lines}\n"
         "  },\n"
+        f"{desc_block}"
         "};"
     )
 

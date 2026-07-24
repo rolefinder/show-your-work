@@ -18,3 +18,18 @@ map:
   YAML content pipelines: Languages & content
   Fit: Fit & evidence
   evidence: Fit & evidence
+
+# What each skill means, site-wide. Optional — chips render without it. Pairs
+# with a work item's `skill_notes` (how it applied there) to form the two
+# halves of a skill tooltip.
+descriptions:
+  CI/CD: Delivery gated by automated checks rather than by a green local build.
+  GitHub Actions: Workflow automation for builds, gates, and preview deploys.
+  Cloudflare Pages: Static hosting with edge functions and preview deployments.
+  pipelines: Multi-stage build and delivery flows with explicit contracts between stages.
+  TypeScript: Typed application and tooling code.
+  Python: Content generation and verification tooling.
+  YAML: Structured, human-authored content and configuration.
+  content pipelines: Turning authored content into typed, buildable artifacts.
+  Fit: Matching a job description against published evidence.
+  evidence: Claims that link back to something published rather than asserted.
