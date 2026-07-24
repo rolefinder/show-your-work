@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
+    "init": "node scripts/init-site.mjs",
     "emit": "python scripts/emit-content.py",
     "emit:evidence": "python scripts/emit-evidence.py",
     "emit:fit-config": "python scripts/emit-fit-config.py",

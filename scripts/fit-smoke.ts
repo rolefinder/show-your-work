@@ -13,7 +13,7 @@ import { buildEvidencePack } from "../src/fit/evidence";
 import { matchFit } from "../src/fit/match";
 import type { FitMatchConfig } from "../src/fit/config";
 import type { EvidenceDoc } from "../src/types";
-import { BLOG, SITE_PROFILE, WORK } from "../src/generated/content";
+import { BLOG, SITE_CONFIG, SITE_PROFILE, WORK } from "../src/generated/content";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -57,10 +57,21 @@ for (const mine of docs) {
 
 /* Structured outcome/evidence exist and reach the pack as quotable claims. */
 const claimDocs = docs.filter((d) => (d.claims || []).length);
-assert(
-  claimDocs.length >= 1,
-  "no work item contributed claims — the editorial contract (outcome/evidence) is not reaching the evidence pack",
-);
+if (SITE_CONFIG.demo) {
+  // The shipped demo corpus must exercise the editorial contract, or the
+  // template stops demonstrating the thing it is trying to teach.
+  assert(
+    claimDocs.length >= 1,
+    "no work item contributed claims — the editorial contract (outcome/evidence) is not reaching the evidence pack",
+  );
+} else if (!claimDocs.length) {
+  // Optional for an adopter, but it is the difference between Fit citing a
+  // whole statement and Fit citing a fragment. Worth saying out loud.
+  console.warn(
+    "fit-smoke: no work item defines outcome/evidence — Fit will quote text " +
+      "fragments instead of authored claims. See content/work/*.yaml.",
+  );
+}
 
 function loadFitConfig(): FitMatchConfig {
   return loadJson<FitMatchConfig>("dist", "fit-config.json");
@@ -68,10 +79,22 @@ function loadFitConfig(): FitMatchConfig {
 const fitCfg = loadFitConfig();
 assert(Array.isArray(fitCfg.extraStops), "fit-config must include extraStops");
 assert(
-  fitCfg.extraStops!.some((s) => s.toLowerCase() === "avery"),
-  "demo fit-config should stop 'avery' (tenant, not core)",
+  fitCfg.extraStops!.length > 0,
+  "fit-config should stop the site owner's name tokens (tenant data, not core)",
 );
 
+/*
+ * Two tiers of assertion, and the split matters for adopters.
+ *
+ * ENGINE invariants hold for ANY corpus and always run: cite-or-missing,
+ * nonsense produces nothing aligned, caveats come from config, the two
+ * evidence packs agree.
+ *
+ * DEMO expectations ("a CI/CD JD must cite Harbor Gate") are about THIS
+ * repo's fictional corpus. On an adopter's own content they are meaningless
+ * and fail, which would mean a correctly-initialized site cannot pass
+ * `npm test` — the same trap the fictional-corpus gate had.
+ */
 const cicdJd = `
 Senior Platform Engineer
 
@@ -86,16 +109,20 @@ Nice to have
 
 const cicd = matchFit(cicdJd, docs, fitCfg);
 const cicdAligned = cicd.requirements.filter((r) => r.status === "aligned");
-assert(cicdAligned.length >= 1, "CI/CD JD should produce ≥1 aligned requirement");
 for (const r of cicdAligned) {
   assert(r.evidence.length >= 1, `aligned requires citation: ${r.text}`);
 }
-const citesHarbor = cicd.requirements.some(
-  (r) =>
-    (r.status === "aligned" || r.status === "partial") &&
-    r.evidence.some((e) => /harbor gate/i.test(e.title) || /harbor-gate/i.test(e.url)),
-);
-assert(citesHarbor, "CI/CD JD must cite Harbor Gate");
+
+let citesHarbor = false;
+if (SITE_CONFIG.demo) {
+  assert(cicdAligned.length >= 1, "CI/CD JD should produce ≥1 aligned requirement");
+  citesHarbor = cicd.requirements.some(
+    (r) =>
+      (r.status === "aligned" || r.status === "partial") &&
+      r.evidence.some((e) => /harbor gate/i.test(e.title) || /harbor-gate/i.test(e.url)),
+  );
+  assert(citesHarbor, "CI/CD JD must cite Harbor Gate");
+}
 
 const k8sJd = `
 Platform Engineer
@@ -107,11 +134,10 @@ Requirements
 
 const k8s = matchFit(k8sJd, docs, fitCfg);
 const k8sAligned = k8s.requirements.filter((r) => r.status === "aligned");
-assert(k8sAligned.length === 0, "Kubernetes must not be aligned on demo corpus");
+if (SITE_CONFIG.demo) {
+  assert(k8sAligned.length === 0, "Kubernetes must not be aligned on demo corpus");
+}
 for (const r of k8s.requirements) {
-  if (r.status === "aligned") {
-    assert(r.evidence.length >= 1, "aligned requires citation");
-  }
   assert(
     r.status !== "aligned" || r.evidence.length >= 1,
     "cite-or-missing: aligned without evidence",
