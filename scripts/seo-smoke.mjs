@@ -42,4 +42,39 @@ if (!notFound.includes('name="robots"') || !notFound.toLowerCase().includes("noi
   fail("404.html missing a noindex robots meta — functions/_middleware.js keys off this to set a real 404 status");
 }
 
-console.log("seo-smoke ok", { urlCount, knownPaths: knownPaths.length });
+const llms = readFileSync(join(dist, "llms.txt"), "utf8");
+if (!llms.includes("## Work")) fail("llms.txt missing the Work section");
+
+/*
+ * Prerender coverage. Skipped entirely when the build ran without Playwright
+ * (a legitimate state — see scripts/run-prerender.mjs), but once ANY route is
+ * prerendered, EVERY indexable route must be, or some URLs would silently ship
+ * with the home page's metadata.
+ */
+const home = readFileSync(join(dist, "index.html"), "utf8");
+const prerendered = home.includes('data-prerender="1"');
+let checkedRoutes = 0;
+if (prerendered) {
+  for (const p of knownPaths) {
+    if (p === "/") continue;
+    const file = join(dist, ...p.split("/").filter(Boolean)) + ".html";
+    if (!existsSync(file)) fail(`prerendered dist${p}.html missing while index.html is prerendered`);
+    const doc = readFileSync(file, "utf8");
+    if (!doc.includes('data-prerender="1"')) fail(`dist${p}.html has no prerendered body snapshot`);
+    const canonical = (doc.match(/<link rel="canonical" href="([^"]*)"/) || [])[1];
+    if (!canonical || !canonical.endsWith(p)) {
+      fail(`dist${p}.html canonical is ${canonical || "missing"}, expected it to end with ${p}`);
+    }
+    if (!/<script type="application\/ld\+json">\s*\{"@context"/.test(doc)) {
+      fail(`dist${p}.html missing JSON-LD`);
+    }
+    checkedRoutes++;
+  }
+}
+
+console.log("seo-smoke ok", {
+  urlCount,
+  knownPaths: knownPaths.length,
+  prerendered,
+  checkedRoutes,
+});

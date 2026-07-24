@@ -1,11 +1,16 @@
 import * as esbuild from "esbuild";
-import { cpSync, mkdirSync, existsSync } from "node:fs";
+import { cpSync, mkdirSync, existsSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 
+// Wipe first: prerendered route docs and social cards are named after content
+// slugs, so deleting a project would otherwise leave its page and card behind
+// in dist/, served for a path no longer in the sitemap. This is the first step
+// in `npm run build` that writes to dist/, so nothing downstream is lost.
+rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 
 await esbuild.build({
