@@ -21,3 +21,10 @@ weights:
   minHit: 6
   alignedMin: 20
   partialMin: 10
+
+# Appended after the two engine caveats on every brief. The demo disclaimer
+# lives HERE, not in src/fit/ — an adopter who forgets to remove a hardcoded
+# one would ship "this corpus is fictional" to their own recruiters.
+# Delete this list (or empty it) once content/ is your real corpus.
+extraCaveats:
+  - Demo corpus is fictional (Avery Quill) — replace content/ with your own YAML.

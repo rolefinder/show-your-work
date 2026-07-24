@@ -1,4 +1,4 @@
-import { BLOG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
@@ -50,22 +50,61 @@ function routeFor(view: View): string {
   return "/";
 }
 
+/** "<page> — <titleSuffix>", or just the page name if no suffix is configured. */
+export function withSuffix(pageName: string): string {
+  const suffix = SITE_CONFIG.titleSuffix.trim();
+  return suffix ? `${pageName} — ${suffix}` : pageName;
+}
+
 function titleFor(view: View): string {
-  if (view.name === "about") return `About — ${SITE_PROFILE.name}`;
-  if (view.name === "work") return `Work — ${SITE_PROFILE.name}`;
+  if (view.name === "about") return withSuffix("About");
+  if (view.name === "work") return withSuffix("Work");
   if (view.name === "workDetail") {
     const w = WORK.find((x) => x.slug === view.slug);
-    if (w) return `${w.title} — ${SITE_PROFILE.name}`;
+    if (w) return withSuffix(w.title);
   }
-  if (view.name === "blog") return `Blog — ${SITE_PROFILE.name}`;
+  if (view.name === "blog") return withSuffix("Blog");
   if (view.name === "blogDetail") {
     const b = BLOG.find((x) => x.slug === view.slug);
-    if (b) return `${b.title} — ${SITE_PROFILE.name}`;
+    if (b) return withSuffix(b.title);
   }
-  if (view.name === "fit") return `Fit — ${SITE_PROFILE.name}`;
-  if (view.name === "graph") return `Graph — ${SITE_PROFILE.name}`;
-  if (view.name === "notfound") return `Page Not Found — ${SITE_PROFILE.name}`;
-  return `${SITE_PROFILE.name} — recruit-me demo`;
+  if (view.name === "fit") return withSuffix("Fit");
+  if (view.name === "graph") return withSuffix("Graph");
+  if (view.name === "notfound") return withSuffix("Page Not Found");
+  // Home leads with the person and what they do, not a page label.
+  return `${SITE_PROFILE.name} — ${SITE_PROFILE.tagline}`;
+}
+
+/**
+ * One outlined strip: the email, then whatever profile.links holds. Outbound
+ * links get rel="noopener noreferrer" — they are adopter-authored URLs.
+ */
+function ContactRow() {
+  return React.createElement(
+    "div",
+    { className: "contact-row", role: "group", "aria-label": "Contact" },
+    React.createElement(
+      "a",
+      {
+        className: "contact-row__item",
+        href: `mailto:${SITE_PROFILE.email}`,
+      },
+      SITE_PROFILE.email,
+    ),
+    SITE_PROFILE.links.map((l) =>
+      React.createElement(
+        "a",
+        {
+          key: l.href,
+          className: "contact-row__item",
+          href: l.href,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+        l.label,
+      ),
+    ),
+  );
 }
 
 /** Top-level nav, shared by the header bar and the mobile drawer. */
@@ -262,10 +301,13 @@ function App() {
     body = React.createElement(
       "section",
       { className: "page" },
-      React.createElement("p", { className: "eyebrow" }, "recruit-me demo"),
+      SITE_CONFIG.demo
+        ? React.createElement("p", { className: "eyebrow" }, "recruit-me demo")
+        : null,
       React.createElement("h1", null, SITE_PROFILE.name),
       React.createElement("p", { className: "lede" }, SITE_PROFILE.tagline),
       React.createElement("p", { className: "prose" }, SITE_PROFILE.summary),
+      React.createElement(ContactRow, null),
       React.createElement(
         "div",
         { className: "cta-row" },
@@ -286,6 +328,7 @@ function App() {
       React.createElement("h1", null, "About"),
       React.createElement("p", { className: "prose" }, SITE_PROFILE.summary),
       React.createElement("p", { className: "muted" }, SITE_PROFILE.location),
+      React.createElement(ContactRow, null),
       React.createElement(
         "ul",
         { className: "tags" },
@@ -533,8 +576,14 @@ function App() {
           ),
         ),
       ),
-      React.createElement("span", null, "Demo corpus · Avery Quill (fictional)"),
-      React.createElement("span", null, "Apache-2.0"),
+      SITE_CONFIG.demo
+        ? React.createElement(
+            "span",
+            null,
+            "Demo corpus — replace content/ with your own YAML",
+          )
+        : null,
+      React.createElement("span", null, `© ${SITE_PROFILE.name}`),
       React.createElement("span", { className: "site-footer__route" }, routeFor(view)),
     ),
   );

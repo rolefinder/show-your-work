@@ -22,7 +22,9 @@ Open http://localhost:4173/fit and paste a sample JD.
 | Path | Role |
 |------|------|
 | `content/about\|work\|blog/` | Adopter-owned YAML |
+| `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
 | `content/config/skills.yaml` | Skill-bank category map (tenant) |
+| `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
 | `scripts/emit-content.py` | Splices typed blocks into `src/app.tsx` |
 | `src/fit/` | Deterministic Fit matcher + UI |
 | `src/skills/` | Skill-bank UI + `?skill=` filter |
@@ -31,6 +33,19 @@ Open http://localhost:4173/fit and paste a sample JD.
 | `styles.css` | Component layer; reads tokens only, no literals |
 | `functions/api/fit.ts` | Optional same-origin `POST /api/fit` |
 | `docs/` | PRDs, ADRs, security, handoff |
+
+## Adopting it
+
+Standing up your own site is a `content/` edit, never a code change — see
+[`skills/infra-pages/SKILL.md`](./skills/infra-pages/SKILL.md) for the full
+runbook and [ADR 016](./docs/architecture/adr/016-adopter-config-boundary.md)
+for why the boundary is drawn there. `npm run config:check` fails the build if
+your identity leaks into `src/`.
+
+Not yet at parity with a full personal site: no prerendering (per-route
+metadata is client-set, so non-JS crawlers see only the home shell), no JSON-LD,
+and work pages carry no structured outcome/evidence fields. ADR 016 lists the
+open set.
 
 ## Theming
 

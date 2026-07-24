@@ -1,3 +1,8 @@
+export type ProfileLink = {
+  label: string;
+  href: string;
+};
+
 export type SiteProfile = {
   name: string;
   tagline: string;
@@ -5,6 +10,18 @@ export type SiteProfile = {
   email: string;
   summary: string;
   skills: string[];
+  links: ProfileLink[];
+};
+
+/** Deployment identity, from content/config/site.yaml. Never hardcode these. */
+export type SiteConfig = {
+  origin: string;
+  titleSuffix: string;
+  description: string;
+  shortName: string;
+  themeColor: string;
+  themeColorDark: string;
+  demo: boolean;
 };
 
 export type WorkItem = {

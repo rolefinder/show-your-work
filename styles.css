@@ -245,6 +245,43 @@
   margin-top: var(--space-6);
 }
 
+/* Contact strip — email and profile links share one outline, the way the
+   sibling site's contact bar does. Wraps to its own rows on a phone. */
+.contact-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.contact-row__item {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  min-width: 0;
+  padding: 0 var(--space-4);
+  overflow: hidden;
+  color: var(--fg-muted);
+  font-size: var(--text-body);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-row__item + .contact-row__item {
+  border-left: 1px solid var(--border-hairline);
+}
+
+.contact-row__item:hover,
+.contact-row__item:focus-visible {
+  background: var(--ink-05);
+  color: var(--fg);
+}
+
 button.linkish {
   padding: 0;
   border: 0;

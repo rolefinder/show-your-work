@@ -28,7 +28,19 @@ export type FitMatchConfig = {
   skillWeights?: Record<string, number>;
   /** Scoring thresholds; omitted fields use DEFAULT_WEIGHTS. */
   weights?: Partial<FitScoreWeights>;
+  /**
+   * Tenant caveats appended after the two engine caveats. This is where a
+   * "demo corpus is fictional" style disclaimer belongs — the engine must not
+   * carry one, or every adopter ships it to their own recruiters.
+   */
+  extraCaveats?: string[];
 };
+
+/** The two caveats that are true of the engine itself, for any corpus. */
+export const ENGINE_CAVEATS: readonly string[] = [
+  "Deterministic keyword matcher — not an LLM. Citations come only from published site content.",
+  "Absence of evidence is not proof of absence of skill.",
+];
 
 export const DEFAULT_STOP: ReadonlySet<string> = new Set([
   "a", "an", "the", "and", "or", "to", "of", "in", "on", "for", "with", "at",
@@ -79,4 +91,11 @@ export function resolveStopSet(cfg?: FitMatchConfig): Set<string> {
 
 export function resolveSynonyms(cfg?: FitMatchConfig): Record<string, string[]> {
   return { ...DEFAULT_SYNONYMS, ...(cfg?.synonyms || {}) };
+}
+
+export function resolveCaveats(cfg?: FitMatchConfig): string[] {
+  const extra = (cfg?.extraCaveats || [])
+    .map((c) => String(c || "").trim())
+    .filter(Boolean);
+  return [...ENGINE_CAVEATS, ...extra];
 }

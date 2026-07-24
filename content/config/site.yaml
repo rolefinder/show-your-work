@@ -1,5 +1,32 @@
-# Adopter config: the absolute origin this site is deployed at.
-# Used for sitemap.xml, robots.txt, canonical/OG URLs, and JSON-LD.
-# This template has no fixed domain (Cloudflare Pages assigns one, or you
-# attach your own) — replace this before deploying somewhere real.
+# Adopter config: everything that identifies THIS deployment.
+#
+# Nothing below should ever be hardcoded in src/, index.html, or manifest.json
+# — scripts/emit-html.ts writes those from this file at build time, so standing
+# up a fork is an edit here plus your own content/, never a code change.
+
+# The absolute origin this site is deployed at. Used for sitemap.xml,
+# robots.txt, canonical/OG URLs. Cloudflare Pages assigns one, or attach your
+# own domain — replace this before deploying somewhere real.
 origin: "https://example.com"
+
+# Appended after the page name in <title> ("Work — Avery Quill").
+# Leave empty for no suffix.
+title_suffix: "Avery Quill"
+
+# Fallback <meta name="description"> and og:description, for the initial HTML
+# and for routes that don't supply their own (the client sets per-route values
+# on navigation).
+description: "Demo portfolio for the recruit-me open-source template (fictional Avery Quill persona)."
+
+# PWA manifest identity.
+short_name: "Avery Quill"
+
+# Browser chrome color per scheme. Keep in sync with --rm-bg in
+# tokens/colors.css and the dark --bg — they are the same two surfaces.
+theme_color: "#f7f4ef"
+theme_color_dark: "#131211"
+
+# Demo mode. TRUE ships the "this corpus is fictional" chrome (home eyebrow,
+# footer line). Set to false — and clear extraCaveats in config/fit.yaml — the
+# moment content/ holds your real work.
+demo: true

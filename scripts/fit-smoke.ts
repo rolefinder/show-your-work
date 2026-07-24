@@ -29,6 +29,7 @@ function loadYamlishFromApp(): { profile: SiteProfile; work: WorkItem[]; blog: B
     email: "avery.quill@example.com",
     summary: about?.text || "",
     skills: about?.skills || [],
+    links: [],
   };
 
   const work: WorkItem[] = pack.docs
@@ -140,6 +141,23 @@ Requirements
 const nonsenseAligned = nonsense.requirements.filter((r) => r.status === "aligned");
 assert(nonsenseAligned.length === 0, "nonsense JD must not produce aligned");
 assert(nonsense.gaps.length >= 1 || nonsense.requirements.some((r) => r.status !== "aligned"), "nonsense should surface gaps");
+
+// Caveats must be tenant data, not engine constants. An adopter who never
+// touches fit.yaml still gets a clean brief; the demo disclaimer only appears
+// because THIS repo's fit.yaml asks for it. Regression guard for the bug where
+// "Demo corpus is fictional (Avery Quill)" was hardcoded in src/fit/match.ts
+// and therefore shipped in every adopter's recruiter-facing brief.
+const bare = matchFit("Platform engineer with CI/CD experience.", docs);
+assert(bare.caveats.length === 2, `engine must emit exactly 2 caveats, got ${bare.caveats.length}`);
+assert(
+  !bare.caveats.some((c) => /fictional|avery|quill|demo/i.test(c)),
+  "engine caveats must not mention the demo corpus",
+);
+const tenant = matchFit("Platform engineer with CI/CD experience.", docs, fitCfg);
+assert(
+  tenant.caveats.length === 2 + (fitCfg.extraCaveats || []).length,
+  "tenant caveats must be the engine pair plus fit.yaml extraCaveats",
+);
 
 console.log("fit-smoke OK");
 console.log(`  CI/CD aligned=${cicdAligned.length} harbor-cited=${citesHarbor}`);
