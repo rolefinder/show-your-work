@@ -44,7 +44,7 @@
     "ux:check": "node scripts/check-ux.mjs",
     "docs:check": "node scripts/check-doc-drift.mjs",
     "docs:links": "node scripts/check-doc-links.mjs",
-    "test": "npm run additive:check && npm run parity:check && npm run corpus:check && npm run publication:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run pages:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
+    "test": "npm run additive:check && npm run parity:check && npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run publication:check && npm run pages:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",
