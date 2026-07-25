@@ -25,7 +25,8 @@ function scalar(text, key) {
   return m[1].trim().replace(/^["']|["']$/g, "");
 }
 
-const blockers = [];
+const blockers = [];   // content/config problems -> exit 1
+const missingDeps = []; // toolchain problems     -> exit 2
 const warnings = [];
 
 // ---------- config ----------
@@ -68,28 +69,42 @@ if (blog.some((f) => /^fake-/.test(f))) {
   blockers.push("content/blog/: still contains the demo corpus (fake-*.yaml)");
 }
 
-// Editorial contract is optional, but its absence is what makes Fit quote
-// fragments instead of claims — worth saying, not worth blocking on.
-let unreviewedDrafts = 0;
-for (const f of work) {
-  const text = readFileSync(join(workDir, f), "utf8");
-  if (/^visible:\s*false/m.test(text)) {
-    unreviewedDrafts++;
-    if (/TODO/i.test(text)) {
-      warnings.push(`content/work/${f}: draft awaiting review — still has TODO markers`);
-    } else {
-      warnings.push(`content/work/${f}: draft is visible: false — flip it once you've read it`);
+/* YAML has more than one way to say false. PyYAML (which the emitter uses)
+   hides `visible: no`, `visible: False` and `visible: off` too, so matching
+   only the lowercase literal would treat a hidden file as published — and then
+   block on its TODOs, or miss it in the all-drafts guard. */
+const HIDDEN_RE = /^visible:\s*(false|no|off)\s*(#.*)?$/im;
+
+/** Same rules for projects and posts: a published TODO ships to a recruiter. */
+function auditCorpus(label, dir, files) {
+  let drafts = 0;
+  for (const f of files) {
+    const text = readFileSync(join(dir, f), "utf8");
+    if (HIDDEN_RE.test(text)) {
+      drafts++;
+      warnings.push(
+        /TODO/i.test(text)
+          ? `${label}/${f}: draft awaiting review — still has TODO markers`
+          : `${label}/${f}: draft is hidden — flip visible once you've read it`,
+      );
+      continue; // an unpublished draft shouldn't also be nagged about its contract
     }
-    continue; // an unpublished draft shouldn't also be nagged about its contract
+    if (/TODO/i.test(text)) {
+      blockers.push(`${label}/${f}: published but still contains TODO markers`);
+    }
+    // Editorial contract is optional, but its absence is what makes Fit quote
+    // fragments instead of claims — worth saying, not worth blocking on. Only
+    // projects carry it.
+    if (dir === workDir && (!/^outcome:/m.test(text) || !/^evidence:/m.test(text))) {
+      warnings.push(`${label}/${f}: no outcome/evidence — Fit will quote prose fragments here`);
+    }
   }
-  if (!/^outcome:/m.test(text) || !/^evidence:/m.test(text)) {
-    warnings.push(`content/work/${f}: no outcome/evidence — Fit will quote prose fragments here`);
-  }
-  if (/TODO/i.test(text)) {
-    blockers.push(`content/work/${f}: published but still contains TODO markers`);
-  }
+  return drafts;
 }
-if (unreviewedDrafts && unreviewedDrafts === work.length) {
+
+const workDrafts = auditCorpus("content/work", workDir, work);
+auditCorpus("content/blog", blogDir, blog);
+if (workDrafts && workDrafts === work.length) {
   blockers.push("content/work/: every project is an unreviewed draft — nothing would be published");
 }
 
@@ -101,11 +116,11 @@ if (unreviewedDrafts && unreviewedDrafts === work.length) {
 const py = ["python", "python3"].find(
   (c) => spawnSync(`${c} -c "pass"`, { shell: true, stdio: "ignore" }).status === 0,
 );
-if (!py) blockers.push("no working python interpreter (needed by the content emitter)");
+if (!py) missingDeps.push("no working python interpreter (needed by the content emitter)");
 else if (spawnSync(`${py} -c "import yaml"`, { shell: true, stdio: "ignore" }).status !== 0) {
-  blockers.push(`${py} cannot import yaml — run: pip install --user pyyaml`);
+  missingDeps.push(`${py} cannot import yaml — run: pip install --user pyyaml`);
 }
-if (!existsSync(join(root, "node_modules"))) blockers.push("node_modules missing — run: npm ci");
+if (!existsSync(join(root, "node_modules"))) missingDeps.push("node_modules missing — run: npm ci");
 
 const pw = spawnSync("npx --yes playwright --version", { shell: true, stdio: "ignore" });
 if (pw.status !== 0) {
@@ -117,6 +132,15 @@ if (pw.status !== 0) {
 
 // ---------- report ----------
 for (const w of warnings) console.warn(`check-ready: WARN  ${w}`);
+
+// Toolchain first, and with its own exit code: "your machine isn't set up" is
+// a different problem from "your config isn't filled in", and the caller acts
+// on them differently.
+if (missingDeps.length) {
+  console.error("check-ready: MISSING DEPENDENCIES");
+  for (const d of missingDeps) console.error(`  - ${d}`);
+  process.exit(2);
+}
 if (blockers.length) {
   console.error("check-ready: NOT READY");
   for (const b of blockers) console.error(`  - ${b}`);

@@ -19,6 +19,12 @@ import re
 import sys
 from pathlib import Path
 
+try:
+    import yaml
+except ImportError:
+    print("PyYAML required: pip install --user pyyaml", file=sys.stderr)
+    sys.exit(1)
+
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "content"
 
@@ -38,14 +44,31 @@ ALLOWED_EMAIL_DOMAINS = {"example.com", "example.org", "example.net"}
 
 
 def is_demo() -> bool:
-    """content/config/site.yaml demo flag. Absent or unreadable → assume demo."""
+    """content/config/site.yaml demo flag.
+
+    Parsed with PyYAML, not split on ':'. A naive split leaves the comment
+    attached in `demo: false  # …`, so the value never equals "false" and the
+    gate stays on for a site that has explicitly turned demo off.
+
+    A missing KEY defaults to False, matching emit_site_config's
+    cfg.get("demo", False) — the same file must not drive opposite behaviour in
+    the gate and in the emitted SITE_CONFIG. A missing or unparseable FILE is
+    the one asymmetry: there is nothing to read, so it fails closed and keeps
+    protecting the demo corpus rather than silently disabling the gate.
+    """
     cfg = ROOT / "content" / "config" / "site.yaml"
     if not cfg.is_file():
         return True
-    for line in cfg.read_text(encoding="utf-8").splitlines():
-        if line.strip().startswith("demo:"):
-            return line.split(":", 1)[1].strip().lower() not in {"false", "no", "0"}
-    return True
+    try:
+        data = yaml.safe_load(cfg.read_text(encoding="utf-8"))
+    except yaml.YAMLError:
+        return True
+    # A scalar or list is truthy, so `or {}` would not catch it and .get would
+    # raise. Anything that isn't a mapping is a broken config: fail closed
+    # rather than crash the gate.
+    if not isinstance(data, dict):
+        return True
+    return bool(data.get("demo", False))
 
 
 def check_obviously_fake() -> list[str]:
