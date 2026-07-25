@@ -15,8 +15,9 @@ after a public flip, prefer coordinated disclosure.
 - No secrets, Cloudflare account IDs, API tokens, or real PII in the tree
 - `wrangler.toml` with real bindings stays local / CI secrets — only
   `wrangler.example.toml` is committed
-- Demo corpus is fictional (**Avery Quill**); never paste real portfolio YAML
-  from a private dogfood site into this repo
+- Demo corpus is fictional and self-evidently so (**Fake Name**, `fake-*`
+  slugs); never paste real portfolio YAML from a private dogfood site into
+  this repo
 - `npm run corpus:check` fails if `content/` contains real-person / employer
   fingerprints (Harrison, LPL, non-`example.*` emails, etc.)
 - `npm run secrets:check` fails on high-signal credential patterns (AWS keys,
@@ -46,5 +47,7 @@ Still needed (human / org):
 - [ ] Confirm LICENSE + SECURITY contacts are correct for public disclosure
 - [ ] **Do not** auto-flip visibility from an agent PR — owner action only
 
-See `docs/strategy/recruit-me-security.md`, ADR 012, and
-`docs/architecture/SITE_OSS_GAP_LIST.md` for the fuller surface map + remaining gaps.
+See the [security posture](docs/strategy/recruit-me-security.md) and
+[ADR 012](docs/architecture/adr/012-recruiter-fit-security-data.md) for the
+fuller surface map. The original gap list is kept, unmaintained, in
+[docs/history](docs/history/SITE_OSS_GAP_LIST.md).

@@ -1,4 +1,4 @@
-﻿# recruit-me scaffold status (v0.2)
+# recruit-me scaffold status (v0.2)
 
 **Date:** 2026-07-10  
 **Local path (agent machine):** `/home/ubuntu/recruit-me`  
@@ -13,7 +13,7 @@
 |------|--------|
 | TypeScript SPA (`src/app.tsx`) | Done |
 | YAML `content/about\|work\|blog` + emit | Done |
-| **Fit UI** `/fit` ΓÇö paste/drop JD, cite-or-missing brief | Done (deterministic) |
+| **Fit UI** `/fit` — paste/drop JD, cite-or-missing brief | Done (deterministic) |
 | `src/fit/*` matcher + evidence pack | Done |
 | `dist/evidence.json` + `POST /api/fit` Pages Function scaffold | Done |
 | Optional KV daily quota stub | Done |
@@ -29,7 +29,7 @@ Verified: `npm run test` (build + fit-smoke) green. Harbor Gate cites for CI/CD 
 
 Cloud-agent GitHub token for **harrison-site** cannot push `hhalperin/recruit-me`
 (`Repository not found` / 404). Harrison created the private repo; next agent
-**with recruit-me access** must push local `main` (or unpack artifact) ΓÇö see handoff ┬º0.
+**with recruit-me access** must push local `main` (or unpack artifact) — see handoff §0.
 
 ## Artifacts
 
@@ -52,7 +52,7 @@ Or unpack the full tarball and push.
 
 ```bash
 cd /home/ubuntu/recruit-me
-npm ci && npm run test && npm run preview   # :4173 ΓÇö try /fit
+npm ci && npm run test && npm run preview   # :4173 — try /fit
 ```
 
 ## Next (after land on GitHub)

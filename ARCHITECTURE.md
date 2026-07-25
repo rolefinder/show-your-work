@@ -166,7 +166,13 @@ recruit-me/
 │   ├── skills/ui-review/          /ui-review — the judgement ux:check can't make
 │   └── workflows/draft-content.mjs subagent drafting workflow
 │
-├── docs/architecture/adr/       ▓ why — including rejected options
+├── docs/                        ▓ routed by audience
+│   ├── guide/                     building YOUR site: setup, authoring, theming
+│   ├── architecture/adr/          why — including the options that were rejected
+│   ├── ops/                       running it: bot/cost protection, SEO checklist
+│   ├── strategy/                  PRDs, security posture, platform review
+│   └── history/                   unmaintained record of how this got built
+│
 └── dist/                        build output (gitignored)
 ```
 
