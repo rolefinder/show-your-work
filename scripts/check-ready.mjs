@@ -14,7 +14,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { corpusDir, isDemo, isOwn, rel, resolve } from "./lib/content-paths.mjs";
+import { DEMO, corpusDir, isDemo, isOwn, rel, resolve } from "./lib/content-paths.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (...p) => readFileSync(join(root, ...p), "utf8");
@@ -66,13 +66,34 @@ if (isDemo()) {
   for (const [field, value] of [["name", name], ["email", email]]) {
     if (!value) blockers.push(`content/about/profile.yaml: ${field} is empty — fill it in`);
   }
-  if (name && /\bfake\b/i.test(name)) {
-    blockers.push(
-      `content/about/profile.yaml: name is still ${JSON.stringify(name)} — this looks like a copy of ` +
-        "the demo profile. Demo chrome is already off, so the site would publish that name as a real person.",
-    );
+
+  /* Compare against the demo file's ACTUAL values rather than pattern-matching
+     for "fake".
+
+     A regex here would be a second definition of "is this the demo persona",
+     and check-fictional-corpus.py already owns the first one — it requires the
+     substring `fake` in the demo profile's name. Two definitions drift: a fork
+     that renames its persona to "Fakeperson" satisfies that gate and slips
+     past a \bfake\b word-boundary test. Reading the file both gates are
+     talking about cannot disagree with itself. */
+  const demoProfile = readFileSync(join(DEMO, "about", "profile.yaml"), "utf8");
+  for (const [field, value] of [["name", name], ["email", email]]) {
+    if (value && value === scalar(demoProfile, field)) {
+      blockers.push(
+        `content/about/profile.yaml: ${field} is still the demo's (${JSON.stringify(value)}) — ` +
+          "this is a copy of content/demo/about/profile.yaml. Demo chrome is already off, so the " +
+          "site would publish it as a real person.",
+      );
+    }
   }
-  if (email && /@example\.(com|org|net)$/i.test(email)) {
+
+  /* Backstop for a copy that was partially edited — a new name that is still
+     obviously a placeholder, or an address at a reserved example domain
+     (RFC 2606, which exists precisely so these cannot be real). */
+  if (name && name !== scalar(demoProfile, "name") && /fake/i.test(name)) {
+    blockers.push(`content/about/profile.yaml: name is still a placeholder (${JSON.stringify(name)})`);
+  }
+  if (email && email !== scalar(demoProfile, "email") && /@example\.(com|org|net)$/i.test(email)) {
     blockers.push(`content/about/profile.yaml: email is still the placeholder ${email}`);
   }
   if (/^\s*-\s*(Add|your|skills)\s*$/m.test(profile)) {
