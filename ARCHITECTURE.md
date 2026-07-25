@@ -155,13 +155,18 @@ recruit-me/
 │   ├── _middleware.js             404 status + which document to serve
 │   └── api/fit.ts                 optional POST /api/fit
 │
-├── .claude/
-│   ├── skills/build-recruit-me/   the /build-recruit-me command
+├── public/                      ▓ WEB ROOT — copied to dist/, never edited
+│   ├── index.html · 404.html      templates; identity injected at build
+│   ├── manifest.json              PWA manifest; name/short_name injected too
+│   └── _headers · _redirects      CSP and SPA fallback
+│
+├── .claude/                     ▓ AGENT SURFACE — live in a fork, no install
+│   ├── skills/build-recruit-me/   /build-recruit-me — config → deployable site
+│   ├── skills/deploy-pages/       /deploy-pages — fork → live on Cloudflare
+│   ├── skills/ui-review/          /ui-review — the judgement ux:check can't make
 │   └── workflows/draft-content.mjs subagent drafting workflow
 │
 ├── docs/architecture/adr/       ▓ why — including rejected options
-├── index.html · 404.html        templates; identity injected at build
-├── _headers · _redirects        CSP and SPA fallback
 └── dist/                        build output (gitignored)
 ```
 

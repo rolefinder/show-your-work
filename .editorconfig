@@ -1,0 +1,24 @@
+# Line endings are not cosmetic here. Several build scripts rewrite YAML with
+# line-anchored regexes; when a checkout carried CRLF, `npm run init` matched
+# nothing and silently left the demo persona's Fit stop words in place on every
+# Windows fork. The scripts now handle both, but LF in the tree is the fix.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+[*.md]
+# Two trailing spaces are a markdown line break.
+trim_trailing_whitespace = false
+
+[{Makefile,*.mk}]
+indent_style = tab

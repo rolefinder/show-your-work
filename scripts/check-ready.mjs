@@ -109,6 +109,15 @@ if (workDrafts && workDrafts === work.length) {
 }
 
 // ---------- dependencies ----------
+/* Node first, because every other probe below runs on it. esbuild, tsx and
+   playwright all require 18+, and 18 is end-of-life — package.json says >=20,
+   but npm only WARNS on an engines mismatch, so an adopter on an old Node
+   otherwise discovers it as an unrelated syntax error deep in the build. */
+const major = Number(process.versions.node.split(".")[0]);
+if (major < 20) {
+  missingDeps.push(`node ${process.versions.node} is too old — this build needs Node 20 or newer (see .nvmrc)`);
+}
+
 /* Resolve the interpreter by RUNNING it, not by finding it on PATH: on Windows
    `python3` is the Microsoft Store stub, which exists and exits non-zero. The
    probe is a single shell string because an empty-string argv entry gets

@@ -1,0 +1,27 @@
+# LF in the working tree, on every platform.
+#
+# This is not a style preference. `scripts/init-site.mjs` rewrites fit.yaml with
+# line-anchored regexes; with core.autocrlf=true (the Windows default) the
+# checkout carried CRLF, `/^extra_stops:\n/` matched nothing, and init silently
+# left the DEMO persona's Fit stop words in every Windows fork. The scripts now
+# tolerate both, but the tree itself should not be the hazard.
+#
+# The index is already LF everywhere, so this changes checkouts only — it
+# produces no renormalization diff.
+* text=auto eol=lf
+
+# Binary: never touch, never diff as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Generated, and large. Collapsed in review; still diffable on request.
+assets/graph-engine.js linguist-generated=true
+assets/vendor/** linguist-vendored=true
+src/generated/** linguist-generated=true
+package-lock.json linguist-generated=true
