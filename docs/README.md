@@ -4,6 +4,8 @@ Strategy and architecture for the OSS template + Fit product.
 
 ## Strategy
 
+- [Platform review 2026-07](strategy/platform-review-2026-07.md) — standardization + adopter UX findings, with repros
+
 - [recruit-me PRD](strategy/recruit-me-prd.md)
 - [Recruiter Fit PRD](strategy/recruiter-fit-prd.md)
 - [Recruiter Fit OSS plan](strategy/recruiter-fit-oss-plan.md)
