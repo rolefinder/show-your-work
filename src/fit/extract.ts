@@ -10,6 +10,15 @@ export type ExtractedRequirement = {
   priority: FitPriority;
 };
 
+/** A short, capitalized, punctuation-free phrase — a section title, not a requirement. */
+function isHeading(text: string): boolean {
+  return (
+    /^[A-Z][A-Za-z0-9 /|&,-]{3,60}$/.test(text) &&
+    !/[.:,]/.test(text) &&
+    text.split(/\s+/).length <= 6
+  );
+}
+
 /** Pull requirement-like lines from a JD. Deterministic, no LLM. */
 export function extractRequirements(jd: string): ExtractedRequirement[] {
   const text = String(jd || "").replace(/\r\n/g, "\n").trim();
@@ -34,13 +43,23 @@ export function extractRequirements(jd: string): ExtractedRequirement[] {
       continue;
     }
 
+    const hadMarker = /^([-*•●]\s+|\d+[.)]\s+)/.test(line);
     const bullet = line.replace(/^[-*•●]\s+/, "").replace(/^\d+[.)]\s+/, "").trim();
     if (bullet.length < 8) continue;
     if (bullet.length > 280) continue;
-    // Skip pure title lines
-    if (/^[A-Z][A-Za-z0-9 /|&,-]{3,60}$/.test(bullet) && !/\b(experience|ci\/cd|kubernetes|python|aws)\b/i.test(bullet)) {
-      if (!/[.:,]/.test(bullet) && bullet.split(/\s+/).length <= 6) continue;
-    }
+
+    /* Headings ("Senior Platform Engineer", "About Us") are prose, never
+       bulleted — so only an UNMARKED line can be one. A bulleted line is a
+       requirement no matter how short.
+       This used to skip any short capitalized line unless it contained one of
+       a hardcoded tech list, which silently dropped real requirements: a JD
+       asking for "Rust systems programming" produced a brief that never
+       mentioned Rust. Omitting a requirement makes the candidate look like a
+       BETTER fit than the evidence supports, which is precisely what
+       cite-or-missing exists to prevent — a gap must be stated, not hidden.
+       The tech list also had no business in the engine; tenant vocabulary
+       belongs in content/config/fit.yaml. */
+    if (!hadMarker && isHeading(bullet)) continue;
 
     out.push({ text: bullet, priority: section });
   }
