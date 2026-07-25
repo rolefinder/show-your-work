@@ -1,0 +1,29 @@
+# Raw material for /build-recruit-me to draft content FROM.
+#
+# This file is optional. Leave it empty and the build simply uses whatever you
+# hand-wrote in content/work and content/blog.
+#
+# What drafting does and does not do:
+#   - Drafts land as content/work/<slug>.yaml with `visible: false`, so an
+#     accidental build never publishes something you have not read.
+#   - Every claim must be traceable to the source below. Anything the source
+#     does not say becomes a `TODO:` marker for you to fill in — it is never
+#     guessed. That rule is the whole point of this project: a Fit brief cites
+#     published evidence, so the evidence has to be real.
+#   - You review, edit, and flip `visible: true`. Nothing else publishes.
+
+# Public repositories become candidate projects. Read-only, via the GitHub API.
+github:
+  user: ""            # your handle, e.g. "octocat"
+  include_forks: false
+  max_repos: 12
+
+# A plain-text resume. Used for skills and for the shape of past work — never
+# to invent employers, titles, or dates that aren't in the file.
+resume: ""            # e.g. "./my-resume.txt"
+
+# Not implemented yet. A channel would need a transcript provider (captions or
+# speech-to-text) before it could become a source; the link itself belongs in
+# profile.yaml `links.youtube`, which works today. See ADR 018.
+# youtube:
+#   channel: ""

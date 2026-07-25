@@ -15,11 +15,15 @@ skills:
   - YAML content pipelines
 
 # Profile URLs for the contact row, and for sameAs in the emitted JSON-LD.
-# Both optional — delete either line and it stops rendering. Full URLs, so the
-# site never has to guess how a platform builds a profile address.
+# Keyed by platform, in the order you want them rendered. Add any platform you
+# like — the label is derived from the key, so `mastodon:` or `scholar:` needs
+# no code change. Full URLs, so the site never guesses how a platform builds a
+# profile address.
 #
 # The demo points at example.com on purpose: it is IANA-reserved for
 # documentation, so these can never resolve to a real person's account the way
 # a plausible-looking github.com/<handle> would.
-github: https://example.com/fake-github-profile
-linkedin: https://example.com/fake-linkedin-profile
+links:
+  github: https://example.com/fake-github-profile
+  linkedin: https://example.com/fake-linkedin-profile
+  youtube: https://example.com/fake-youtube-channel

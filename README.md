@@ -27,6 +27,19 @@ Open http://localhost:4173/fit and paste a sample JD.
 npm run init
 ```
 
+Then, in Claude Code:
+
+```
+/build-recruit-me
+```
+
+Preflights your config, optionally drafts project YAML from the sources you
+name in `content/config/sources.yaml` (GitHub repos, a resume) as reviewable
+`visible: false` drafts, builds with prerendering, and verifies the artifact.
+See [ADR 018](./docs/architecture/adr/018-build-command-and-source-drafting.md).
+
+`npm run ready` runs the preflight on its own.
+
 One pass: writes your identity into `content/config/site.yaml` and
 `content/about/profile.yaml`, swaps the demo persona's Fit stop words for
 yours, clears the demo disclaimer, and turns demo mode off. `--replace-content`

@@ -13,6 +13,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE_CONFIG, SITE_PROFILE } from "../src/generated/content";
+import { linkLabel } from "../src/profile-links";
 import { buildRoutes, knownPaths, visibleBlog, visibleWork } from "./lib/routes";
 import { SITE } from "./lib/site-meta";
 
@@ -44,8 +45,9 @@ function llmsTxt(): string {
     `Location: ${SITE_PROFILE.location}`,
     `Contact: ${SITE_PROFILE.email}`,
   ];
-  if (SITE_PROFILE.github) lines.push(`GitHub: ${SITE_PROFILE.github}`);
-  if (SITE_PROFILE.linkedin) lines.push(`LinkedIn: ${SITE_PROFILE.linkedin}`);
+  for (const [key, href] of Object.entries(SITE_PROFILE.links)) {
+    lines.push(`${linkLabel(key)}: ${href}`);
+  }
   lines.push("", "## Work", "");
   for (const w of visibleWork) {
     lines.push(`- [${w.title}](${SITE}/work/${w.slug}): ${w.summary.replace(/\s+/g, " ").trim()}`);

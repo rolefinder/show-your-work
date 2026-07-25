@@ -38,12 +38,18 @@ def emit_profile(data: dict[str, Any]) -> str:
         f"  summary: {ts_string(str(data['summary']).strip())},",
         f"  skills: {ts_string_array(list(data.get('skills') or []))},",
     ]
-    # Optional profile URLs — omitted entirely rather than emitted empty, so
-    # `SITE_PROFILE.github` is undefined and every consumer's falsy check works.
-    for key in ("github", "linkedin"):
-        value = str(data.get(key) or "").strip()
-        if value:
-            lines.append(f"  {key}: {ts_string(value)},")
+    # Profile URLs, keyed by platform. Authoring order is preserved (dicts are
+    # ordered), so the adopter controls the order they render in.
+    entries = {
+        str(k): str(v).strip()
+        for k, v in (data.get("links") or {}).items()
+        if str(v or "").strip()
+    }
+    if entries:
+        body = ", ".join(f"{ts_string(k)}: {ts_string(v)}" for k, v in entries.items())
+        lines.append(f"  links: {{ {body} }},")
+    else:
+        lines.append("  links: {},")
     lines.append("};")
     return "\n".join(lines)
 

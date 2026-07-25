@@ -26,8 +26,7 @@ export const SITE_PROFILE: SiteProfile = {
   email: "fake.name@example.com",
   summary: "Fake Name is a placeholder persona for the recruit-me template — not a real person. The naming is deliberately obvious so a demo deploy can never be mistaken for someone's actual portfolio. Replace this file with your own.",
   skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "YAML content pipelines"],
-  github: "https://example.com/fake-github-profile",
-  linkedin: "https://example.com/fake-linkedin-profile",
+  links: { "github": "https://example.com/fake-github-profile", "linkedin": "https://example.com/fake-linkedin-profile", "youtube": "https://example.com/fake-youtube-channel" },
 };
 
 export const WORK: WorkItem[] = [

@@ -38,8 +38,15 @@ const FIELDS = [
   { key: "summary", q: "Short summary paragraph", required: true },
   { key: "github", q: "GitHub URL (blank to skip)", required: false },
   { key: "linkedin", q: "LinkedIn URL (blank to skip)", required: false },
+  { key: "youtube", q: "YouTube channel URL (blank to skip)", required: false },
+  { key: "website", q: "Personal site / blog URL (blank to skip)", required: false },
   { key: "accent", q: "Accent color hex (blank keeps #0f5c4c)", required: false },
 ];
+
+/* These four are prompted because they are the common case. `links` accepts
+   ANY key, so a --config file can pass { links: { mastodon: "…" } } and the
+   site renders it with no code change. */
+const LINK_PROMPTS = ["github", "linkedin", "youtube", "website"];
 
 function yamlString(s) {
   // Always quote: names and taglines routinely contain ':' and '#'.
@@ -110,12 +117,27 @@ demo: false
 `;
 }
 
+/**
+ * An explicit `links` map from a --config file wins and may use any keys;
+ * the individually prompted platforms are merged in on top. Blanks are dropped.
+ */
+function collectLinks(a) {
+  const out = { ...(a.links || {}) };
+  for (const key of LINK_PROMPTS) {
+    const value = String(a[key] || "").trim();
+    if (value) out[key] = value;
+  }
+  return out;
+}
+
 function profileYaml(a) {
-  // Named fields, so the YAML mirrors what init already asks for.
+  const rows = Object.entries(collectLinks(a)).map(([k, v]) => `  ${k}: ${v}`);
   const profileBlock =
-    "\n# Profile URLs for the contact row and JSON-LD sameAs. Both optional.\n" +
-    (a.github ? `github: ${a.github}\n` : "# github: https://github.com/you\n") +
-    (a.linkedin ? `linkedin: ${a.linkedin}\n` : "# linkedin: https://www.linkedin.com/in/you\n");
+    "\n# Profile URLs, keyed by platform, in render order. Add any key you like —\n" +
+    "# the label is derived from it, so a new platform needs no code change.\n" +
+    (rows.length
+      ? "links:\n" + rows.join("\n") + "\n"
+      : "links: {}\n#  github: https://github.com/you\n#  youtube: https://www.youtube.com/@you\n");
   return `name: ${yamlString(a.name)}
 tagline: ${yamlString(a.tagline)}
 location: ${yamlString(a.location)}
