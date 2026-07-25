@@ -109,14 +109,29 @@ function schedule(tier) {
   }, 120);
 }
 
-for (const target of ["content", "src", "tokens", "styles.css"]) {
+/*
+ * Each watch root carries the tier to assume when we can't tell what changed.
+ * `filename` is nullable — Node documents it as unreliable on some platforms,
+ * and it is routinely null when watching a single FILE. Without a fallback,
+ * styles.css edits would never fire at all, and a content/ edit would resolve
+ * to no tier because only its subdirectories are mapped. content/ falls back
+ * to `identity`, the most conservative tier, so an unidentified change there
+ * rebuilds everything rather than silently rebuilding nothing.
+ */
+const WATCH = [
+  ["content", "identity"],
+  ["src", "app"],
+  ["tokens", "styles"],
+  ["styles.css", "styles"],
+];
+
+for (const [target, fallback] of WATCH) {
   const abs = join(root, target);
   if (!existsSync(abs)) continue;
   watch(abs, { recursive: true }, (_event, filename) => {
-    if (!filename) return;
-    if (filename.includes("generated")) return; // our own output
-    const tier = tierFor(join(abs, filename)) || tierFor(abs);
-    if (tier) schedule(tier);
+    if (filename && filename.includes("generated")) return; // our own output
+    const tier = (filename && tierFor(join(abs, filename))) || fallback;
+    schedule(tier);
   });
 }
 
