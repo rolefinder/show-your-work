@@ -29,3 +29,12 @@ allowed_email_domains:
   - example.com
   - example.org
   - example.net
+
+# Terms that must never appear in YOUR OWN content or in dist/ — an employer's
+# codename, a client, an internal hostname, a ticket prefix. Enforced by
+# `npm run publication:check`. Run /sanitize to work out what belongs here.
+#
+# This file is COMMITTED, so anything listed here is published. Put genuinely
+# sensitive terms in content/config/corpus-guard.local.yaml (gitignored) or in
+# $RM_GUARD_TERMS instead.
+never_publish: []

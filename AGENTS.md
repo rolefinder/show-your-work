@@ -32,6 +32,7 @@ Available in any fork with no install step, because they live in
 | `/build-recruit-me` | Preflight config, optionally draft content from named sources, build with prerendering, verify |
 | `/deploy-pages` | Cloudflare Pages, for real response headers and `/api/fit` |
 | `/ui-review` | The design judgement `ux:check` cannot make |
+| `/sanitize` | Find employer-internal detail before it publishes, and guard against its return |
 
 ## Working on the human's behalf
 

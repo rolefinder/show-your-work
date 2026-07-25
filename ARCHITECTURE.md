@@ -167,6 +167,7 @@ recruit-me/
 │   ├── skills/deploy-pages/       /deploy-pages — fork → live on Cloudflare
 │   ├── skills/ui-review/          /ui-review — the judgement ux:check can't make
 │   ├── skills/launch/             /launch — fork to live URL, one authorization
+│   ├── skills/sanitize/           /sanitize — catch employer-internal detail
 │   └── workflows/draft-content.mjs subagent drafting workflow
 │
 ├── docs/                        ▓ routed by audience
@@ -700,6 +701,7 @@ flowchart LR
 | Gate | Fails on |
 |---|---|
 | `parity:check` | The Python and Node content resolvers disagreeing, on any of 15 questions across 7 adopter states. Where one fact must have two readers, this is what keeps them honest |
+| `publication:check` | A guarded term appearing in your content or in `dist/`. Terms come from `corpus-guard.yaml` (committed), `corpus-guard.local.yaml` (gitignored) or `$RM_GUARD_TERMS` (CI) |
 | `additive:check` | A file committed at an adopter path (it would have to be edited, and every template update would conflict); a missing demo fallback; `tokens/adopter.css` not imported last |
 | `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a missing required field; a bad date; one skill spelled two ways. Warns on skills missing from `skills.yaml` |
 | `corpus:check` | Real-person fingerprints in `content/demo/`; a persona name that isn't self-evidently fake; a non-`fake-` slug. Scoped by directory, so it needs no flag and never switches off |
