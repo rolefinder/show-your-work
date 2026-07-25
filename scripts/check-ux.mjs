@@ -212,13 +212,22 @@ const server = spawn(process.execPath, [join(root, "scripts", "preview.mjs"), "-
   cwd: root,
   stdio: ["ignore", "pipe", "ignore"],
 });
-await new Promise((ready, fail) => {
-  const t = setTimeout(() => fail(new Error("preview did not start")), 10000);
-  server.stdout.on("data", (d) => {
-    if (String(d).includes("serving")) { clearTimeout(t); ready(); }
+/* Handle this rejection explicitly. Left bare it escapes as an unhandled
+   rejection - the process dies with the wrong exit code AND leaves the spawned
+   preview server running, which then blocks the port on the next run. */
+try {
+  await new Promise((ready, fail) => {
+    const t = setTimeout(() => fail(new Error("preview did not start within 10s")), 10000);
+    server.stdout.on("data", (d) => {
+      if (String(d).includes("serving")) { clearTimeout(t); ready(); }
+    });
+    server.on("exit", (c) => fail(new Error(`preview exited early (code ${c})`)));
   });
-  server.on("exit", (c) => fail(new Error(`preview exited (${c})`)));
-});
+} catch (err) {
+  console.error("check-ux: could not start the preview server -", err.message);
+  server.kill();
+  process.exit(2);
+}
 
 const findings = [];
 let checked = 0;
@@ -243,13 +252,14 @@ try {
         for (const f of found) findings.push({ ...f, path, scheme, width });
         if (verbose) console.log(`  ${scheme} ${width}px ${path} - ${found.length} finding(s)`);
       }
-      if (width === 1280 && scheme === "light") {
-        await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
-        await page.keyboard.press("Tab"); // real keyboard focus, so :focus-visible applies
-        const focus = await page.evaluate(FOCUS_PROBE);
-        if (!focus.ok) {
-          findings.push({ rule: "focus-ring", detail: `keyboard focus has no visible ring - ${focus.detail}`, path: "/", scheme, width });
-        }
+      /* Once per scheme AND width, not just light/1280: the focus ring is
+         drawn with --focus-ring, which is re-declared in the dark block, so a
+         dark-only regression would otherwise ship. */
+      await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
+      await page.keyboard.press("Tab"); // real keyboard focus, so :focus-visible applies
+      const focus = await page.evaluate(FOCUS_PROBE);
+      if (!focus.ok) {
+        findings.push({ rule: "focus-ring", detail: `keyboard focus has no visible ring - ${focus.detail}`, path: "/", scheme, width });
       }
       await ctx.close();
     }
