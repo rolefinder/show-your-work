@@ -100,7 +100,7 @@ export function FitPage({ docs, onNavigate }: Props) {
     React.createElement(
       "p",
       { className: "lede" },
-      "Paste or drop a job description. Get a cite-or-missing evidence brief against published work and blog — never invented employers or years.",
+      "Paste or drop a job description. Every requirement shown is matched to a published page and quoted from it — never invented employers, dates, or numbers.",
     ),
     React.createElement(
       "div",
@@ -144,7 +144,21 @@ function FitBriefView({
     { className: "fit-brief" },
     React.createElement("h2", null, "Role read-back"),
     React.createElement("p", { className: "prose" }, brief.role_read),
-    React.createElement("h2", null, "Requirements"),
+    React.createElement(
+      "h2",
+      null,
+      brief.gaps.length ? "Requirements" : "Requirements covered by published work",
+    ),
+    // In highlight mode a JD with no overlap returns nothing at all. An empty
+    // <ul> reads as a broken tool, so say plainly that there is nothing to
+    // show — factual, and without volunteering a verdict on the candidate.
+    brief.requirements.length === 0
+      ? React.createElement(
+          "p",
+          { className: "card-empty" },
+          "Nothing in the published work maps to this description. Try a job description closer to the work on this site.",
+        )
+      : null,
     React.createElement(
       "ul",
       { className: "fit-reqs" },

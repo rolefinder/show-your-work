@@ -148,20 +148,22 @@ for (const r of k8s.requirements) {
 const empty = matchFit("", docs, fitCfg);
 assert(empty.requirements.every((r) => r.status !== "aligned"), "empty JD must not align");
 
-const nonsense = matchFit(
-  `
+const NONSENSE_JD = `
 Unicorn Wrangler
 
 Requirements
 - Telepathy with distributed consensus pigeons
 - Underwater Kubernetes on Mars
-`,
-  docs,
-  fitCfg,
-);
+`;
+const nonsense = matchFit(NONSENSE_JD, docs, fitCfg);
 const nonsenseAligned = nonsense.requirements.filter((r) => r.status === "aligned");
 assert(nonsenseAligned.length === 0, "nonsense JD must not produce aligned");
-assert(nonsense.gaps.length >= 1 || nonsense.requirements.some((r) => r.status !== "aligned"), "nonsense should surface gaps");
+/* In highlight mode a nonsense JD yields an EMPTY brief - nothing matched, so
+   nothing is shown. The gap reporting moved with the mode, so assert it where
+   it now lives rather than deleting the check. */
+assert(nonsense.requirements.length === 0, "nonsense JD should surface nothing in highlight mode");
+const nonsenseAudit = matchFit(NONSENSE_JD, docs, { ...fitCfg, showGaps: true });
+assert(nonsenseAudit.gaps.length >= 1, "audit mode should still surface gaps for a nonsense JD");
 
 // Caveats must be tenant data, not engine constants. An adopter who never
 // touches fit.yaml still gets a clean brief; the demo disclaimer only appears
@@ -179,6 +181,45 @@ assert(
   tenant.caveats.length === 2 + (fitCfg.extraCaveats || []).length,
   "tenant caveats must be the engine pair plus fit.yaml extraCaveats",
 );
+
+/*
+ * Surface mode. The matcher evaluates every requirement either way; showGaps
+ * decides what the brief returns. Highlight mode (the default) must never leak
+ * a dequalifying verdict, and audit mode must still be able to produce one --
+ * so the honest path stays available rather than being deleted.
+ */
+const gapJd = `Senior Platform Engineer
+
+Requirements
+- Experience building CI/CD pipelines with GitHub Actions
+- Rust systems programming for embedded devices
+`;
+
+const highlight = matchFit(gapJd, docs, { ...fitCfg, showGaps: false });
+assert(
+  highlight.requirements.every((r) => r.status === "aligned" || r.status === "partial"),
+  `highlight mode leaked a dequalifying status: ${highlight.requirements.map((r) => r.status).join(", ")}`,
+);
+assert(highlight.gaps.length === 0, "highlight mode must not return a gaps list");
+assert(
+  highlight.requirements.length >= 1,
+  "highlight mode still has to show the requirements that DO match",
+);
+assert(
+  highlight.caveats.some((c) => /not an exhaustive review/i.test(c)),
+  "highlight mode must say the brief is not exhaustive - otherwise omitting rows reads as a full audit",
+);
+
+const audit = matchFit(gapJd, docs, { ...fitCfg, showGaps: true });
+assert(
+  audit.requirements.length > highlight.requirements.length,
+  "audit mode should surface at least one requirement highlight mode hides",
+);
+assert(
+  audit.requirements.some((r) => r.status === "not_evidenced_on_site" || r.status === "missing"),
+  "audit mode must still report unevidenced requirements",
+);
+assert(audit.gaps.length >= 1, "audit mode must still return a gaps list");
 
 console.log("fit-smoke OK");
 console.log(`  CI/CD aligned=${cicdAligned.length} merge-gate-cited=${citesMergeGate}`);
