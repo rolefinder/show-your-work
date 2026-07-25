@@ -21,6 +21,9 @@ Strategy and architecture for the OSS template + Fit product.
 - [ADR 011 — Fit quota](architecture/adr/011-recruiter-fit-quota.md)
 - [ADR 012 — Fit security & data](architecture/adr/012-recruiter-fit-security-data.md)
 - [ADR 013 — CSP graph + opts.forces](architecture/adr/013-csp-graph-opts-forces.md)
+- [ADR 014 — SEO/AEO baseline](architecture/adr/014-seo-aeo-baseline.md)
+- [ADR 015 — Design token system](architecture/adr/015-design-token-system.md)
+- [ADR 016 — Adopter-config boundary](architecture/adr/016-adopter-config-boundary.md)
 
 ## Ops
 

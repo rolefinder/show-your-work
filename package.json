@@ -11,17 +11,20 @@
     "emit:fit-config": "python scripts/emit-fit-config.py",
     "corpus:check": "python scripts/check-fictional-corpus.py",
     "secrets:check": "python scripts/check-secrets.py",
+    "style:check": "node scripts/check-style-tokens.mjs",
+    "config:check": "node scripts/check-adopter-config.mjs",
     "typecheck": "tsc --noEmit",
     "build:graph": "node scripts/build-graph-vendor.mjs",
     "bundle": "node scripts/build.mjs",
     "build:fit-worker": "node scripts/build-fit-worker.mjs",
+    "emit:html": "npx --yes tsx scripts/emit-html.ts",
     "emit:seo": "npx --yes tsx scripts/emit-seo-artifacts.ts",
-    "build": "npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:seo && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker",
+    "build": "npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:html && npm run emit:seo && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker",
     "preview": "node scripts/preview.mjs",
     "fit:smoke": "npx --yes tsx scripts/fit-smoke.ts",
     "graph:smoke": "node scripts/graph-smoke.mjs",
     "seo:smoke": "node scripts/seo-smoke.mjs",
-    "test": "npm run corpus:check && npm run secrets:check && npm run build && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke"
+    "test": "npm run corpus:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",

@@ -1,14 +1,26 @@
-/* Portfolio graph theme tokens (pg-*). Overridable per tenant. */
-:root {
-  --pg-canvas-bg: #1a1b26;
-  --pg-node: #c0caf5;
-  --pg-pro: #7aa2f7;
-  --pg-personal: #9ece6a;
-  --pg-skill: #e0af68;
-  --pg-post: #bb9af7;
-  --pg-here: #f7768e;
-  --pg-orphan: #565f89;
-  --pg-link: #414868;
+/* ============================================================
+   recruit-me — Portfolio graph theme (pg-*)
+   Scoped to the graph surfaces rather than :root so the dark
+   canvas palette never leaks into page chrome. graph/theme.mjs
+   reads these through getComputedStyle on the nearest .pg-page /
+   .work-graph-viewport ancestor, resolving any CSS color syntax
+   (oklch included) via canvas readback.
+   ============================================================ */
+
+.pg-page,
+.work-graph-viewport {
+  --pg-canvas-bg: #050505;
+  --pg-node: oklch(0.78 0.08 250);
+  /* Distinct hues per node kind — pairs with the engine's node shapes. */
+  --pg-pro: oklch(0.78 0.1 245);
+  --pg-personal: oklch(0.8 0.08 75);
+  --pg-skill: oklch(0.74 0.09 185);
+  --pg-post: oklch(0.72 0.09 25);
+  --pg-orphan: oklch(0.55 0.02 250);
+  /* Dull charcoal edges — never light/white, or the hubs disappear. */
+  --pg-link: rgb(88 92 100 / 0.42);
+  /* Accent marks the current page node; shape still carries the kind. */
+  --pg-here: var(--brand);
 }
 
 .pg-page .pg-host,
@@ -16,10 +28,11 @@
   width: 100%;
   height: min(70vh, 560px);
   min-height: 320px;
-  border-radius: var(--radius, 10px);
-  border: 1px solid var(--line, #ddd5c8);
+  margin-top: var(--space-4);
   overflow: hidden;
-  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  background: var(--pg-canvas-bg);
 }
 
 .pg-host canvas {

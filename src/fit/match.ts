@@ -1,7 +1,7 @@
 import { extractRequirements } from "./extract";
 import { retrieveEvidence } from "./index";
 import type { FitMatchConfig } from "./config";
-import { resolveWeights } from "./config";
+import { resolveCaveats, resolveWeights } from "./config";
 import type { EvidenceDoc, FitBrief, FitEvidence, FitRequirement, FitStatus } from "./types";
 
 /**
@@ -71,11 +71,7 @@ export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig):
     requirements: mapped,
     strongest_matches: strongest.slice(0, 6),
     gaps: [...new Set(gaps)].slice(0, 12),
-    caveats: [
-      "Deterministic keyword matcher — not an LLM. Citations come only from published site content.",
-      "Absence of evidence is not proof of absence of skill.",
-      "Demo corpus is fictional (Avery Quill); replace with your own YAML before production use.",
-    ],
+    caveats: resolveCaveats(cfg),
   };
 }
 

@@ -1,4 +1,4 @@
-import { BLOG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
@@ -50,22 +50,77 @@ function routeFor(view: View): string {
   return "/";
 }
 
+/** "<page> — <titleSuffix>", or just the page name if no suffix is configured. */
+export function withSuffix(pageName: string): string {
+  const suffix = SITE_CONFIG.titleSuffix.trim();
+  return suffix ? `${pageName} — ${suffix}` : pageName;
+}
+
 function titleFor(view: View): string {
-  if (view.name === "about") return `About — ${SITE_PROFILE.name}`;
-  if (view.name === "work") return `Work — ${SITE_PROFILE.name}`;
+  if (view.name === "about") return withSuffix("About");
+  if (view.name === "work") return withSuffix("Work");
   if (view.name === "workDetail") {
     const w = WORK.find((x) => x.slug === view.slug);
-    if (w) return `${w.title} — ${SITE_PROFILE.name}`;
+    if (w) return withSuffix(w.title);
   }
-  if (view.name === "blog") return `Blog — ${SITE_PROFILE.name}`;
+  if (view.name === "blog") return withSuffix("Blog");
   if (view.name === "blogDetail") {
     const b = BLOG.find((x) => x.slug === view.slug);
-    if (b) return `${b.title} — ${SITE_PROFILE.name}`;
+    if (b) return withSuffix(b.title);
   }
-  if (view.name === "fit") return `Fit — ${SITE_PROFILE.name}`;
-  if (view.name === "graph") return `Graph — ${SITE_PROFILE.name}`;
-  if (view.name === "notfound") return `Page Not Found — ${SITE_PROFILE.name}`;
-  return `${SITE_PROFILE.name} — recruit-me demo`;
+  if (view.name === "fit") return withSuffix("Fit");
+  if (view.name === "graph") return withSuffix("Graph");
+  if (view.name === "notfound") return withSuffix("Page Not Found");
+  // Home leads with the person and what they do, not a page label.
+  return `${SITE_PROFILE.name} — ${SITE_PROFILE.tagline}`;
+}
+
+/**
+ * One outlined strip: the email, then whatever profile.links holds. Outbound
+ * links get rel="noopener noreferrer" — they are adopter-authored URLs.
+ */
+function ContactRow() {
+  return React.createElement(
+    "div",
+    { className: "contact-row", role: "group", "aria-label": "Contact" },
+    React.createElement(
+      "a",
+      {
+        className: "contact-row__item",
+        href: `mailto:${SITE_PROFILE.email}`,
+      },
+      SITE_PROFILE.email,
+    ),
+    SITE_PROFILE.links.map((l) =>
+      React.createElement(
+        "a",
+        {
+          key: l.href,
+          className: "contact-row__item",
+          href: l.href,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+        l.label,
+      ),
+    ),
+  );
+}
+
+/** Top-level nav, shared by the header bar and the mobile drawer. */
+const NAV_ITEMS: [label: string, view: View][] = [
+  ["About", { name: "about" }],
+  ["Work", { name: "work" }],
+  ["Blog", { name: "blog" }],
+  ["Graph", { name: "graph" }],
+  ["Fit", { name: "fit" }],
+];
+
+/** A nav item is current for its own view and for its detail routes. */
+function navActive(item: View, view: View): boolean {
+  if (item.name === "work") return view.name === "work" || view.name === "workDetail";
+  if (item.name === "blog") return view.name === "blog" || view.name === "blogDetail";
+  return item.name === view.name;
 }
 
 function App() {
@@ -73,6 +128,8 @@ function App() {
   const [search, setSearch] = React.useState(() => window.location.search || "");
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [mobile, setMobile] = React.useState(false);
+  const [navOpen, setNavOpen] = React.useState(false);
   const view = viewFor(path);
   const visibleWork = WORK.filter((w) => w.visible !== false);
   const visibleBlog = BLOG.filter((b) => b.visible !== false);
@@ -101,6 +158,19 @@ function App() {
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Below --bp-md the nav collapses behind a menu button; widening the
+  // viewport must also close an open drawer or it hangs under the bar.
+  React.useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => {
+      setMobile(mq.matches);
+      if (!mq.matches) setNavOpen(false);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
   React.useEffect(() => {
@@ -165,16 +235,25 @@ function App() {
     }
     setPath(url.pathname);
     setSearch(url.search);
+    setNavOpen(false);
     window.scrollTo(0, 0);
   }
 
-  function Link(props: { href: string; children?: React.ReactNode; className?: string }) {
+  function Link(props: {
+    href: string;
+    children?: React.ReactNode;
+    className?: string;
+    "aria-current"?: "page";
+  }) {
     return React.createElement(
       "a",
       {
         href: props.href,
         className: props.className,
+        "aria-current": props["aria-current"],
         onClick: (e: React.MouseEvent) => {
+          // Let the browser own modified clicks (new tab, download, …).
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
           e.preventDefault();
           navigate(props.href);
         },
@@ -222,10 +301,13 @@ function App() {
     body = React.createElement(
       "section",
       { className: "page" },
-      React.createElement("p", { className: "eyebrow" }, "recruit-me demo"),
+      SITE_CONFIG.demo
+        ? React.createElement("p", { className: "eyebrow" }, "recruit-me demo")
+        : null,
       React.createElement("h1", null, SITE_PROFILE.name),
       React.createElement("p", { className: "lede" }, SITE_PROFILE.tagline),
-      React.createElement("p", null, SITE_PROFILE.summary),
+      React.createElement("p", { className: "prose" }, SITE_PROFILE.summary),
+      React.createElement(ContactRow, null),
       React.createElement(
         "div",
         { className: "cta-row" },
@@ -242,19 +324,28 @@ function App() {
     body = React.createElement(
       "section",
       { className: "page" },
+      React.createElement("p", { className: "eyebrow" }, "Profile"),
       React.createElement("h1", null, "About"),
-      React.createElement("p", null, SITE_PROFILE.summary),
+      React.createElement("p", { className: "prose" }, SITE_PROFILE.summary),
       React.createElement("p", { className: "muted" }, SITE_PROFILE.location),
+      React.createElement(ContactRow, null),
       React.createElement(
         "ul",
         { className: "tags" },
-        SITE_PROFILE.skills.map((s) => React.createElement("li", { key: s }, s)),
+        SITE_PROFILE.skills.map((s) =>
+          React.createElement(
+            "li",
+            { key: s },
+            React.createElement("span", { className: "tag" }, s),
+          ),
+        ),
       ),
     );
   } else if (view.name === "work") {
     body = React.createElement(
       "section",
       { className: "page" },
+      React.createElement("p", { className: "eyebrow" }, "Selected work"),
       React.createElement("h1", null, "Work"),
       activeSkills.length
         ? React.createElement(
@@ -276,17 +367,25 @@ function App() {
         : null,
       React.createElement(
         "ul",
-        { className: "card-list" },
+        { className: "card-list card-list--split" },
         filteredWork.length
           ? filteredWork.map((w) =>
               React.createElement(
                 "li",
                 { key: w.slug },
-                React.createElement(Link, { href: "/work/" + w.slug }, React.createElement("strong", null, w.title)),
-                React.createElement("p", null, w.summary),
+                React.createElement(
+                  Link,
+                  { href: "/work/" + w.slug, className: "card-link u-card-link" },
+                  React.createElement("span", { className: "card-link__title" }, w.title),
+                  React.createElement("span", { className: "card-link__summary" }, w.summary),
+                ),
               ),
             )
-          : React.createElement("li", null, React.createElement("p", { className: "muted" }, "No work matches these skills.")),
+          : React.createElement(
+              "li",
+              { className: "card-empty" },
+              "No work matches these skills.",
+            ),
       ),
       React.createElement(SkillBank, {
         groups: workSkillGroups,
@@ -299,10 +398,10 @@ function App() {
       ? React.createElement(
           "section",
           { className: "page" },
-          React.createElement(Link, { href: "/work", className: "muted" }, "← Work"),
+          React.createElement(Link, { href: "/work", className: "page-back" }, "← Work"),
           React.createElement("h1", null, w.title),
           React.createElement("p", { className: "lede" }, w.summary),
-          React.createElement("p", null, richText(w.body, navigate)),
+          React.createElement("p", { className: "prose" }, richText(w.body, navigate)),
           React.createElement(
             "ul",
             { className: "tags" },
@@ -310,7 +409,11 @@ function App() {
               React.createElement(
                 "li",
                 { key: s },
-                React.createElement(Link, { href: "/work" + searchFromSkills([s]) }, s),
+                React.createElement(
+                  Link,
+                  { href: "/work" + searchFromSkills([s]), className: "tag" },
+                  s,
+                ),
               ),
             ),
           ),
@@ -320,6 +423,7 @@ function App() {
     body = React.createElement(
       "section",
       { className: "page" },
+      React.createElement("p", { className: "eyebrow" }, "Writing"),
       React.createElement("h1", null, "Blog"),
       React.createElement(
         "ul",
@@ -328,8 +432,12 @@ function App() {
           React.createElement(
             "li",
             { key: b.slug },
-            React.createElement(Link, { href: "/blog/" + b.slug }, React.createElement("strong", null, b.title)),
-            React.createElement("p", null, b.summary),
+            React.createElement(
+              Link,
+              { href: "/blog/" + b.slug, className: "card-link u-card-link" },
+              React.createElement("span", { className: "card-link__title" }, b.title),
+              React.createElement("span", { className: "card-link__summary" }, b.summary),
+            ),
           ),
         ),
       ),
@@ -340,10 +448,10 @@ function App() {
       ? React.createElement(
           "section",
           { className: "page" },
-          React.createElement(Link, { href: "/blog", className: "muted" }, "← Blog"),
+          React.createElement(Link, { href: "/blog", className: "page-back" }, "← Blog"),
           React.createElement("h1", null, b.title),
           React.createElement("p", { className: "lede" }, b.summary),
-          React.createElement("p", null, richText(b.body, navigate)),
+          React.createElement("p", { className: "prose" }, richText(b.body, navigate)),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
   } else if (view.name === "fit") {
@@ -374,35 +482,71 @@ function App() {
     );
   }
 
-  return React.createElement(
-    "div",
-    { className: "shell" },
+  const navLinks = (className: string) =>
     React.createElement(
-      "header",
-      { className: "topnav" },
-      React.createElement(Link, { href: "/", className: "brand" }, SITE_PROFILE.name),
-      React.createElement(
-        "nav",
-        null,
-        React.createElement(Link, { href: "/about" }, "About"),
-        React.createElement(Link, { href: "/work" }, "Work"),
-        React.createElement(Link, { href: "/blog" }, "Blog"),
-        React.createElement(Link, { href: "/graph" }, "Graph"),
-        React.createElement(Link, { href: "/fit" }, "Fit"),
+      "nav",
+      { className, id: className.includes("mobile") ? "site-nav-mobile" : undefined, "aria-label": "Main" },
+      NAV_ITEMS.map(([label, target]) =>
         React.createElement(
-          "button",
+          Link,
           {
-            type: "button",
-            className: "search-trigger",
-            onClick: () => setSearchOpen(true),
-            "aria-label": "Open search",
+            key: target.name,
+            href: routeFor(target),
+            "aria-current": navActive(target, view) ? "page" : undefined,
           },
-          "Search",
-          React.createElement("kbd", null, "⌘K"),
+          label,
         ),
       ),
+    );
+
+  return React.createElement(
+    React.Fragment,
+    null,
+    React.createElement(
+      "header",
+      { className: "site-header" },
+      React.createElement(
+        "a",
+        { href: "#main", className: "visually-hidden skip-link" },
+        "Skip to content",
+      ),
+      React.createElement(
+        "div",
+        { className: "container site-header__bar" },
+        React.createElement(Link, { href: "/", className: "site-brand" }, SITE_PROFILE.name),
+        React.createElement(
+          "div",
+          { className: "site-header__actions" },
+          React.createElement(
+            "button",
+            {
+              type: "button",
+              className: "search-trigger",
+              onClick: () => setSearchOpen(true),
+              "aria-label": "Open search",
+            },
+            "Search",
+            React.createElement("kbd", null, "⌘K"),
+          ),
+          mobile
+            ? React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: "nav-toggle",
+                  onClick: () => setNavOpen((o) => !o),
+                  "aria-label": navOpen ? "Close menu" : "Menu",
+                  "aria-expanded": navOpen,
+                  "aria-controls": "site-nav-mobile",
+                },
+                navOpen ? "✕" : "☰",
+              )
+            : navLinks("site-nav"),
+        ),
+      ),
+      mobile && navOpen ? navLinks("container site-nav site-nav--mobile") : null,
     ),
-    React.createElement("main", null, body),
+    React.createElement("main", { id: "main", className: "container" }, body),
     React.createElement(SearchPalette, {
       open: searchOpen,
       onClose: () => setSearchOpen(false),
@@ -413,9 +557,34 @@ function App() {
     }),
     React.createElement(
       "footer",
-      { className: "site-footer" },
-      React.createElement("span", null, "Demo corpus · Avery Quill (fictional) · Apache-2.0"),
-      React.createElement("span", { className: "muted" }, " route " + routeFor(view)),
+      { className: "container site-footer" },
+      React.createElement(
+        "nav",
+        { "aria-label": "Site" },
+        NAV_ITEMS.map(([label, target], i) =>
+          React.createElement(
+            React.Fragment,
+            { key: target.name },
+            i === 0
+              ? null
+              : React.createElement(
+                  "span",
+                  { className: "site-footer__sep", "aria-hidden": true },
+                  "·",
+                ),
+            React.createElement(Link, { href: routeFor(target) }, label),
+          ),
+        ),
+      ),
+      SITE_CONFIG.demo
+        ? React.createElement(
+            "span",
+            null,
+            "Demo corpus — replace content/ with your own YAML",
+          )
+        : null,
+      React.createElement("span", null, `© ${SITE_PROFILE.name}`),
+      React.createElement("span", { className: "site-footer__route" }, routeFor(view)),
     ),
   );
 }

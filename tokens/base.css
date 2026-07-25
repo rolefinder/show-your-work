@@ -1,0 +1,226 @@
+/* ============================================================
+   recruit-me — Base reset + element defaults
+   Out-of-the-box defaults that match the system. Mobile-first,
+   accessible, cross-OS. All overridable.
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%; /* iOS: no zoom-on-rotate resize */
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--wash-1) 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, var(--wash-2) 0%, transparent 50%),
+    var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--line-body);
+  font-weight: var(--weight-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* The one first-class transition: light↔dark fade */
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+/* Honor user motion preference everywhere */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg);
+}
+
+h1 {
+  font-size: var(--text-h1);
+}
+
+h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+}
+
+h3 {
+  font-size: var(--text-h3);
+}
+
+p {
+  margin: 0;
+  line-height: var(--line-body);
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--ink-40);
+  text-underline-offset: 0.18em;
+  transition:
+    text-decoration-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+a:hover {
+  text-decoration-color: var(--accent);
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+code {
+  background: var(--ink-05);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+/* Form controls inherit the type system rather than the UA's. */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Range inputs pick up the accent (gravity slider on /graph). */
+input[type="range"] {
+  accent-color: var(--accent);
+}
+
+/* Keyboard-visible focus ring (no ring on mouse) */
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Reusable primitives ---------- */
+
+/* THE eyebrow — uppercase, tracked, muted. Over every section head. */
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--fg-muted);
+  font-weight: var(--weight-medium);
+}
+
+/* Card — the dominant container. */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+/* Centered content column with responsive gutter. */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Screen-reader-only text; becomes visible when focused (skip link). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-modal);
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  clip-path: none;
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+}
+
+/* Shared hover/focus states. Interactive elements opt in by class so
+   pointer and keyboard get identical feedback. */
+.u-hover-fill:hover,
+.u-hover-fill:focus-visible {
+  background: var(--ink-05);
+}
+
+.u-fade-primary:hover {
+  opacity: 0.9;
+}
+
+/* Lift only where hover is real; touch gets pressed feedback instead. */
+@media (hover: hover) {
+  .u-card-link:hover {
+    box-shadow: var(--shadow-lifted);
+    transform: translateY(-2px);
+  }
+}
+
+@media (hover: none) {
+  .u-card-link:active {
+    transform: translateY(1px);
+  }
+}
+
+.u-card-link:focus-visible {
+  box-shadow: var(--shadow-lifted);
+  transform: translateY(-2px);
+}

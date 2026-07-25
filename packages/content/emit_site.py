@@ -28,6 +28,16 @@ def ts_string_array(items: list[str]) -> str:
     return "[" + ", ".join(ts_string(x) for x in items) + "]"
 
 
+def emit_links(links: list[dict[str, Any]]) -> str:
+    if not links:
+        return "  links: [],"
+    rows = ",\n".join(
+        f"    {{ label: {ts_string(str(l['label']))}, href: {ts_string(str(l['href']))} }}"
+        for l in links
+    )
+    return "  links: [\n" + rows + "\n  ],"
+
+
 def emit_profile(data: dict[str, Any]) -> str:
     return "\n".join(
         [
@@ -38,6 +48,24 @@ def emit_profile(data: dict[str, Any]) -> str:
             f"  email: {ts_string(data['email'])},",
             f"  summary: {ts_string(str(data['summary']).strip())},",
             f"  skills: {ts_string_array(list(data.get('skills') or []))},",
+            emit_links(list(data.get("links") or [])),
+            "};",
+        ]
+    )
+
+
+def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
+    """Everything that identifies this deployment, for src/ and emit-html."""
+    return "\n".join(
+        [
+            "export const SITE_CONFIG: SiteConfig = {",
+            f"  origin: {ts_string(origin)},",
+            f"  titleSuffix: {ts_string(str(cfg.get('title_suffix') or ''))},",
+            f"  description: {ts_string(str(cfg.get('description') or ''))},",
+            f"  shortName: {ts_string(str(cfg.get('short_name') or ''))},",
+            f"  themeColor: {ts_string(str(cfg.get('theme_color') or '#ffffff'))},",
+            f"  themeColorDark: {ts_string(str(cfg.get('theme_color_dark') or '#000000'))},",
+            f"  demo: {'true' if cfg.get('demo', False) else 'false'},",
             "};",
         ]
     )
@@ -143,7 +171,7 @@ def render_module(
         "   content/config/site.yaml\n"
         "   Regenerate: npm run emit\n"
         "*/\n"
-        'import type { BlogPost, SiteProfile, WorkItem } from "../types";\n'
+        'import type { BlogPost, SiteConfig, SiteProfile, WorkItem } from "../types";\n'
         'import type { SkillCategoryConfig } from "../skills/SkillBank";\n'
         "\n"
     )
@@ -151,6 +179,8 @@ def render_module(
     parts = [
         header,
         f"export const SITE_ORIGIN = {ts_string(origin)};",
+        "",
+        emit_site_config(site_cfg, origin),
         "",
         emit_profile(profile),
         "",

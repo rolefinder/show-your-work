@@ -49,7 +49,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!packRes.ok) return json({ error: "evidence_unavailable" }, 503);
   const pack = (await packRes.json()) as EvidencePack;
 
-  const brief = matchFit(jd, pack.docs);
+  // Same tenant config the browser path uses, so /api/fit and the offline
+  // matcher return identical briefs. Absent config falls back to engine
+  // defaults rather than failing the request.
+  let cfg: unknown;
+  try {
+    const cfgRes = await fetch(new URL("/fit-config.json", request.url));
+    if (cfgRes.ok) cfg = await cfgRes.json();
+  } catch {
+    cfg = undefined;
+  }
+
+  const brief = matchFit(jd, pack.docs, cfg);
   return json(brief, 200);
 };
 

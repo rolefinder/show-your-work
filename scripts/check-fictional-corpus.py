@@ -29,10 +29,30 @@ FORBIDDEN = [
 ALLOWED_EMAIL_DOMAINS = {"example.com", "example.org", "example.net"}
 
 
+def is_demo() -> bool:
+    """content/config/site.yaml demo flag. Absent or unreadable → assume demo."""
+    cfg = ROOT / "content" / "config" / "site.yaml"
+    if not cfg.is_file():
+        return True
+    for line in cfg.read_text(encoding="utf-8").splitlines():
+        if line.strip().startswith("demo:"):
+            return line.split(":", 1)[1].strip().lower() not in {"false", "no", "0"}
+    return True
+
+
 def main() -> int:
     if not CONTENT.is_dir():
         print("content/ missing", file=sys.stderr)
         return 1
+
+    # This gate protects the SHIPPED DEMO corpus from acquiring real-person
+    # fingerprints. On an adopter's fork the corpus is supposed to be a real
+    # person, so the gate would fail on correct content — and making them edit
+    # this file's FORBIDDEN list would be exactly the kind of code change the
+    # template promises they'll never need (ADR 016).
+    if not is_demo():
+        print("fictional-corpus skipped (site.yaml demo: false - corpus is the adopter's own)")
+        return 0
 
     failures: list[str] = []
     for path in sorted(CONTENT.rglob("*")):

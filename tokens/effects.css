@@ -1,0 +1,38 @@
+/* ============================================================
+   recruit-me — Effects: radii, shadows, motion, focus, z
+   The system commits to a small set: one card radius, one pill,
+   three shadows, and almost no motion (a color fade and a 2px
+   card lift). Everything respects prefers-reduced-motion.
+   ============================================================ */
+
+:root {
+  /* ---------- Radii ---------- */
+  --radius-sm: 0.5rem; /*  8 — inline code, small chips */
+  --radius-md: 0.75rem; /* 12 — inputs, inner panels */
+  --radius-lg: 1rem; /* 16 — dialogs */
+  --radius-2xl: 1rem; /* 16 — THE card radius */
+  --radius-pill: 9999px; /* every action button + dot */
+
+  /* ---------- Shadows ---------- */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lifted: 0 8px 24px -8px rgb(0 0 0 / 0.14),
+    0 2px 6px -2px rgb(0 0 0 / 0.08);
+  --shadow-modal: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ---------- Motion ----------
+     Minimal by design: hovers swap a color, cards lift 2px. */
+  --dur-fast: 0.15s;
+  --dur-med: 0.25s;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------- Focus ring (keyboard-visible) ---------- */
+  --focus-width: 2px;
+  --focus-offset: 2px;
+
+  /* ---------- Z-index scale ---------- */
+  --z-base: 0;
+  --z-sticky: 20;
+  --z-overlay: 40;
+  --z-modal: 50;
+}

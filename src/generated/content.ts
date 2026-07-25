@@ -3,11 +3,21 @@
    content/config/site.yaml
    Regenerate: npm run emit
 */
-import type { BlogPost, SiteProfile, WorkItem } from "../types";
+import type { BlogPost, SiteConfig, SiteProfile, WorkItem } from "../types";
 import type { SkillCategoryConfig } from "../skills/SkillBank";
 
 
 export const SITE_ORIGIN = "https://example.com";
+
+export const SITE_CONFIG: SiteConfig = {
+  origin: "https://example.com",
+  titleSuffix: "Avery Quill",
+  description: "Demo portfolio for the recruit-me open-source template (fictional Avery Quill persona).",
+  shortName: "Avery Quill",
+  themeColor: "#f7f4ef",
+  themeColorDark: "#131211",
+  demo: true,
+};
 
 export const SITE_PROFILE: SiteProfile = {
   name: "Avery Quill",
@@ -16,6 +26,10 @@ export const SITE_PROFILE: SiteProfile = {
   email: "avery.quill@example.com",
   summary: "Avery Quill is a fictional demo persona for the recruit-me template. They focus on CI/CD, Cloudflare Pages, and turning published work into recruiter-ready evidence — never inventing employers or years.",
   skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "YAML content pipelines"],
+  links: [
+    { label: "GitHub", href: "https://github.com/averyquill" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/averyquill" }
+  ],
 };
 
 export const WORK: WorkItem[] = [

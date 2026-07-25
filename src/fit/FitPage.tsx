@@ -1,4 +1,5 @@
 import type { FitBrief } from "../types";
+import type { FitMatchConfig } from "./config";
 import type { EvidenceDoc } from "./types";
 import { matchFit } from "./match";
 
@@ -15,6 +16,25 @@ export function FitPage({ docs, onNavigate }: Props) {
   const [brief, setBrief] = React.useState<FitBrief | null>(null);
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  // Tenant tuning (stops, synonyms, weights, caveats) is authored in
+  // content/config/fit.yaml and emitted to /fit-config.json at build time.
+  // Held in a ref so run() reads the current value without re-creating itself.
+  const cfgRef = React.useRef<FitMatchConfig | undefined>(undefined);
+
+  React.useEffect(() => {
+    let live = true;
+    fetch("/fit-config.json")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cfg) => {
+        if (live && cfg) cfgRef.current = cfg as FitMatchConfig;
+      })
+      // Absent or malformed config is not fatal — the engine defaults are
+      // a complete, working configuration on their own.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
 
   function run(text: string) {
     setError("");
@@ -30,7 +50,7 @@ export function FitPage({ docs, onNavigate }: Props) {
     }
     setBusy(true);
     try {
-      setBrief(matchFit(trimmed, docs));
+      setBrief(matchFit(trimmed, docs, cfgRef.current));
     } finally {
       setBusy(false);
     }
@@ -56,6 +76,7 @@ export function FitPage({ docs, onNavigate }: Props) {
   return React.createElement(
     "section",
     { className: "page fit-page" },
+    React.createElement("p", { className: "eyebrow" }, "Recruiter tool"),
     React.createElement("h1", null, "Fit"),
     React.createElement(
       "p",
@@ -103,7 +124,7 @@ function FitBriefView({
     "div",
     { className: "fit-brief" },
     React.createElement("h2", null, "Role read-back"),
-    React.createElement("p", null, brief.role_read),
+    React.createElement("p", { className: "prose" }, brief.role_read),
     React.createElement("h2", null, "Requirements"),
     React.createElement(
       "ul",

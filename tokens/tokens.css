@@ -1,6 +1,16 @@
-/* Default theme tokens — override in adopter forks */
-:root {
-  --rm-brand: #0f5c4c;
-  --rm-bg: #f7f4ef;
-  --rm-fg: #1c1a17;
-}
+/* ============================================================
+   recruit-me Design System — token entry point
+   An @import manifest only: every token and the base reset is
+   reached from here. Component styles live in /styles.css and
+   read these tokens — never raw hex values (enforced by
+   scripts/check-style-tokens.mjs).
+
+   Re-theming a fork: override the four --rm-* vars at the top
+   of colors.css. Nothing else needs to change.
+   ============================================================ */
+
+@import "./colors.css";
+@import "./typography.css";
+@import "./spacing.css";
+@import "./effects.css";
+@import "./base.css";
