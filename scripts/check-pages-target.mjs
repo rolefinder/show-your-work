@@ -74,16 +74,42 @@ function nested(parent, key) {
 }
 
 const target = nested("deploy", "target") || "github-pages";
+
+/* While this is still the template it is not somebody's site: the repo is
+   named recruit-me and origin is example.com, both correctly. Enforcing the
+   root-path rule here would fail the template's own test run forever. Adding
+   content/about/profile.yaml is exactly the moment the rule starts to matter
+   (ADR 021). */
+const stillTemplate = isDemo();
+
+/**
+ * `--deploy-guard`: answer "should the deploy workflow run at all?" in
+ * GITHUB_OUTPUT form, and nothing else.
+ *
+ * The workflow used to decide this with its own
+ * `grep -Eq '^demo:[[:space:]]*(true|yes|on)[[:space:]]*$' content/config/site.yaml`.
+ * Two readers of one fact is two chances to disagree, and they did:
+ * `demo: "true"`, `demo: True` and a trailing `# comment` all evaded that
+ * anchored, case-sensitive pattern while this file read them as true — so the
+ * workflow would have deployed a placeholder site while the root-path check
+ * inside it skipped.
+ *
+ * ADR 021 then removed the `demo:` key outright, and content/config/site.yaml
+ * does not exist at all until an adopter adds it — so that grep would now hit
+ * a missing file, exit 2, and let the TEMPLATE repo deploy itself. One reader,
+ * and it is the one that already owns the question.
+ */
+if (process.argv.includes("--deploy-guard")) {
+  console.log(`deploy=${stillTemplate ? "false" : "true"}`);
+  process.exit(0);
+}
+
 if (target !== "github-pages") {
   console.log(`check-pages-target: skipped (deploy.target is ${target})`);
   process.exit(0);
 }
 
-/* While demo is true this IS the template, not somebody's site: the repo is
-   named recruit-me and origin is example.com, both correctly. Enforcing the
-   root-path rule here would fail the template's own test run forever. `init`
-   sets demo: false, which is exactly the moment the rule starts to matter. */
-if (isDemo()) {
+if (stillTemplate) {
   console.log(
     `check-pages-target: skipped (no content/about/profile.yaml yet, so this is still the ` +
       `template — config is coming from ${rel(sitePath)})`,
