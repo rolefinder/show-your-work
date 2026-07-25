@@ -223,12 +223,20 @@ function main(answers) {
      stop words in place on every Windows fork. This predates the snake_case
      rename — the old camelCase pattern had the identical flaw. [ \t]+ rather
      than \s+ for the same class of reason: \s swallows line breaks. */
+  /* Match BOTH spellings. emit-fit-config.py still accepts the deprecated
+     camelCase keys for a release, so a fork made before the rename has
+     `extraStops:` — and a snake_case-only pattern would silently no-op there,
+     which is precisely the failure above. Rewriting to snake_case also
+     migrates the file, so the next emit stops warning. */
   const eol = fit.includes("\r\n") ? "\r\n" : "\n";
   fit = fit.replace(
-    /^extra_stops:\r?\n(?:[ \t]+- .*\r?\n)*/m,
+    /^(?:extra_stops|extraStops):\r?\n(?:[ \t]+- .*\r?\n)*/m,
     "extra_stops:" + eol + nameStops(answers.name).map((s) => `  - ${s}${eol}`).join(""),
   );
-  fit = fit.replace(/^extra_caveats:\r?\n(?:[ \t]+- .*\r?\n)*/m, "extra_caveats: []" + eol);
+  fit = fit.replace(
+    /^(?:extra_caveats|extraCaveats):\r?\n(?:[ \t]+- .*\r?\n)*/m,
+    "extra_caveats: []" + eol,
+  );
   writes.push(["content/config/fit.yaml", fit]);
 
   // The accent is the one token an adopter is most likely to want changed, and
