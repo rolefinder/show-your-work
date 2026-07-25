@@ -13,7 +13,7 @@
  *
  * Regression guard for two real bugs: the "Demo corpus is fictional (<persona>)"
  * caveat baked into src/fit/match.ts (shipped to adopters' recruiters),
- * and the hand-edited <title>/og:* block in index.html.
+ * and the hand-edited <title>/og:* block in public/index.html.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
@@ -23,7 +23,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Code that must stay identity-free. */
 const SCAN_DIRS = ["src", "functions", "graph"];
-const SCAN_FILES = ["index.html", "404.html", "manifest.json"];
+const SCAN_FILES = ["public/index.html", "public/404.html", "public/manifest.json"];
 const SCAN_EXT = new Set([".ts", ".tsx", ".js", ".mjs", ".html", ".json", ".css"]);
 /** Generated FROM the config, so of course it contains it. */
 const EXCLUDE = ["src/generated/", "functions/_lib/"];

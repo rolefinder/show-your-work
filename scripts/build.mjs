@@ -26,24 +26,25 @@ await esbuild.build({
   logLevel: "info",
 });
 
-function copy(rel) {
-  const from = join(root, rel);
-  const to = join(dist, rel);
-  if (!existsSync(from)) return;
-  mkdirSync(dirname(to), { recursive: true });
-  cpSync(from, to, { recursive: true });
+/** Copy `from` (repo-relative) to `to` (dist-relative). */
+function copy(from, to = from) {
+  const src = join(root, from);
+  const dest = join(dist, to);
+  if (!existsSync(src)) return;
+  mkdirSync(dirname(dest), { recursive: true });
+  cpSync(src, dest, { recursive: true });
 }
 
-for (const rel of [
-  "index.html",
-  "404.html",
-  "manifest.json",
-  "styles.css",
-  "_headers",
-  "_redirects",
-  "tokens",
-  "assets",
-]) {
+// public/ is the web root: its contents land at dist/, not dist/public/. These
+// are the files an adopter never edits — identity is injected into the copies
+// in dist/ by emit-html.ts, so the sources stay templates.
+for (const rel of ["index.html", "404.html", "manifest.json", "_headers", "_redirects"]) {
+  copy(join("public", rel), rel);
+}
+
+// Authored surfaces, copied verbatim: the component layer, the token files it
+// reads, and the images/fonts/vendored React.
+for (const rel of ["styles.css", "tokens", "assets"]) {
   copy(rel);
 }
 

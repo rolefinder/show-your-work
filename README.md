@@ -158,19 +158,34 @@ WCAG AA (4.5:1) in both light and dark.
 
 ## Layout
 
+The repository is arranged so that the directories you edit come first and the
+engine stays out of your way. **If you only ever open `content/`, that is the
+intended experience.**
+
+### Yours
+
 | Path | Role |
 |------|------|
-| `content/about\|work\|blog/` | Your YAML. The only thing you normally edit |
-| `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
+| `content/work\|blog/` | One YAML file per project or post. The bulk of your site |
 | `content/about/profile.yaml` | Name, tagline, email, skills, and `links` keyed by platform |
+| `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
 | `content/config/skills.yaml` | Skill-bank grouping + descriptions |
 | `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
 | `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
-| `src/fit/` | Deterministic matcher + UI |
-| `graph/` + `src/graph/` | CSP-safe WebGL engine + KG builder |
+| `tokens/colors.css` | Four `--rm-*` variables that drive every color |
+
+### The engine
+
+| Path | Role |
+|------|------|
+| `src/` | The React app — `fit/` (matcher + UI), `graph/`, `search/`, `skills/` |
+| `graph/` | The CSP-safe WebGL engine, bundled to a self-hosted file |
 | `tokens/` + `styles.css` | Design tokens, then a component layer that reads only tokens |
-| `scripts/lib/routes.ts` | The single route table |
+| `scripts/` | The build, the emitters, and every gate below. `lib/routes.ts` is the single route table |
+| `public/` | Web-root boilerplate — HTML templates, manifest, `_headers`, `_redirects`. Identity is injected into the copies in `dist/`, so **you never edit these** |
 | `functions/` | Pages middleware (404 status + route docs) and optional `/api/fit` |
+| `packages/` | The YAML→TypeScript emitter, and resume/GitHub ingest |
+| `.claude/skills/` | `/build-recruit-me`, `/deploy-pages`, `/ui-review` — live in a fork with no install step |
 | `docs/` | ADRs — the reasoning, including what was deliberately *not* built |
 
 ## Demo persona
@@ -198,5 +213,6 @@ identity is data, never code),
 
 ## License
 
-Apache-2.0 — see [LICENSE](./LICENSE). Handoff notes in
-[HANDOFF.md](./HANDOFF.md).
+Apache-2.0 — see [LICENSE](./LICENSE). Contributing:
+[CONTRIBUTING.md](./CONTRIBUTING.md) · [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
+· [SECURITY.md](./SECURITY.md).

@@ -5,6 +5,9 @@
   "description": "Open-source personal portfolio template + recruiter Fit (JD \u2192 cite-or-missing evidence brief).",
   "license": "Apache-2.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "init": "node scripts/init-site.mjs",
     "dev": "node scripts/dev.mjs",

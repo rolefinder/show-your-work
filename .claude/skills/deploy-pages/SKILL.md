@@ -1,16 +1,18 @@
-# Stand up a recruit-me site on Cloudflare Pages
+---
+name: deploy-pages
+description: Take a filled-in recruit-me fork from local build to a live site on Cloudflare Pages — what to edit, how to build with prerendering, how to create the Pages project, and how to verify the deploy is really yours. Use when the user runs /deploy-pages, or asks to "deploy my site", "put this on Cloudflare", or "how do I go live".
+---
 
-## When to use
+# /deploy-pages
 
-Standing up a new adopter site from this template — going from a fork to a
-deployed site under your own name.
+Going from a fork to a deployed site under your own name.
 
 ## What you edit (and what you never edit)
 
 Everything that identifies your deployment lives in `content/`. The build
 reads it and writes the rest. If a step below asks you to edit a file under
-`src/`, `index.html`, or `manifest.json`, that is a bug in the template —
-`npm run config:check` exists to fail the build when identity leaks into code.
+`src/` or `public/`, that is a bug in the template — `npm run config:check`
+exists to fail the build when identity leaks into code.
 
 | Edit | Holds |
 |------|-------|
@@ -86,8 +88,6 @@ reads it and writes the rest. If a step below asks you to edit a file under
 
 Template limitations, not setup mistakes:
 
-- **The knowledge graph is its own page** (`/graph`) rather than an embedded
-  lens on home and work.
 - **No infrastructure-as-code.** The Pages project and custom domain are set
   up in the Cloudflare dashboard; there is no Terraform in this repo.
 - **No LinkedIn import.** `packages/ingest/` drafts YAML from a resume or a
