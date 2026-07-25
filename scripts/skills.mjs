@@ -43,6 +43,15 @@ for (const kind of ["work", "blog"]) {
     }
   }
 }
+// Same vocabulary: profile skills render on /about and become the `about`
+// doc's skills in the Fit evidence pack.
+const profile = join(root, "content", "about", "profile.yaml");
+if (existsSync(profile)) {
+  for (const s of skillsIn(readFileSync(profile, "utf8"))) {
+    counts.set(s, (counts.get(s) || 0) + 1);
+    where.set(s, [...(where.get(s) || []), "about/profile.yaml"]);
+  }
+}
 
 if (!counts.size) {
   console.log("skills: none found in content/work or content/blog");

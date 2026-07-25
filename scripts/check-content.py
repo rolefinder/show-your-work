@@ -126,6 +126,12 @@ for kind, items in (("work", work), ("blog", blog)):
     for slug, data in items.items():
         for s in data.get("skills") or []:
             used.setdefault(str(s), []).append(f"content/{kind}/{slug}.yaml")
+# profile.yaml's skills are part of the same vocabulary: they render on /about
+# AND become the `about` doc's skills in the Fit evidence pack. A typo split
+# between the profile and a project would otherwise pass this gate and still
+# fork Fit's matching.
+for s in (profile or {}).get("skills") or []:
+    used.setdefault(str(s), []).append("content/about/profile.yaml")
 
 # Near-duplicates: same skill differing only by case or punctuation is almost
 # always a typo, and it forks the taxonomy silently.
