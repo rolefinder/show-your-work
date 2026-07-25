@@ -21,6 +21,7 @@ import { stdin, stdout } from "node:process";
 import { readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { banner } from "./banner.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -85,7 +86,8 @@ async function collect() {
   }
   const rl = createInterface({ input: stdin, output: stdout });
   const answers = {};
-  console.log("recruit-me init - answers go to content/, never to code.\n");
+  console.log(banner());
+  console.log("Answers go to content/, never to code.\n");
   for (const f of FIELDS) {
     answers[f.key] = (await rl.question(`${f.q}: `)).trim();
   }

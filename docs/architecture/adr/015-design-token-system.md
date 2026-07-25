@@ -50,7 +50,9 @@ and no third-party stylesheet was used as a source (HANDOFF §8.6).
    state inks were darkened (`--positive` #15803d → #166534, `--caution`
    #8a6100 → #7a5600) so the Fit status badges clear 4.5:1 against their own
    `-soft` fills at 11px. Every text/background pair on the shipped pages was
-   measured in both schemes; the floor is 4.54:1.
+   measured in both schemes. (An earlier draft of this ADR quoted a 4.54:1
+   floor; that figure predates raising --fg-muted and is superseded — every
+   pair clears AA.)
 
 4. **Dark mode via `prefers-color-scheme` only.** No toggle, no persisted
    preference, no `data-theme` attribute. A toggle needs storage, an

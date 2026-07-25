@@ -1,13 +1,47 @@
-# recruit-me
+```
+####  #####  #### ####  #   # ##### #####       #   # #####
+#   # #     #     #   # #   #   #     #         ## ## #
+####  ####  #     ####  #   #   #     #    #### # # # ####
+#  #  #     #     #  #  #   #   #     #         #   # #
+#   # #####  #### #   #  ###  #####   #         #   # #####
+```
 
-Open-source (Apache-2.0) personal portfolio **site template** + recruiter **Fit**
-surface: paste a job description → cite-or-missing evidence brief against your
-published `/work` and `/blog`.
+**A personal site that answers the recruiter's actual question.**
+Paste a job description; get a brief where every aligned claim cites a page you
+actually published — and every gap says so out loud.
 
-Demo persona: **Fake Name**, with **Fake Project** / **Fake Post** content. The
-naming is deliberate — every route ships prerendered `Person` JSON-LD, so a demo
-deploy that was never customized must be obviously a placeholder rather than a
-plausible-sounding human. `npm run corpus:check` enforces it while `demo: true`.
+Apache-2.0 · self-hosted React + WebGL graph, no CDN · strict CSP · every route
+prerendered · no LLM anywhere in the matching path.
+
+---
+
+## The point
+
+Most portfolios make a recruiter do the mapping. This one does it for them, and
+refuses to bluff. Here is real output from the shipped demo corpus — not a
+mockup:
+
+```
+[aligned]  Experience building CI/CD pipelines with GitHub Actions
+     cites Fake Project: Merge Gate
+     "Delivery runs through merge gates rather than trusting a green
+      local build."
+
+[not_evidenced_on_site]  Rust systems programming for embedded devices
+     no citation -- No published site evidence matched this requirement.
+```
+
+Two rules make that trustworthy:
+
+- **`aligned` requires at least one citation.** No citation, no claim. Enforced
+  in `fit-smoke`, not just intended.
+- **A requirement is never dropped.** If nothing matches, it is reported as
+  unevidenced. Hiding a gap would make you look like a better fit than the
+  evidence supports, which is the failure this whole project is built against.
+
+The matcher is deterministic keyword retrieval, not a model. It cannot
+hallucinate an employer, a date, or a metric, because it can only quote text
+that already exists in your `content/`.
 
 ## Quick start
 
@@ -19,7 +53,7 @@ npm run test
 npm run preview
 ```
 
-Open http://localhost:4173/fit and paste a sample JD.
+Open <http://localhost:4173/fit> and paste a real JD.
 
 ## Make it yours
 
@@ -27,58 +61,69 @@ Open http://localhost:4173/fit and paste a sample JD.
 npm run init
 ```
 
+Prompts for your identity and writes it into `content/`, swaps the demo
+persona's Fit stop words for your name, clears the demo disclaimer, and turns
+demo mode off. `--dry-run` shows the plan first, `--replace-content` also swaps
+the corpus for starter files, `--config me.json` runs it unattended.
+**It never touches `src/`.**
+
 Then, in Claude Code:
 
 ```
 /build-recruit-me
 ```
 
-Preflights your config, optionally drafts project YAML from the sources you
-name in `content/config/sources.yaml` (GitHub repos, a resume) as reviewable
+Preflights the config, optionally drafts project YAML from sources you name in
+`content/config/sources.yaml` (GitHub repos, a resume) as reviewable
 `visible: false` drafts, builds with prerendering, and verifies the artifact.
-See [ADR 018](./docs/architecture/adr/018-build-command-and-source-drafting.md).
+`npm run ready` runs just the preflight.
 
-`npm run ready` runs the preflight on its own.
+## What you get
 
-One pass: writes your identity into `content/config/site.yaml` and
-`content/about/profile.yaml`, swaps the demo persona's Fit stop words for
-yours, clears the demo disclaimer, and turns demo mode off. `--replace-content`
-also swaps the demo corpus for starter files; `--dry-run` shows the plan;
-`--config me.json` runs it non-interactively. It never touches `src/`.
+| Route | What it is |
+|-------|-----------|
+| `/` `/about` | Who you are, with a contact strip built from `links` |
+| `/work/<slug>` | A project page with a fixed editorial brief: problem, outcome, evidence, decisions |
+| `/blog/<slug>` | Writing, cross-linked with `{{work:slug\|Label}}` tokens |
+| `/graph` | A WebGL knowledge graph of projects, posts and skills — embedded as a lens on `/work` too |
+| `/fit` | The brief above. Works offline in the browser; `POST /api/fit` optional |
 
-## Layout
+## How a build runs
 
-| Path | Role |
-|------|------|
-| `content/about\|work\|blog/` | Adopter-owned YAML |
-| `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
-| `content/config/skills.yaml` | Skill-bank category map (tenant) |
-| `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
-| `scripts/emit-content.py` | Splices typed blocks into `src/app.tsx` |
-| `src/fit/` | Deterministic Fit matcher + UI |
-| `src/skills/` | Skill-bank UI + `?skill=` filter |
-| `graph/` + `src/graph/` | CSP-safe WebGL engine + KG builder (`/graph`) |
-| `tokens/` | Design tokens — colors (light/dark), type, spacing, effects, base reset |
-| `styles.css` | Component layer; reads tokens only, no literals |
-| `functions/api/fit.ts` | Optional same-origin `POST /api/fit` |
-| `docs/` | PRDs, ADRs, security, handoff |
+```
+content/*.yaml
+     |
+     |  emit-content.py        typed module, slug/filename checked
+     v
+src/generated/content.ts ------+--> esbuild ------> dist/app.js
+     |                         |
+     |  scripts/lib/routes.ts  |    one route table, so sitemap, known-paths,
+     |  (the single source)    |    prerender and cards cannot drift
+     v                         v
+emit-html  ->  emit-seo  ->  prerender-routes
+  identity      sitemap        per-route <title>, canonical, OG,
+  into HTML     robots         JSON-LD, and a 1200x630 social card
+                llms.txt
+```
 
-## Adopting it
+## What's actually enforced
 
-Standing up your own site is a `content/` edit, never a code change — see
-[`skills/infra-pages/SKILL.md`](./skills/infra-pages/SKILL.md) for the full
-runbook and [ADR 016](./docs/architecture/adr/016-adopter-config-boundary.md)
-for why the boundary is drawn there. `npm run config:check` fails the build if
-your identity leaks into `src/`.
+Every one of these fails the build, and each exists because it already caught
+something real:
 
-Every route is prerendered to its own HTML with per-route title, canonical,
-OG tags, JSON-LD and a generated social card, so crawlers and link unfurls see
-real content without running JS ([ADR 017](./docs/architecture/adr/017-prerender-and-editorial-contract.md)).
+| Gate | Refuses to ship |
+|------|-----------------|
+| `corpus:check` | Real-person fingerprints in the demo corpus — and a demo persona that isn't obviously fake |
+| `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |
+| `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
+| `fit:smoke` | An `aligned` requirement without a citation; the browser and Worker evidence packs disagreeing |
+| `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
+| `check-ready` | Placeholder identity, an unreviewed draft, or a published `TODO` |
 
 ## Theming
 
-Every color on the site derives from four variables at the top of
-[`tokens/colors.css`](./tokens/colors.css):
+Four variables at the top of [`tokens/colors.css`](./tokens/colors.css) drive
+every color on the site:
 
 ```css
 --rm-brand: #0f5c4c;      /* accent — links, focus ring, active state */
@@ -87,16 +132,47 @@ Every color on the site derives from four variables at the top of
 --rm-fg: #1c1a17;         /* primary ink (light) */
 ```
 
-Change those and the whole site re-themes — component rules never name a
-color. Dark mode follows `prefers-color-scheme` automatically. `npm run
-style:check` fails the build if a literal color creeps into `styles.css`
-or a `var(--x)` stops resolving. See
-[ADR 015](./docs/architecture/adr/015-design-token-system.md).
+Component rules never name a color. Dark mode follows `prefers-color-scheme`.
+Contrast was measured, not assumed: every shipped text/background pair clears
+WCAG AA (4.5:1) in both light and dark.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `content/about\|work\|blog/` | Your YAML. The only thing you normally edit |
+| `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
+| `content/about/profile.yaml` | Name, tagline, email, skills, and `links` keyed by platform |
+| `content/config/skills.yaml` | Skill-bank grouping + descriptions |
+| `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
+| `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
+| `src/fit/` | Deterministic matcher + UI |
+| `graph/` + `src/graph/` | CSP-safe WebGL engine + KG builder |
+| `tokens/` + `styles.css` | Design tokens, then a component layer that reads only tokens |
+| `scripts/lib/routes.ts` | The single route table |
+| `functions/` | Pages middleware (404 status + route docs) and optional `/api/fit` |
+| `docs/` | ADRs — the reasoning, including what was deliberately *not* built |
+
+## Demo persona
+
+**Fake Name**, with **Fake Project** / **Fake Post** content. Deliberately
+unmistakable: every route ships prerendered `Person` JSON-LD, so a demo deploy
+nobody customized must read as a placeholder rather than a plausible human.
+`corpus:check` enforces that while `demo: true`, and turns itself off once the
+corpus is yours.
+
+## Docs
+
+[`docs/README.md`](./docs/README.md) indexes the ADRs. The ones worth reading
+first: [015](./docs/architecture/adr/015-design-token-system.md) (design
+tokens), [016](./docs/architecture/adr/016-adopter-config-boundary.md) (why
+identity is data, never code),
+[017](./docs/architecture/adr/017-prerender-and-editorial-contract.md)
+(prerendering + the editorial contract),
+[018](./docs/architecture/adr/018-build-command-and-source-drafting.md)
+(`/build-recruit-me`).
 
 ## License
 
-Apache-2.0 — see [LICENSE](./LICENSE).
-
-## Handoff
-
-See [HANDOFF.md](./HANDOFF.md) for product decisions and next slices.
+Apache-2.0 — see [LICENSE](./LICENSE). Handoff notes in
+[HANDOFF.md](./HANDOFF.md).
