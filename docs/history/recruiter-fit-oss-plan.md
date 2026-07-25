@@ -12,8 +12,8 @@
 
 | Repo | Role | Visibility |
 |------|------|------------|
-| **`hhalperin/recruit-me`** | Template harness + Fit + ingest + themes + infra skill + **demo** corpus | **Private now → public later** |
-| **`hhalperin/harrison-site`** | Personal production site + real content + dogfood Fit | **Remains private** |
+| **`<owner>/recruit-me`** | Template harness + Fit + ingest + themes + infra skill + **demo** corpus | **Private now → public later** |
+| **`<owner>/private-site`** | Personal production site + real content + dogfood Fit | **Remains private** |
 
 **Copy** modules onto the recruit-me harness (and vendor/copy back into
 harrison-site as needed). Do **not** convert harrison-site into the public
@@ -89,13 +89,13 @@ protection, SECURITY.md, Publish Guardian, no prod IDs in docs).
 ## 8. Work card
 
 After public flip: harrison-site `content/projects/recruit-me.yaml` with
-`note.href` → `https://github.com/hhalperin/recruit-me`.
+`note.href` → `https://github.com/<owner>/recruit-me`.
 
 ---
 
 ## 9. Sequencing
 
-1. Create **private** `hhalperin/recruit-me`.  
+1. Create **private** `<owner>/recruit-me`.  
 2. Scaffold + security baseline.  
 3. Demo deploy via infra skill.  
 4. Fit package; dogfood on private harrison-site.  

@@ -13,8 +13,8 @@ Companion to [`recruit-me-prd.md`](./recruit-me-prd.md). Addresses the concern:
 
 | Asset | Where it lives | Public? |
 |-------|----------------|---------|
-| Template app, Fit module, ingest skills, demo corpus | `hhalperin/recruit-me` | Private → public |
-| Real portfolio content, production Fit, personal ops | `hhalperin/harrison-site` (+ CF account) | **Stays private** |
+| Template app, Fit module, ingest skills, demo corpus | `<owner>/recruit-me` | Private → public |
+| Real portfolio content, production Fit, personal ops | `<owner>/private-site` (+ CF account) | **Stays private** |
 | Cloudflare tokens, AI bindings, JD retention store | Account secrets / private stores | **Never in git** |
 | Personal Terraform / zone IDs / production hostnames | harrison-site `infra/` | **Private** — not copied into recruit-me docs |
 

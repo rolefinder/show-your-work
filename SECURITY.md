@@ -18,8 +18,10 @@ after a public flip, prefer coordinated disclosure.
 - Demo corpus is fictional and self-evidently so (**Fake Name**, `fake-*`
   slugs); never paste real portfolio YAML from a private dogfood site into
   this repo
-- `npm run corpus:check` fails if `content/` contains real-person / employer
-  fingerprints (Harrison, LPL, non-`example.*` emails, etc.)
+- `npm run corpus:check` fails if `content/demo/` contains real-person or
+  employer fingerprints. The patterns are derived from your own
+  `content/about/profile.yaml` plus anything you list in
+  `content/config/corpus-guard.yaml`; no names are hardcoded in the source
 - `npm run secrets:check` fails on high-signal credential patterns (AWS keys,
   GitHub PATs, private key blocks, etc.) — wired into `npm test` / CI
 - Browser CSP stays strict (`script-src 'self'`, `connect-src 'self'`); do not

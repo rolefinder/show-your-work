@@ -40,3 +40,4 @@ each prints what it found rather than just a status. Start with the message.
 | `check-pages-target: FAILED` | [Deploying](./deploy.md#the-root-path-requirement) — the site would land on a subpath and load blank |
 | `pages:setup: NEEDS YOU` | Something only you can do. The message names the exact command |
 | `csp:smoke: FAILED` | Something on the page violates its own CSP. Usually an inline `style=` attribute — use a class |
+| `check-publication-safety: FAILED` | You are about to publish a term you guarded. Run `/sanitize` and rewrite the sentence |

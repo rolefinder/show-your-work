@@ -17,6 +17,10 @@ node_modules/
 wrangler.toml
 .wrangler/
 
+# Terms you never want published. Deliberately NOT committed: writing a
+# codename into a tracked file publishes the codename. See /sanitize.
+content/config/corpus-guard.local.yaml
+
 # Secrets and local environment
 .env
 .env.*

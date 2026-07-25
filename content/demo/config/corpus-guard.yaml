@@ -1,0 +1,40 @@
+# Extra strings that must never appear in the demo corpus.
+#
+# `npm run corpus:check` scans content/demo/ and fails if it finds any of
+# these. It exists because this template was extracted from a private site,
+# and the failure mode it prevents is pasting real portfolio YAML into the
+# shipped demo — which would publish a real employer, or a real person, to
+# every fork.
+#
+# The list is EMPTY as shipped, and that is deliberate. It used to be
+# hardcoded in scripts/check-fictional-corpus.py, which put one maintainer's
+# name and employer into the template's source — exactly the adopter-specific
+# data in code that ADR 016 exists to keep out. The gate does not need it:
+# it already derives the important patterns from your own config (below), and
+# it already rejects any email domain outside example.com/org/net.
+#
+# Add a term here only if it is something you would recognise as a leak but a
+# regex would not — a project codename, a client name, an internal system.
+# Matched case-insensitively, on word boundaries where the term is a word.
+#
+# Nothing you add here is secret. It ships in your repository, so write the
+# thing you want *blocked*, never the thing you want hidden.
+forbidden: []
+#  - Acme Corporation
+#  - project-nightingale
+
+# Email domains the demo corpus may use. RFC 2606 reserves these precisely so
+# they cannot belong to a real person. Anything else fails.
+allowed_email_domains:
+  - example.com
+  - example.org
+  - example.net
+
+# Terms that must never appear in YOUR OWN content or in dist/ — an employer's
+# codename, a client, an internal hostname, a ticket prefix. Enforced by
+# `npm run publication:check`. Run /sanitize to work out what belongs here.
+#
+# This file is COMMITTED, so anything listed here is published. Put genuinely
+# sensitive terms in content/config/corpus-guard.local.yaml (gitignored) or in
+# $RM_GUARD_TERMS instead.
+never_publish: []

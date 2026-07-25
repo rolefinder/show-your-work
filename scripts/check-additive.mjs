@@ -42,6 +42,7 @@ const ADOPTER_FILES = [
   ["config", "skills.yaml"],
   ["config", "fit.yaml"],
   ["config", "sources.yaml"],
+  ["config", "corpus-guard.yaml"],
 ];
 const CORPORA = ["work", "blog"];
 

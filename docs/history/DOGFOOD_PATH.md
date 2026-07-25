@@ -35,7 +35,7 @@ can adopt pieces without becoming the public template.
 
 4. **Optional project card (when repo is public)**
    - Add `content/projects/recruit-me.yaml` with `visible: false` until ready,
-     then flip visible and set `note.href` → `https://github.com/hhalperin/recruit-me`.
+     then flip visible and set `note.href` → `https://github.com/<owner>/recruit-me`.
    - Do **not** paste Avery Quill demo copy into the live site as if it were
      Harrison’s work.
    - First dogfood PR may land the hidden YAML only (no Fit/graph vendor yet).

@@ -133,11 +133,11 @@ Hidden projects: soft-degrade tokens in visible YAML; **hard-block** if hand-aut
 
 | Area | Examples |
 |------|----------|
-| **All real portfolio YAML** | `content/projects/*` especially `pro: true` / employer stacks (`ai-hub.yaml`: Kong, ForgeRock, Bedrock, EKS, …) |
+| **All real portfolio YAML** | `content/projects/*`, especially entries describing professional work and the vendor stacks behind them |
 | **POSTS / FOCUS / hero** | Harrison essays, surfing hero assets, personal bio |
 | **Identity** | `SITE_ORIGIN`, emails, LinkedIn/GitHub, Person JSON-LD, `llms.txt` |
 | **Fit/skill literals** | `harrison` in stop/NL patterns, Harrison synonym map, `SKILL_CATEGORY_MAP` |
-| **Publication-safety banlists** | LPL codenames, `hhalperi`, internal leak patterns (keep *mechanism*, not Harrison’s list as demo) |
+| **Publication-safety banlists** | Employer codenames, handle fragments, internal leak patterns — keep the *mechanism*, never one maintainer's list as demo data |
 | **design-handoff extracted dump** | full `app.jsx` copies, personal photos, brand notes |
 | **`.design-sync/config.json`** | Claude Design `projectId`, `HHDesignSystem`, `harrison-site-design-system` |
 | **Org/agent CI** | `app/orchestrator`, agent-cicd wiring, BugBot SDK — not recruit-me product |
@@ -198,14 +198,14 @@ recruit-me/
 
 ## 6. Explicit do-not-copy list
 
-- Any `content/projects/*.yaml` from harrison-site (especially `pro: true` / LPL-shaped stacks)
+- Any `content/projects/*.yaml` from the private site, especially entries describing professional work
 - `POSTS`, `FOCUS`, hero surfing images, personal OG/JSON-LD
 - `FIT_STOP` / `isFitQuery` / placeholders containing `harrison`
 - `SKILL_CATEGORY_MAP` as-is (Harrison’s vocabulary)
 - `CONTACT_EMAIL`, `SITE_ORIGIN`, LinkedIn, GitHub personal URLs
 - `docs/design-handoff/extracted/**`, personal photos, full app.jsx dumps
 - `.design-sync/config.json` projectId / HH package names
-- Publication-safety patterns that encode employer-internal codenames (as demo data)
+- Publication-safety patterns that encode employer-internal codenames (as demo data — the mechanism ships, the list does not)
 - `app/orchestrator`, agent-cicd, BugBot playbooks
 - Real `llms.txt` / sitemap identity
 - Assumption that `/writing` is the OSS route (OSS uses `/blog`; site may keep `/writing`)
@@ -221,7 +221,7 @@ recruit-me/
 | — | **No new XSS/CSP/secret issues** in wave | Safe to copy *mechanisms* (escapeRe, React nodes, self-hosted graph, allowlist build) |
 | Low–Med | `window.HHPG_FORCES` mutable transport | Must be typed `opts` before package publish |
 | Low | O(n²) collision on every drag mousemove | Fine for ~25 projects; guard/rAF for large demo graphs |
-| Pre-existing (flag) | `ai-hub.yaml` employer stack detail | **Wrong to republish** in a public template |
+| Pre-existing (flag) | Employer stack detail in a professional-work entry | **Wrong to republish** in a public template |
 
 ### Maintainability / structure
 
