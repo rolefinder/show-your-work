@@ -47,7 +47,7 @@ export function retrieveEvidence(
         if (!skillQuote) skillQuote = doc.skillNotes?.[skillMatch] || skillMatch;
       }
       if (!claimQuote) {
-        const claim = (doc.claims || []).find((c) => c.toLowerCase().includes(term));
+        const claim = (doc.claims || []).find((c) => containsTerm(c, term));
         if (claim) claimQuote = claim;
       }
       if (corpus.includes(term)) {
@@ -70,6 +70,25 @@ export function retrieveEvidence(
 
   hits.sort((a, b) => b.score - a.score || a.doc.title.localeCompare(b.doc.title));
   return hits.slice(0, 5);
+}
+
+/**
+ * Whole-token containment, for picking a claim to QUOTE.
+ *
+ * A bare `includes` lets a two-letter token like "ci" (tokenize splits
+ * "CI/CD") match inside "decisions", "efficiency" or "specific". Because a
+ * claim is preferred over every other quote source, one spurious match
+ * outranks a genuinely relevant skill note — so the citation shown to a
+ * recruiter would be an unrelated sentence.
+ *
+ * Boundaries are non-word-character lookarounds rather than \b, so terms that
+ * themselves contain punctuation ("ci/cd", "node.js") still match correctly.
+ * Scoring deliberately still uses substring matching; changing that would move
+ * every threshold in DEFAULT_WEIGHTS.
+ */
+export function containsTerm(haystack: string, term: string): boolean {
+  const escaped = term.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+  return new RegExp(`(^|[^\\w])${escaped}($|[^\\w])`, "i").test(haystack);
 }
 
 function snippetAround(text: string, term: string): string {

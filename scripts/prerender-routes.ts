@@ -25,6 +25,20 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 const PORT = Number(process.env.PRERENDER_PORT || 4178);
 
+/**
+ * The card's accent stripe is the BRAND colour, which lives in
+ * tokens/colors.css as --rm-brand — not in site.yaml. site.yaml's theme_color
+ * is the page background, so using it painted a beige bar on a near-black
+ * card. Read the token instead of duplicating the value into config, so the
+ * card can't drift from the site.
+ */
+function brandAccent(): string {
+  const css = readFileSync(join(root, "tokens", "colors.css"), "utf8");
+  const m = css.match(/--rm-brand:\s*(#[0-9a-f]{3,8})/i);
+  return m ? m[1] : SITE_CONFIG.themeColorDark;
+}
+const ACCENT = brandAccent();
+
 if (process.env.PRERENDER === "0") {
   console.warn("prerender: skipped (PRERENDER=0)");
   process.exit(2);
@@ -63,7 +77,7 @@ function cardHtml(route: RouteMeta): string {
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .foot { display: flex; justify-content: space-between; align-items: baseline;
       font-size: 28px; color: rgba(244,241,234,0.62); font-weight: 500; }
-    .accent { width: 120px; height: 6px; background: ${esc(SITE_CONFIG.themeColor)}; border-radius: 3px; margin-bottom: 28px; }
+    .accent { width: 120px; height: 6px; background: ${esc(ACCENT)}; border-radius: 3px; margin-bottom: 28px; }
   </style></head><body>
     <div class="eyebrow">${esc(route.eyebrow)}</div>
     <div><div class="accent"></div><h1>${esc(route.card)}</h1>

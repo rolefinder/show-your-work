@@ -40,13 +40,20 @@ export async function onRequest(context) {
    the home page's metadata on every URL. Falling back to the shell also covers
    the build where Playwright was unavailable and nothing was prerendered. */
 async function fetchDoc(context, url, path, isKnown) {
-  if (isKnown && path !== "/") {
+  // Unknown path: serve the dedicated not-found document. Falling back to
+  // index.html here would return the HOME page's prerendered body, title,
+  // canonical and OG tags under a 404 — inviting a crawler to index junk URLs
+  // as the home page. dist/404.html carries the notfound view and noindex.
+  const candidate = isKnown ? (path === "/" ? null : `${path}.html`) : "/404.html";
+  if (candidate) {
     try {
-      const routeDoc = await context.env.ASSETS.fetch(new URL(`${path}.html`, url));
-      if (routeDoc.ok) return routeDoc;
+      const doc = await context.env.ASSETS.fetch(new URL(candidate, url));
+      if (doc.ok) return doc;
     } catch {
       // fall through to the shell
     }
   }
+  // The SPA shell: correct for "/", and the honest fallback when a build ran
+  // without prerendering and no per-route document exists.
   return context.env.ASSETS.fetch(new URL("/index.html", url));
 }

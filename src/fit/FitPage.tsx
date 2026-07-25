@@ -11,32 +11,42 @@ type Props = {
   onNavigate: (path: string) => void;
 };
 
+/**
+ * Tenant tuning (stops, synonyms, weights, caveats) is authored in
+ * content/config/fit.yaml and emitted to /fit-config.json at build time.
+ *
+ * One shared promise, resolved once per page load. A ref would have let the
+ * first submission race the fetch: clicking Run or dropping a file before it
+ * landed produced a brief built on engine defaults, silently missing the
+ * tenant's stop words and extraCaveats. Awaiting the promise costs nothing
+ * after the first call and is correct on the first.
+ *
+ * A missing or malformed file resolves to undefined rather than rejecting —
+ * the engine defaults are a complete, working configuration on their own.
+ */
+let fitConfigPromise: Promise<FitMatchConfig | undefined> | null = null;
+
+function loadFitConfig(): Promise<FitMatchConfig | undefined> {
+  if (!fitConfigPromise) {
+    fitConfigPromise = fetch("/fit-config.json")
+      .then((r) => (r.ok ? (r.json() as Promise<FitMatchConfig>) : undefined))
+      .catch(() => undefined);
+  }
+  return fitConfigPromise;
+}
+
 export function FitPage({ docs, onNavigate }: Props) {
   const [jd, setJd] = React.useState("");
   const [brief, setBrief] = React.useState<FitBrief | null>(null);
   const [error, setError] = React.useState("");
   const [busy, setBusy] = React.useState(false);
-  // Tenant tuning (stops, synonyms, weights, caveats) is authored in
-  // content/config/fit.yaml and emitted to /fit-config.json at build time.
-  // Held in a ref so run() reads the current value without re-creating itself.
-  const cfgRef = React.useRef<FitMatchConfig | undefined>(undefined);
 
+  // Warm it on mount so the first submission usually doesn't wait.
   React.useEffect(() => {
-    let live = true;
-    fetch("/fit-config.json")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((cfg) => {
-        if (live && cfg) cfgRef.current = cfg as FitMatchConfig;
-      })
-      // Absent or malformed config is not fatal — the engine defaults are
-      // a complete, working configuration on their own.
-      .catch(() => undefined);
-    return () => {
-      live = false;
-    };
+    void loadFitConfig();
   }, []);
 
-  function run(text: string) {
+  async function run(text: string) {
     setError("");
     const trimmed = text.trim();
     if (!trimmed) {
@@ -50,7 +60,7 @@ export function FitPage({ docs, onNavigate }: Props) {
     }
     setBusy(true);
     try {
-      setBrief(matchFit(trimmed, docs, cfgRef.current));
+      setBrief(matchFit(trimmed, docs, await loadFitConfig()));
     } finally {
       setBusy(false);
     }
@@ -70,7 +80,7 @@ export function FitPage({ docs, onNavigate }: Props) {
     }
     const text = await file.text();
     setJd(text.slice(0, MAX_CHARS));
-    run(text.slice(0, MAX_CHARS));
+    await run(text.slice(0, MAX_CHARS));
   }
 
   return React.createElement(
