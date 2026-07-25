@@ -14,7 +14,7 @@ recruit-me ships demo corpus only. Security:
 On the **template**, evidence URLs are `/work/<slug>` and `/blog/<slug>`.
 harrison-site may keep `/writing` until it chooses to align.
 
-Related decisions: [ADR 010](../architecture/adr/010-recruiter-fit-architecture.md) (architecture), [ADR 011](../architecture/adr/011-recruiter-fit-quota.md) (quota + request-more), [ADR 012](../architecture/adr/012-recruiter-fit-security-data.md) (inputs, security, retention), [ADR 013](../architecture/adr/013-modular-post-content.md) (modular posts dependency). Packaging: [`recruiter-fit-oss-plan.md`](./recruiter-fit-oss-plan.md).
+Related decisions: [ADR 010](../architecture/adr/010-recruiter-fit-architecture.md) (architecture), [ADR 011](../architecture/adr/011-recruiter-fit-quota.md) (quota + request-more), [ADR 012](../architecture/adr/012-recruiter-fit-security-data.md) (inputs, security, retention). Packaging: [`recruiter-fit-oss-plan.md`](./recruiter-fit-oss-plan.md).
 
 ---
 

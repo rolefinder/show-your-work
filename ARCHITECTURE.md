@@ -692,6 +692,9 @@ flowchart LR
 | `fit:smoke` | An `aligned` requirement with no citation; the two evidence packs disagreeing; a dequalifying status leaking into highlight mode; the non-exhaustive caveat going missing; audit mode losing the ability to report gaps |
 | `graph:smoke` | A missing bundle; a bundle without `RMPortfolioGraph`/`create`; a regression to the retired `window.HHPG_FORCES` global; `resolveForces` ignoring `opts.forces`, the compact preset, or the defaults |
 | `seo:smoke` | Sitemap/known-paths count mismatch; a 404 without `noindex`; an indexable route without its own document, canonical, or JSON-LD |
+| `ux:check` | Text below WCAG AA against its real composited background; horizontal overflow; an undersized touch target that also fails the 2.5.8 spacing rule; no keyboard focus ring; a route without exactly one `h1`, a `lang`, or a title. 9 routes x light/dark x 375/1280px |
+| `docs:check` | A number quoted in the docs that no longer matches source |
+| `docs:links` | A relative doc link or in-page anchor that does not resolve |
 | `check-ready` | Placeholder identity, an unreviewed draft, a published `TODO` → exit 1. Missing Python/PyYAML/`node_modules` → exit 2 |
 
 Every one of these exists because it caught something real, not speculatively.
