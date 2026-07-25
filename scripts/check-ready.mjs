@@ -57,8 +57,23 @@ if (isDemo()) {
       `still says "${name}". Add the file with your name, tagline, location, email and skills.`,
   );
 } else {
+  /* The file existing is not the same as the file being yours. Copying
+     content/demo/about/profile.yaml across is a natural first move — the guide
+     even suggests copying a config out to edit it — and on its own that flips
+     demo mode OFF while the site still publishes "Fake Name" in every title
+     and every JSON-LD Person block. Deriving demo mode from the file's
+     PRESENCE is what makes this check load-bearing rather than redundant. */
   for (const [field, value] of [["name", name], ["email", email]]) {
-    if (!value) blockers.push(`content/about/profile.yaml: ${field} is empty`);
+    if (!value) blockers.push(`content/about/profile.yaml: ${field} is empty — fill it in`);
+  }
+  if (name && /\bfake\b/i.test(name)) {
+    blockers.push(
+      `content/about/profile.yaml: name is still ${JSON.stringify(name)} — this looks like a copy of ` +
+        "the demo profile. Demo chrome is already off, so the site would publish that name as a real person.",
+    );
+  }
+  if (email && /@example\.(com|org|net)$/i.test(email)) {
+    blockers.push(`content/about/profile.yaml: email is still the placeholder ${email}`);
   }
   if (/^\s*-\s*(Add|your|skills)\s*$/m.test(profile)) {
     blockers.push("content/about/profile.yaml: skills still say 'Add / your / skills'");
