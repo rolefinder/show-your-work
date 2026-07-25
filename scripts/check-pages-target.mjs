@@ -69,16 +69,38 @@ function nested(parent, key) {
 }
 
 const target = nested("deploy", "target") || "github-pages";
-if (target !== "github-pages") {
-  console.log(`check-pages-target: skipped (deploy.target is ${target})`);
-  process.exit(0);
-}
 
 /* While demo is true this IS the template, not somebody's site: the repo is
    named recruit-me and origin is example.com, both correctly. Enforcing the
    root-path rule here would fail the template's own test run forever. `init`
    sets demo: false, which is exactly the moment the rule starts to matter. */
-if (/^(true|yes|on)$/i.test(scalar("demo"))) {
+const stillTemplate = /^(true|yes|on)$/i.test(scalar("demo"));
+
+/**
+ * `--deploy-guard`: answer "should the deploy workflow run at all?" in
+ * GITHUB_OUTPUT form, and nothing else.
+ *
+ * The workflow used to decide this with its own `grep -Eq '^demo:[[:space:]]*
+ * (true|yes|on)[[:space:]]*$'`. Two readers of one key is two chances to
+ * disagree, and they did: the grep is anchored and case-sensitive, so
+ * `demo: "true"`, `demo: True`, and `demo: true  # still the template` all
+ * failed to match it while `scalar()` above read every one of them as true.
+ * The workflow would have deployed a placeholder site while the root-path
+ * check inside it skipped.
+ *
+ * So the guard is this file, which already owns the parser.
+ */
+if (process.argv.includes("--deploy-guard")) {
+  console.log(`deploy=${stillTemplate ? "false" : "true"}`);
+  process.exit(0);
+}
+
+if (target !== "github-pages") {
+  console.log(`check-pages-target: skipped (deploy.target is ${target})`);
+  process.exit(0);
+}
+
+if (stillTemplate) {
   console.log("check-pages-target: skipped (demo: true — still the template, not a deployment)");
   process.exit(0);
 }

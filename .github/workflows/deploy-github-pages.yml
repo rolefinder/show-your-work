@@ -38,14 +38,14 @@ jobs:
       deploy: ${{ steps.check.outputs.deploy }}
     steps:
       - uses: actions/checkout@v4
+      # Asks the checker rather than re-deciding in bash. An earlier version
+      # grepped for the demo flag here, and the two readers disagreed:
+      # `demo: "true"`, `demo: True` and a trailing `# comment` all slipped
+      # past the anchored, case-sensitive grep while the checker read them as
+      # true — so the workflow would have deployed a placeholder site while
+      # the root-path check inside it skipped. One parser, one answer.
       - id: check
-        run: |
-          if grep -Eq '^demo:[[:space:]]*(true|yes|on)[[:space:]]*$' content/config/site.yaml; then
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "demo: true - this is still the template, not a site. Nothing to deploy."
-          else
-            echo "deploy=true" >> "$GITHUB_OUTPUT"
-          fi
+        run: node scripts/check-pages-target.mjs --deploy-guard | tee -a "$GITHUB_OUTPUT"
 
   build:
     needs: decide
