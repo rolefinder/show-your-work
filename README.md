@@ -137,6 +137,7 @@ something real:
 | `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
 | `fit:smoke` | An `aligned` requirement without a citation; a dequalifying verdict leaking into highlight mode; the browser and Worker evidence packs disagreeing |
 | `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
+| `content:check` | A cross-link that would 404; a missing required field; a skill spelled two ways |
 | `check-ready` | Placeholder identity, an unreviewed draft, or a published `TODO` |
 
 ## Theming
