@@ -100,7 +100,11 @@ export function FitPage({ docs, onNavigate }: Props) {
     React.createElement(
       "p",
       { className: "lede" },
-      "Paste or drop a job description. Every requirement shown is matched to a published page and quoted from it — never invented employers, dates, or numbers.",
+      // True in both modes on purpose. "Every requirement shown is matched"
+      // would be false under showGaps: true, where uncited rows appear — and
+      // this lede renders before the config has loaded, so it cannot depend on
+      // the mode without flashing the wrong copy.
+      "Paste or drop a job description. Every claim the brief makes is quoted from a page published on this site — never an invented employer, date, or number.",
     ),
     React.createElement(
       "div",
