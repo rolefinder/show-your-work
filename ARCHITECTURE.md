@@ -337,6 +337,12 @@ prerendered documents and the cards all derive from `scripts/lib/routes.ts`,
 built from the same generated module the client router uses. They cannot drift,
 because there is nothing to drift *from*.
 
+**Authoring skips most of this.** `npm run dev` watches `content/`, `src/`
+and `tokens/` and runs only the tier a change needs — ~2s for a work/blog edit,
+~4s when identity changes, instant for CSS — and never prerenders. Prerendering
+is a publish-time concern, so `npm run build` remains the thing you run before
+deploying.
+
 **Prerendering degrades loudly.** `run-prerender.mjs` treats a missing
 Playwright as a warning locally — you get an SPA-only `dist` — and as a hard
 failure when `PRERENDER_REQUIRED=1`, which CI sets. `seo-smoke` then enforces

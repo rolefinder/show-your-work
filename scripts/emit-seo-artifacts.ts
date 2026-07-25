@@ -66,7 +66,7 @@ function llmsTxt(): string {
   return lines.join("\n");
 }
 
-function main(): void {
+export function emitSeoArtifacts(): void {
   const routes = buildRoutes();
   const paths = knownPaths();
 
@@ -105,4 +105,8 @@ function main(): void {
   );
 }
 
-main();
+// Still runnable on its own; scripts/emit-artifacts.ts imports it instead
+// so the build pays tsx's ~1.6s startup once rather than per emitter.
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
+  emitSeoArtifacts();
+}

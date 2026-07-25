@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFileSync, existsSync, statSync } from "node:fs";
+import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -47,6 +47,43 @@ function resolveFile(pathname) {
 
   return join(root, "index.html");
 }
+
+/**
+ * Serving dist/ says nothing about whether dist/ matches content/. Editing a
+ * YAML file and forgetting to rebuild shows stale content with no signal at
+ * all, which is a genuinely confusing five minutes. Compare mtimes once at
+ * startup and say so. `npm run dev` makes this moot by rebuilding for you.
+ */
+function warnIfStale() {
+  const built = join(root, "index.html");
+  if (!isFile(built)) {
+    console.warn("preview: dist/ has no index.html — run `npm run build` first");
+    return;
+  }
+  const builtAt = statSync(built).mtimeMs;
+  let newest = 0;
+  let newestFile = "";
+  const scan = (dir) => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const abs = join(dir, entry.name);
+      if (entry.isDirectory()) scan(abs);
+      else {
+        const m = statSync(abs).mtimeMs;
+        if (m > newest) [newest, newestFile] = [m, abs];
+      }
+    }
+  };
+  scan(join(root, "..", "content"));
+  if (newest > builtAt) {
+    const rel = newestFile.split(/[\\/]/).slice(-3).join("/");
+    console.warn(
+      `preview: STALE — ${rel} is newer than dist/index.html.\n` +
+        "         You are looking at an older build. Run `npm run build`, or `npm run dev` to rebuild on save.",
+    );
+  }
+}
+warnIfStale();
 
 createServer((req, res) => {
   const url = new URL(req.url || "/", "http://localhost");
