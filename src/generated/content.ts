@@ -19,6 +19,7 @@ export const SITE_CONFIG: SiteConfig = {
   demo: true,
   deployTarget: "github-pages",
   customDomain: "",
+  theme: {},
 };
 
 export const SITE_PROFILE: SiteProfile = {

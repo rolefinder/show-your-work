@@ -39,7 +39,9 @@ except ImportError:
     raise SystemExit(2)
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTENT = ROOT / "content"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from packages.content.paths import corpus_dir, corpus_files, rel, resolve  # noqa: E402
 
 REQUIRED = {
     "work": ["slug", "title", "summary", "body", "skills"],
@@ -71,11 +73,13 @@ def load(path: Path) -> dict | None:
 
 
 def collect(kind: str) -> dict[str, dict]:
+    """Validate whichever corpus is actually in use — yours, or the demo's.
+
+    An adopter adds content/work/*.yaml and the demo projects stop being part
+    of the site, so validating both would report errors about files that no
+    longer publish anything."""
     out: dict[str, dict] = {}
-    directory = CONTENT / kind
-    if not directory.is_dir():
-        return out
-    for path in sorted(directory.glob("*.yaml")):
+    for path in corpus_files(kind):
         rel = path.relative_to(ROOT).as_posix()
         data = load(path)
         if data is None:
@@ -109,29 +113,32 @@ for kind, items in (("work", work), ("blog", blog)):
                 if target not in known[target_kind]:
                     errors.append(
                         f"content/{kind}/{slug}.yaml: {field} links to "
-                        f"{{{{{m.group(1)}:{target}}}}} but content/{target_kind}/{target}.yaml "
-                        "does not exist - this publishes a link that 404s"
+                        f"{{{{{m.group(1)}:{target}}}}} but no {target}.yaml exists in "
+                        f"{corpus_dir(target_kind).relative_to(ROOT).as_posix()}/ "
+                        "- this publishes a link that 404s"
                     )
 
 # ---------- skill vocabulary ----------
-profile_path = CONTENT / "about" / "profile.yaml"
+profile_path = resolve("about", "profile.yaml")
 profile = load(profile_path) if profile_path.is_file() else None
 if profile is not None:
     for field in PROFILE_REQUIRED:
         if field not in profile or profile[field] in (None, "", []):
-            errors.append(f"content/about/profile.yaml: missing required field `{field}`")
+            errors.append(f"{rel(profile_path)}: missing required field `{field}`")
 
 used: dict[str, list[str]] = {}
 for kind, items in (("work", work), ("blog", blog)):
     for slug, data in items.items():
         for s in data.get("skills") or []:
-            used.setdefault(str(s), []).append(f"content/{kind}/{slug}.yaml")
+            used.setdefault(str(s), []).append(
+                f"{corpus_dir(kind).relative_to(ROOT).as_posix()}/{slug}.yaml"
+            )
 # profile.yaml's skills are part of the same vocabulary: they render on /about
 # AND become the `about` doc's skills in the Fit evidence pack. A typo split
 # between the profile and a project would otherwise pass this gate and still
 # fork Fit's matching.
 for s in (profile or {}).get("skills") or []:
-    used.setdefault(str(s), []).append("content/about/profile.yaml")
+    used.setdefault(str(s), []).append(rel(profile_path))
 
 # Near-duplicates: same skill differing only by case or punctuation is almost
 # always a typo, and it forks the taxonomy silently.
@@ -148,14 +155,14 @@ for key, variants in sorted(buckets.items()):
             "Fit's skill weighting. Pick one."
         )
 
-skills_cfg_path = CONTENT / "config" / "skills.yaml"
+skills_cfg_path = resolve("config", "skills.yaml")
 skills_cfg = load(skills_cfg_path) if skills_cfg_path.is_file() else None
 if isinstance(skills_cfg, dict):
     mapped = set(skills_cfg.get("map") or {})
     for label, where in sorted(used.items()):
         if label not in mapped:
             warnings.append(
-                f"skill {label!r} is not in content/config/skills.yaml `map` - it will "
+                f"skill {label!r} is not in {rel(skills_cfg_path)} `map` - it will "
                 f"fall into the fallback category (used by {where[0]})"
             )
 

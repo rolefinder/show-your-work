@@ -77,15 +77,17 @@ you rename yourself (ADR 016).
 ```
 recruit-me/
 │
-├── content/                     ▓ DATA — the only thing you normally touch
-│   ├── about/profile.yaml         name · tagline · location · email · skills · links{}
-│   ├── work/<slug>.yaml           one project each  (slug MUST equal filename)
-│   ├── blog/<slug>.yaml           one post each
-│   └── config/
-│       ├── site.yaml              origin · title_suffix · description · theme colors · demo
-│       ├── skills.yaml            category order/map + per-skill descriptions
-│       ├── fit.yaml               extra_stops · synonyms · skill_weights · weights · show_gaps
-│       └── sources.yaml           optional: GitHub user / resume for drafting
+├── content/                     ▓ DATA — you only ever ADD here (ADR 021)
+│   ├── about/profile.yaml         ← you add: name · tagline · email · skills · links{}
+│   ├── work/<slug>.yaml           ← you add: one project each (slug MUST equal filename)
+│   ├── blog/<slug>.yaml           ← you add: one post each
+│   ├── config/
+│   │   ├── site.yaml              ← you add: origin · title_suffix · deploy · theme
+│   │   ├── skills.yaml            ← you add: category order/map + descriptions
+│   │   ├── fit.yaml               ← you add: extra_stops · synonyms · weights · show_gaps
+│   │   └── sources.yaml           ← you add: GitHub user / resume for drafting
+│   └── demo/                    ▒ SHIPPED — never edited, never deleted
+│       └── {about,work,blog,config}/  used for anything you have not added
 │
 ├── src/                         ▓ CODE — contains no identity
 │   ├── app.tsx                    view union, router, page bodies, chrome
@@ -688,7 +690,7 @@ publish structured data asserting a plausible human exists.
 
 ```mermaid
 flowchart LR
-    A["corpus:check"] --> B["content:check"] --> C["secrets:check"] --> D["style:check"] --> E["build"]
+    A0["additive:check"] --> A["corpus:check"] --> B["content:check"] --> C["secrets:check"] --> D["style:check"] --> E["build"]
     E --> F["config:check"] --> G["pages:check"] --> H["fit:smoke"] --> I["graph:smoke"]
     I --> J["seo:smoke"] --> K["csp:smoke"] --> L["ux:check"]
 
@@ -697,8 +699,9 @@ flowchart LR
 
 | Gate | Fails on |
 |---|---|
+| `additive:check` | A file committed at an adopter path (it would have to be edited, and every template update would conflict); a missing demo fallback; `tokens/adopter.css` not imported last |
 | `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a missing required field; a bad date; one skill spelled two ways. Warns on skills missing from `skills.yaml` |
-| `corpus:check` | Real-person fingerprints in the demo corpus; a persona name that isn't self-evidently fake; a non-`fake-` slug — all only while `demo: true` |
+| `corpus:check` | Real-person fingerprints in `content/demo/`; a persona name that isn't self-evidently fake; a non-`fake-` slug. Scoped by directory, so it needs no flag and never switches off |
 | `secrets:check` | Private keys, `ghp_`/`gh[ours]_` tokens, `AKIA…`, Slack `xox…`, `sk-…`, Cloudflare tokens, and generic `api_key=`/`secret_key=` assignments |
 | `style:check` | A raw color in `styles.css`, or a `var(--x)` no token defines |
 | `config:check` | Your identity appearing anywhere under `src/`, `functions/`, `graph/`, or `public/` |

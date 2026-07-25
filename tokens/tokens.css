@@ -5,8 +5,9 @@
    read these tokens — never raw hex values (enforced by
    scripts/check-style-tokens.mjs).
 
-   Re-theming a fork: override the four --rm-* vars at the top
-   of colors.css. Nothing else needs to change.
+   Re-theming a fork: set `theme:` in content/config/site.yaml.
+   The build writes adopter.css from it, and that is imported
+   last so it wins. You never edit a file in this directory.
    ============================================================ */
 
 @import "./colors.css";
@@ -14,3 +15,6 @@
 @import "./spacing.css";
 @import "./effects.css";
 @import "./base.css";
+
+/* Last, so an adopter's --rm-* values win over the shipped palette. */
+@import "./adopter.css";

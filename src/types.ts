@@ -29,6 +29,10 @@ export type SiteConfig = {
   deployTarget: "github-pages" | "cloudflare-pages";
   /** Optional custom domain. On GitHub Pages this is emitted as dist/CNAME. */
   customDomain: string;
+  /* Adopter palette overrides from site.yaml `theme:`. Empty means "use the
+     shipped palette". Written into dist/tokens/adopter.css at build time so
+     theming never means editing a file under tokens/. */
+  theme: Partial<Record<"accent" | "accentDeep" | "bg" | "fg", string>>;
 };
 
 export type WorkItem = {

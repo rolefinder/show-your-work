@@ -14,6 +14,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { corpusDir, isDemo, isOwn, rel, resolve } from "./lib/content-paths.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (...p) => readFileSync(join(root, ...p), "utf8");
@@ -29,44 +30,65 @@ const blockers = [];   // content/config problems -> exit 1
 const missingDeps = []; // toolchain problems     -> exit 2
 const warnings = [];
 
-// ---------- config ----------
-const site = read("content", "config", "site.yaml");
-const profile = read("content", "about", "profile.yaml");
+/* ---------- config ----------
+   Every blocker below names a file to ADD. None asks anyone to edit or delete
+   something the template ships: content/demo/ stays exactly as it came, and
+   each file you add takes over from its demo counterpart. That is the whole
+   contract, so the wording here has to hold it up — "still contains the demo
+   corpus" was an instruction to delete, and it is gone. */
+const site = readFileSync(resolve("config", "site.yaml"), "utf8");
+const profile = readFileSync(resolve("about", "profile.yaml"), "utf8");
 
 const origin = scalar(site, "origin");
-if (!origin || origin.includes("example.com")) {
-  blockers.push(`content/config/site.yaml: origin is still ${origin || "unset"} — set your real domain`);
-}
-if (/^true$/i.test(scalar(site, "demo"))) {
-  blockers.push("content/config/site.yaml: demo is still true — set demo: false once content/ is yours");
+if (!isOwn("config", "site.yaml")) {
+  blockers.push(
+    "content/config/site.yaml: not added yet — the build is using content/demo/config/site.yaml, " +
+      `so the site's origin is ${origin || "unset"}. Add the file with your origin.`,
+  );
+} else if (!origin || origin.includes("example.com")) {
+  blockers.push(`content/config/site.yaml: origin is ${origin || "unset"} — set your real domain`);
 }
 
 const name = scalar(profile, "name");
-if (!name || /fake/i.test(name)) {
-  blockers.push(`content/about/profile.yaml: name is still the placeholder (${name || "unset"})`);
-}
 const email = scalar(profile, "email");
-if (!email || email.includes("example.com")) {
-  blockers.push(`content/about/profile.yaml: email is still ${email || "unset"}`);
-}
-if (/^\s*-\s*(Add|your|skills)\s*$/m.test(profile)) {
-  blockers.push("content/about/profile.yaml: skills still contain the 'Add / your / skills' placeholder");
+if (isDemo()) {
+  blockers.push(
+    "content/about/profile.yaml: not added yet — every page and every JSON-LD Person block " +
+      `still says "${name}". Add the file with your name, tagline, location, email and skills.`,
+  );
+} else {
+  for (const [field, value] of [["name", name], ["email", email]]) {
+    if (!value) blockers.push(`content/about/profile.yaml: ${field} is empty`);
+  }
+  if (/^\s*-\s*(Add|your|skills)\s*$/m.test(profile)) {
+    blockers.push("content/about/profile.yaml: skills still say 'Add / your / skills'");
+  }
 }
 
 // ---------- corpus ----------
-const workDir = join(root, "content", "work");
-const blogDir = join(root, "content", "blog");
+const workDir = corpusDir("work");
+const blogDir = corpusDir("blog");
 const listYaml = (dir) =>
   existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".yaml")) : [];
 
 const work = listYaml(workDir);
 const blog = listYaml(blogDir);
-if (!work.length) blockers.push("content/work/: no projects — the site has nothing to show a recruiter");
-if (work.some((f) => /^fake-/.test(f))) {
-  blockers.push("content/work/: still contains the demo corpus (fake-*.yaml)");
+
+/* Adding one project switches the whole corpus over — the demo projects are
+   not merged in alongside. So this is a single "add your first one", never a
+   "now go delete the others". */
+if (!work.length || rel(workDir).startsWith("content/demo/")) {
+  blockers.push(
+    "content/work/: no projects of your own — the site is showing the demo corpus. " +
+      "Add content/work/<slug>.yaml (slug must equal the filename); the demo projects " +
+      "drop out as soon as you do.",
+  );
 }
-if (blog.some((f) => /^fake-/.test(f))) {
-  blockers.push("content/blog/: still contains the demo corpus (fake-*.yaml)");
+if (blog.length && rel(blogDir).startsWith("content/demo/")) {
+  warnings.push(
+    "content/blog/: no posts of your own — the site is showing the demo posts. " +
+      "Add content/blog/<slug>.yaml, or leave it: writing is optional.",
+  );
 }
 
 /* YAML has more than one way to say false. PyYAML (which the emitter uses)

@@ -1,0 +1,15 @@
+/* ============================================================
+   Adopter theme overrides — GENERATED.
+
+   Empty as shipped. If content/config/site.yaml has a `theme:`
+   block, scripts/emit-html.ts rewrites the copy of this file in
+   dist/ with those values.
+
+   It is imported LAST so its :root wins over colors.css, and it
+   sets only the four --rm-* adopter variables that everything
+   else derives from. Theming is therefore a content edit, not a
+   change to a file the template ships — which is what lets you
+   pull template updates without a merge conflict in your palette.
+
+   Do not hand-edit. Set `theme:` in content/config/site.yaml.
+   ============================================================ */

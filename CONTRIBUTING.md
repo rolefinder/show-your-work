@@ -62,7 +62,8 @@ Do not hand-edit these; edit their source and rebuild.
 `npm test` — ten gates, in this order:
 
 ```
-corpus:check -> content:check -> secrets:check -> style:check -> build
+additive:check -> corpus:check -> content:check -> secrets:check -> style:check
+  -> build
   -> config:check -> pages:check -> fit:smoke -> graph:smoke -> seo:smoke
   -> csp:smoke -> ux:check
 ```

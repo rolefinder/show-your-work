@@ -23,6 +23,7 @@ import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDemo, rel, resolve } from "./lib/content-paths.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -39,8 +40,12 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
    Config's source of truth is the YAML; that is what this must see.
 
    Minimal reader rather than a YAML dependency, matching check-ready.mjs:
-   only four scalars are needed, two of them one level deep. */
-const siteYaml = readFileSync(join(root, "content", "config", "site.yaml"), "utf8");
+   only four scalars are needed, two of them one level deep.
+
+   Resolved, not hardcoded: content/config/site.yaml does not exist until an
+   adopter adds it, and until then the demo's is what the build uses. */
+const sitePath = resolve("config", "site.yaml");
+const siteYaml = readFileSync(sitePath, "utf8");
 
 const unquote = (s) => s.trim().replace(/\s+#.*$/, "").trim().replace(/^["']|["']$/g, "");
 
@@ -78,8 +83,11 @@ if (target !== "github-pages") {
    named recruit-me and origin is example.com, both correctly. Enforcing the
    root-path rule here would fail the template's own test run forever. `init`
    sets demo: false, which is exactly the moment the rule starts to matter. */
-if (/^(true|yes|on)$/i.test(scalar("demo"))) {
-  console.log("check-pages-target: skipped (demo: true — still the template, not a deployment)");
+if (isDemo()) {
+  console.log(
+    `check-pages-target: skipped (no content/about/profile.yaml yet, so this is still the ` +
+      `template — config is coming from ${rel(sitePath)})`,
+  );
   process.exit(0);
 }
 

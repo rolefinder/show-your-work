@@ -63,20 +63,26 @@ your name, clears the demo disclaimer, and sets `demo: false`.
 
 | Flag | Effect |
 |---|---|
-| `--dry-run` | Print the plan, write nothing |
-| `--replace-content` | Also swap the demo corpus for starter files that show the editorial contract |
+| `--dry-run` | Print what would be created, write nothing |
+| `--starter-content` | Also add example project and post files showing the editorial contract |
 | `--config me.json` | Non-interactive; the JSON takes the same keys, plus a free-form `links` map |
+| `--force` | Replace answers you already gave. Without it, init refuses to overwrite |
 
-**It never touches `src/`.** If a setup step ever asks you to edit code, that
-is a bug in the template — `config:check` exists to fail the build when
-identity leaks out of `content/`.
+**It only creates files.** It does not edit `src/`, it does not edit `tokens/`,
+and it does not touch `content/demo/`. If a setup step ever asks you to edit or
+delete something the template ships, that is a bug in the template — see
+[ADR 021](../architecture/adr/021-additive-only-adoption.md).
 
-### Demo mode
+### Demo mode turns itself off
 
-While `demo: true`, the site wears visible "this corpus is fictional" chrome
-and `corpus:check` enforces that the demo persona stays obviously fake — it
-fails on real-person fingerprints. Once you set `demo: false`, that gate turns
-itself off, because your corpus is *supposed* to name a real person.
+There is no flag. The site is a demo exactly while
+`content/about/profile.yaml` has not been added — that file carries the name
+and email on every page and in every JSON-LD `Person` block, so if it is still
+the demo's, the deployment is a demo.
+
+While it is, the site wears visible "this corpus is fictional" chrome.
+`corpus:check` keeps `content/demo/` obviously fake forever; it never scans
+what you add, because your corpus is *supposed* to name a real person.
 
 ## Is it ready?
 

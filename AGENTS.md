@@ -7,7 +7,13 @@ want [CONTRIBUTING.md](./CONTRIBUTING.md) or
 ## Which job are you doing?
 
 **Building someone's site from this template.** Then you should not be editing
-code at all. Everything that identifies a deployment lives in `content/`, and
+anything at all — only adding. `content/demo/` holds everything the template
+ships; you write files at the matching paths outside it and they take over
+(ADR 021). If a task seems to need you to edit or delete a shipped file, that
+is a bug worth reporting, not a step. `init` refuses to overwrite for the same
+reason.
+
+You should not be editing code either. Everything that identifies a deployment lives in `content/`, and
 `npm run config:check` fails the build if a name, email or title suffix appears
 under `src/`, `functions/`, `graph/` or `public/`. If a task seems to require a
 code edit to stand up a site, that is a bug in the template — report it rather

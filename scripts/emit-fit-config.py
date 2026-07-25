@@ -34,7 +34,10 @@ except ImportError:
     raise SystemExit(2)
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "content" / "config" / "fit.yaml"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from packages.content.paths import corpus_files, is_demo, resolve  # noqa: E402
+SRC = resolve("config", "fit.yaml")
 OUT = ROOT / "dist" / "fit-config.json"
 
 # Authored key (snake_case) -> FitMatchConfig field (camelCase).
