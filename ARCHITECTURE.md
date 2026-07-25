@@ -684,6 +684,7 @@ flowchart LR
 
 | Gate | Fails on |
 |---|---|
+| `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a missing required field; a bad date; one skill spelled two ways. Warns on skills missing from `skills.yaml` |
 | `corpus:check` | Real-person fingerprints in the demo corpus; a persona name that isn't self-evidently fake; a non-`fake-` slug — all only while `demo: true` |
 | `secrets:check` | Private keys, `ghp_`/`gh[ours]_` tokens, `AKIA…`, Slack `xox…`, `sk-…`, Cloudflare tokens, and generic `api_key=`/`secret_key=` assignments |
 | `style:check` | A raw color in `styles.css`; a `var(--x)` no token defines; a missing `--cat-N` that TypeScript builds by name |
