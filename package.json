@@ -2,11 +2,12 @@
   "name": "recruit-me",
   "version": "0.3.0",
   "private": true,
-  "description": "Open-source personal portfolio template + recruiter Fit (JD → cite-or-missing evidence brief).",
+  "description": "Open-source personal portfolio template + recruiter Fit (JD \u2192 cite-or-missing evidence brief).",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "init": "node scripts/init-site.mjs",
+    "ready": "node scripts/check-ready.mjs",
     "emit": "python scripts/emit-content.py",
     "emit:evidence": "python scripts/emit-evidence.py",
     "emit:fit-config": "python scripts/emit-fit-config.py",

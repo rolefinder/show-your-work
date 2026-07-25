@@ -15,7 +15,8 @@ reads it and writes the rest. If a step below asks you to edit a file under
 | Edit | Holds |
 |------|-------|
 | `content/config/site.yaml` | Origin, title suffix, description, theme colors, `demo:` flag |
-| `content/about/profile.yaml` | Name, tagline, location, email, skills, contact links |
+| `content/about/profile.yaml` | Name, tagline, location, email, skills, `links` map |
+| `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
 | `content/work/*.yaml` | One file per project |
 | `content/blog/*.yaml` | One file per post |
 | `content/config/skills.yaml` | Skill-bank category grouping |

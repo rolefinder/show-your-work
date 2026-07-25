@@ -5,11 +5,12 @@ export type SiteProfile = {
   email: string;
   summary: string;
   skills: string[];
-  /* Profile URLs, first-class alongside email. Both optional — omit either and
-     it simply doesn't render. Full URLs, not handles: the site never has to
-     guess how a platform builds a profile address. */
-  github?: string;
-  linkedin?: string;
+  /* Profile URLs, keyed by platform: { github: "https://…", youtube: "…" }.
+     A map rather than fixed fields so adding a platform is a content edit, not
+     a code change — the display label is derived from the key. Full URLs, not
+     handles: the site never guesses how a platform builds a profile address.
+     Authoring order is preserved and drives render order. */
+  links: Record<string, string>;
 };
 
 /** Deployment identity, from content/config/site.yaml. Never hardcode these. */

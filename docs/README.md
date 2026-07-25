@@ -25,6 +25,7 @@ Strategy and architecture for the OSS template + Fit product.
 - [ADR 015 — Design token system](architecture/adr/015-design-token-system.md)
 - [ADR 016 — Adopter-config boundary](architecture/adr/016-adopter-config-boundary.md)
 - [ADR 017 — Prerendering, editorial contract, one-command setup](architecture/adr/017-prerender-and-editorial-contract.md)
+- [ADR 018 — /build-recruit-me + source drafting](architecture/adr/018-build-command-and-source-drafting.md)
 
 ## Ops
 

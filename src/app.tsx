@@ -1,4 +1,5 @@
 import type { WorkItem } from "./types";
+import { linkLabel } from "./profile-links";
 import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
@@ -171,14 +172,11 @@ function SkillTags({
 }
 
 /**
- * One outlined strip: email, then whichever profile URLs are set. Outbound
- * links get rel="noopener noreferrer" — they are adopter-authored URLs.
+ * One outlined strip: email, then each configured profile URL in authoring
+ * order. Outbound links get rel="noopener noreferrer" — they are
+ * adopter-authored URLs.
  */
 function ContactRow() {
-  const profiles: [label: string, href: string | undefined][] = [
-    ["GitHub", SITE_PROFILE.github],
-    ["LinkedIn", SITE_PROFILE.linkedin],
-  ];
   return React.createElement(
     "div",
     { className: "contact-row", role: "group", "aria-label": "Contact" },
@@ -190,21 +188,19 @@ function ContactRow() {
       },
       SITE_PROFILE.email,
     ),
-    profiles
-      .filter(([, href]) => !!href)
-      .map(([label, href]) =>
-        React.createElement(
-          "a",
-          {
-            key: label,
-            className: "contact-row__item",
-            href,
-            target: "_blank",
-            rel: "noopener noreferrer",
-          },
-          label,
-        ),
+    Object.entries(SITE_PROFILE.links).map(([key, href]) =>
+      React.createElement(
+        "a",
+        {
+          key,
+          className: "contact-row__item",
+          href,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+        linkLabel(key),
       ),
+    ),
   );
 }
 
