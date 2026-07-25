@@ -27,7 +27,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The template repository must not deploy itself. It has Pages disabled, is
+  # named recruit-me rather than <owner>.github.io, and correctly carries
+  # origin: https://example.com — so a deploy here would fail at the last step
+  # and leave a permanently red workflow on main. `demo: true` is exactly the
+  # "this is still the template" signal, and `init` clears it.
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.check.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if grep -Eq '^demo:[[:space:]]*(true|yes|on)[[:space:]]*$' content/config/site.yaml; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "demo: true - this is still the template, not a site. Nothing to deploy."
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: decide
+    if: needs.decide.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +91,8 @@ jobs:
           path: dist/
 
   deploy:
-    needs: build
+    needs: [decide, build]
+    if: needs.decide.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
