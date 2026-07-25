@@ -1,28 +1,90 @@
 # Contributing
 
-Thanks for interest in **recruit-me**.
+Thanks for your interest in **recruit-me**.
+
+If you are here to *use* the template rather than change it, you want
+[docs/guide](./docs/guide/README.md) instead — building your own site should
+never require touching this repository's code.
+
+## Setup
+
+```bash
+npm ci
+pip install --user pyyaml
+npx playwright install chromium
+```
+
+Node 20+ (`.nvmrc` pins 22, which is what CI runs) and Python 3.9+.
+Full detail, including the three things that go wrong on a fresh machine, is in
+[docs/guide/setup.md](./docs/guide/setup.md).
+
+```bash
+npm run dev      # authoring loop, ~2s rebuilds
+npm test         # every gate — run this before you push
+```
 
 ## Ground rules
 
-1. **Apache-2.0** — contributions are under the same license.
-2. **Demo data stays fictional** — Avery Quill only; no real personal bios.
-3. **CSP first** — no CDN React, no browser calls to model hosts.
-4. **Fit contract** — `aligned` requires ≥1 citation; keep the JSON shape stable.
-5. Prefer small, verifiable PRs over large speculative refactors.
+1. **Apache-2.0.** Contributions are under the same license.
+2. **The demo persona must be self-evidently fake.** `corpus:check` requires
+   `fake` in the persona name and in every demo slug, and rejects real-person
+   and employer fingerprints. This is not fussiness: every route ships
+   prerendered `Person` JSON-LD, so a demo deploy nobody customized would
+   publish structured data asserting that a plausible-sounding human exists. A
+   name like `Fake Name` fails loudly; a name like `Avery Quill` fails
+   plausibly.
+3. **CSP first.** No CDN React, no browser calls to model hosts. The graph
+   engine is vendored and self-hosted for this reason.
+4. **The Fit contract.** `aligned` requires at least one citation, and every
+   quote must be real text from a published page. `fit-smoke` enforces both,
+   plus the equality of the browser and Worker evidence packs. Keep the JSON
+   shape stable.
+5. **Identity is data.** Nothing that names a person belongs under `src/`,
+   `functions/`, `graph/` or `public/`. `config:check` reads the current
+   identity out of the generated module and fails if it appears in code —
+   see [ADR 016](./docs/architecture/adr/016-adopter-config-boundary.md).
+6. Prefer small, verifiable PRs over large speculative refactors.
 
-## Dev loop
+## Things that are generated
 
-```powershell
-pip install --user pyyaml
-npm ci
-npm run test
-npm run preview
+Do not hand-edit these; edit their source and rebuild.
+
+| Generated | From |
+|---|---|
+| `src/generated/content.ts` | `content/**.yaml`, via `scripts/emit-content.py` |
+| `dist/**` | the whole build |
+| `functions/_lib/fit-engine.js` | `src/fit/match.ts`, via `build-fit-worker.mjs` |
+| `assets/graph-engine.js` | `graph/*.mjs`, via `build-graph-vendor.mjs` |
+| `public/*` **in `dist/`** | the templates in `public/`, with identity injected |
+
+## What CI runs
+
+`npm test` — ten gates, in this order:
+
+```
+corpus:check -> content:check -> secrets:check -> style:check -> build
+  -> config:check -> fit:smoke -> graph:smoke -> seo:smoke -> ux:check
 ```
 
-Edit YAML under `content/`, then rebuild. Do not hand-edit blocks between
-`/* BEGIN … */` markers unless you understand `scripts/emit-content.py`.
+plus a `lint` job: every script parses, content YAML parses, documented numbers
+still match source (`docs:check`), and every relative doc link resolves
+(`docs:links`).
+
+Each gate exists because it already caught something real, and each names what
+it found rather than just failing. If one blocks you, the message is the
+starting point — see the table in
+[docs/guide](./docs/guide/README.md#when-something-fails).
+
+## Docs
+
+- **ADRs are records.** Add a new one rather than rewriting an old one to match
+  a later decision. `docs/architecture/adr/`.
+- **`docs/history/` is unmaintained** by design. Do not update it to match
+  current reality; that is what makes it history.
+- If you change a number the docs quote — a Fit weight, a search score, an
+  input cap — `docs:check` will fail until the prose is updated too.
 
 ## Branching
 
-Short-lived `feat/`, `fix/`, `docs/`, `chore/` branches from `main`.
-Squash-merge preferred.
+Short-lived `feat/`, `fix/`, `docs/`, `chore/`, `refactor/` branches from
+`main`. Squash-merge. Never merge with red checks.

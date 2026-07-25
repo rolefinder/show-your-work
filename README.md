@@ -198,18 +198,25 @@ corpus is yours.
 
 ## Docs
 
-[`ARCHITECTURE.md`](./ARCHITECTURE.md) has the diagrams: the build pipeline,
-the request path at the edge, how Fit's two implementations stay in sync, and an
-annotated directory tree.
+**Building your own site:** [`docs/guide`](./docs/guide/README.md) —
+[setup](./docs/guide/setup.md) ·
+[authoring](./docs/guide/authoring.md) ·
+[theming](./docs/guide/theming.md) ·
+[deploying](./.claude/skills/deploy-pages/SKILL.md)
 
-[`docs/README.md`](./docs/README.md) indexes the ADRs. The ones worth reading
-first: [015](./docs/architecture/adr/015-design-token-system.md) (design
-tokens), [016](./docs/architecture/adr/016-adopter-config-boundary.md) (why
-identity is data, never code),
+**Changing the template:** [`ARCHITECTURE.md`](./ARCHITECTURE.md) has the
+diagrams — the build pipeline, the request path at the edge, how Fit's two
+implementations stay in sync, and an annotated directory tree.
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) covers the ground rules and what CI
+runs; [`AGENTS.md`](./AGENTS.md) is the same contract for coding agents.
+
+**Why it works this way:** [`docs/README.md`](./docs/README.md) indexes the
+ADRs, including the options that were rejected. Worth reading first:
+[015](./docs/architecture/adr/015-design-token-system.md) (design tokens),
+[016](./docs/architecture/adr/016-adopter-config-boundary.md) (why identity is
+data, never code),
 [017](./docs/architecture/adr/017-prerender-and-editorial-contract.md)
-(prerendering + the editorial contract),
-[018](./docs/architecture/adr/018-build-command-and-source-drafting.md)
-(`/build-recruit-me`).
+(prerendering + the editorial contract).
 
 ## License
 

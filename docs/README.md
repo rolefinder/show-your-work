@@ -1,37 +1,59 @@
-# recruit-me docs
+# Documentation
 
-Strategy and architecture for the OSS template + Fit product.
+## I want to build my site
 
-## Strategy
+Start here: **[Building your site](./guide/README.md)** —
+[setup](./guide/setup.md) · [authoring](./guide/authoring.md) ·
+[theming](./guide/theming.md) · [deploying](../.claude/skills/deploy-pages/SKILL.md)
 
-- [Platform review 2026-07](strategy/platform-review-2026-07.md) — standardization + adopter UX findings, with repros
+## I want to understand or change the code
 
-- [recruit-me PRD](strategy/recruit-me-prd.md)
-- [Recruiter Fit PRD](strategy/recruiter-fit-prd.md)
-- [Recruiter Fit OSS plan](strategy/recruiter-fit-oss-plan.md)
-- [Security / surface map](strategy/recruit-me-security.md)
-- [Scaffold status](strategy/recruit-me-scaffold-status.md)
-- [Handoff mirror](strategy/recruit-me-handoff.md) (canonical: repo-root `HANDOFF.md`)
+- [**ARCHITECTURE.md**](../ARCHITECTURE.md) — the build pipeline, the request
+  path at the edge, how Fit's two implementations stay in sync, and an
+  annotated directory tree
+- [Package boundaries](architecture/PACKAGE_BOUNDARIES.md) — what owns what, so
+  a future split stays honest
 
-## Architecture
+### Decision records
 
-- [ARCHITECTURE.md](../ARCHITECTURE.md) — diagrams: build pipeline, edge request path, Fit data flow, directory tree
+Why things are the way they are, **including the options that were rejected**.
+Read 015–017 first; they cover most of what you would otherwise have to infer.
 
-- [Extraction analysis](architecture/EXTRACTION_ANALYSIS.md) (harrison-site → OSS lessons)
-- [Package boundaries](architecture/PACKAGE_BOUNDARIES.md)
-- [Site → OSS gap list](architecture/SITE_OSS_GAP_LIST.md)
-- [Dogfood path (harrison-site)](architecture/DOGFOOD_PATH.md)
-- [ADR 010 — Fit architecture](architecture/adr/010-recruiter-fit-architecture.md)
-- [ADR 011 — Fit quota](architecture/adr/011-recruiter-fit-quota.md)
-- [ADR 012 — Fit security & data](architecture/adr/012-recruiter-fit-security-data.md)
-- [ADR 013 — CSP graph + opts.forces](architecture/adr/013-csp-graph-opts-forces.md)
-- [ADR 014 — SEO/AEO baseline](architecture/adr/014-seo-aeo-baseline.md)
-- [ADR 015 — Design token system](architecture/adr/015-design-token-system.md)
-- [ADR 016 — Adopter-config boundary](architecture/adr/016-adopter-config-boundary.md)
-- [ADR 017 — Prerendering, editorial contract, one-command setup](architecture/adr/017-prerender-and-editorial-contract.md)
-- [ADR 018 — /build-recruit-me + source drafting](architecture/adr/018-build-command-and-source-drafting.md)
-- [ADR 019 — Fit is a highlight, not an audit](architecture/adr/019-fit-highlight-mode.md)
+| ADR | Decision |
+|---|---|
+| [010](architecture/adr/010-recruiter-fit-architecture.md) | Fit architecture — deterministic retrieval, no model in the matching path |
+| [011](architecture/adr/011-recruiter-fit-quota.md) | Fit quota |
+| [012](architecture/adr/012-recruiter-fit-security-data.md) | Fit security and data handling |
+| [013](architecture/adr/013-csp-graph-opts-forces.md) | Self-hosted graph engine under a strict CSP |
+| [014](architecture/adr/014-seo-aeo-baseline.md) | SEO/AEO baseline |
+| [015](architecture/adr/015-design-token-system.md) | **Design token system** — the four adopter variables |
+| [016](architecture/adr/016-adopter-config-boundary.md) | **Adopter-config boundary** — why identity is data, never code |
+| [017](architecture/adr/017-prerender-and-editorial-contract.md) | **Prerendering, the editorial contract, one-command setup** |
+| [018](architecture/adr/018-build-command-and-source-drafting.md) | `/build-recruit-me` and source drafting |
+| [019](architecture/adr/019-fit-highlight-mode.md) | Fit is a highlight, not an audit |
 
-## Ops
+> ADRs are dated records. Some name file paths from the layout at the time of
+> the decision — the HTML templates moved into `public/`, for instance. The
+> current tree is in [ARCHITECTURE.md](../ARCHITECTURE.md); where they
+> disagree, the code wins. Rewriting an ADR to match a later layout would make
+> it lie about what was true when the decision was taken.
+
+## I want to run it in production
 
 - [Bot and cost protection](ops/bot-and-cost-protection.md)
+- [SEO visibility checklist](ops/seo-visibility-checklist.md)
+- [Security policy](../SECURITY.md), and the fuller
+  [security posture](strategy/recruit-me-security.md)
+
+## I want to know why this exists
+
+- [recruit-me PRD](strategy/recruit-me-prd.md) — the product
+- [Recruiter Fit PRD](strategy/recruiter-fit-prd.md) — the module
+- [Platform review, 2026-07](strategy/platform-review-2026-07.md) —
+  standardization and adopter-UX findings, each with a repro
+
+## Project history
+
+[`history/`](./history/README.md) holds unmaintained records of how the project
+got here — the extraction analysis, the scaffold status, the original packaging
+plan. Kept for the reasoning, not for the instructions.

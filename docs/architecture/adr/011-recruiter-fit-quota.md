@@ -1,4 +1,4 @@
-﻿# ADR 011: Recruiter Fit ΓÇö quota and Request more
+# ADR 011: Recruiter Fit — quota and Request more
 
 **Status:** Accepted  
 **Date:** 2026-07-09
@@ -7,13 +7,13 @@
 
 Fit calls burn Workers AI (and optionally Vectorize) quota. The site is a
 public personal portfolio; unauthenticated visitors can paste JDs or script
-the API. Harrison asked for a cheap product with a limit of **ΓÇ£10 queries
-per week or 2 per dayΓÇ¥** plus a **Request more** button that uses a larger
+the API. Harrison asked for a cheap product with a limit of **“10 queries
+per week or 2 per day”** plus a **Request more** button that uses a larger
 model to decide whether granting extra quota is likely to help the
 requester toward a job offer, with a cooldown.
 
-Ambiguity: English ΓÇ£orΓÇ¥ might mean ΓÇ£whichever comes first,ΓÇ¥ ΓÇ£either plan,ΓÇ¥
-or ΓÇ£pick one cap.ΓÇ¥ Product and ops need one enforceable rule.
+Ambiguity: English “or” might mean “whichever comes first,” “either plan,”
+or “pick one cap.” Product and ops need one enforceable rule.
 
 See [`docs/strategy/recruiter-fit-prd.md`](../../strategy/recruiter-fit-prd.md)
 and ADR 010 / ADR 012.
@@ -26,13 +26,13 @@ Both limits apply to the same identity. A new Fit query is allowed only if:
 
 - fewer than **2** successful Fit queries in the rolling **UTC day**, and
 - fewer than **10** successful Fit queries in the rolling **UTC week**
-  (Monday 00:00 UTC ΓåÆ next Monday, unless implementation picks a simpler
-  7-day sliding window ΓÇö document the choice in code).
+  (Monday 00:00 UTC → next Monday, unless implementation picks a simpler
+  7-day sliding window — document the choice in code).
 
 Hitting either cap blocks further Fit queries until that window allows
-another. UI copy: ΓÇ£Up to 2 per day and 10 per week.ΓÇ¥
+another. UI copy: “Up to 2 per day and 10 per week.”
 
-ΓÇ£OrΓÇ¥ in the original ask is interpreted as **two concurrent ceilings**
+“Or” in the original ask is interpreted as **two concurrent ceilings**
 (common abuse pattern: stop daily burn *and* weekly burn), not as a choice
 between two alternative plans.
 
@@ -75,13 +75,13 @@ against distributed abuse (pair with WAF / Turnstile if needed).
 Default path uses the smallest adequate Workers AI model for Fit. The
 larger model runs only on Request-more. No paid Cloudflare plan is
 required to ship; if free-tier AI limits are hit, fail with a clear
-ΓÇ£temporarily unavailableΓÇ¥ rather than silently upgrading spend.
+“temporarily unavailable” rather than silently upgrading spend.
 
 ## Consequences
 
 - Implementers must track two counters per identity (day + week) plus
   request-more cooldown and bonus balance.
-- UI must explain dual caps to avoid ΓÇ£orΓÇ¥ confusion for recruiters.
+- UI must explain dual caps to avoid “or” confusion for recruiters.
 - Distributed bots can still bypass IP hashing; ops doc must list
   Turnstile / tighter WAF as the escalation path
   (`docs/ops/bot-and-cost-protection.md`).
@@ -93,7 +93,7 @@ required to ship; if free-tier AI limits are hit, fail with a clear
 
 - **Only 10/week OR only 2/day (single cap).** Rejected. Either alone
   allows a bad daily burn or a slow weekly scrape.
-- **OR as ΓÇ£user picks a plan.ΓÇ¥** Rejected. Unnecessary product
+- **OR as “user picks a plan.”** Rejected. Unnecessary product
   complexity for a portfolio tool.
 - **Login / email gate for quota.** Deferred. Higher friction; revisit if
   abuse appears.

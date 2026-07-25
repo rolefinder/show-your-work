@@ -1,4 +1,4 @@
-﻿# ADR 012: Recruiter Fit ΓÇö inputs, security, and data retention
+# ADR 012: Recruiter Fit — inputs, security, and data retention
 
 **Status:** Accepted  
 **Date:** 2026-07-09
@@ -8,7 +8,7 @@
 Fit accepts arbitrary recruiter text and files. That input is untrusted:
 prompt injection, oversized payloads, malicious PDFs, and pasted secrets
 are in scope. Harrison also wants inputs and responses stored so briefs
-can be reviewed and abuse investigated. The siteΓÇÖs baseline is a strict
+can be reviewed and abuse investigated. The site’s baseline is a strict
 CSP, publication-safety scanning (ADR 002), and no third-party analytics
 scripts. Introducing a Function changes the threat model in
 `docs/ops/bot-and-cost-protection.md` (Functions and AI usage become the
@@ -21,7 +21,7 @@ Architecture: ADR 010. Quota: ADR 011.
 
 ### 1. Trust boundary
 
-- Browser ΓåÆ same-origin `POST /api/fit` (and related routes) only.
+- Browser → same-origin `POST /api/fit` (and related routes) only.
 - Worker validates content-type, size, quota, and authn-of-quota-identity
   **before** any model or Vectorize call.
 - JD text is **untrusted data**, never instructions. System prompts state
@@ -47,11 +47,11 @@ egress.
 ### 3. Prompt-injection and output guardrails
 
 - Model may only ground `aligned` / `partial` in retrieved chunks.
-- Empty retrieval ΓçÆ `missing` or `not_evidenced_on_site`, never `aligned`.
-- Strip or ignore JD directives such as ΓÇ£ignore previous instructions,ΓÇ¥
-  ΓÇ£reveal system prompt,ΓÇ¥ or ΓÇ£fetch https://ΓÇªΓÇ¥.
+- Empty retrieval ⇒ `missing` or `not_evidenced_on_site`, never `aligned`.
+- Strip or ignore JD directives such as “ignore previous instructions,”
+  “reveal system prompt,” or “fetch https://…”.
 - Responses must not include Cloudflare secrets, env bindings, or other
-  usersΓÇÖ stored JDs.
+  users’ stored JDs.
 - Publication-safety: index build excludes ADR 002 internal patterns and
   hidden projects/posts.
 
@@ -80,7 +80,7 @@ past briefs.
 - Application quota (ADR 011)
 - Existing zone WAF / Bot Fight Mode / edge rate limit where applicable
 - Optional **Turnstile** on submit after abuse appears (requires CSP
-  `challenges.cloudflare.com` ΓÇö deferred until needed, consistent with
+  `challenges.cloudflare.com` — deferred until needed, consistent with
   `bot-and-cost-protection.md`)
 - Max concurrent in-flight Fit per identity = 1
 
