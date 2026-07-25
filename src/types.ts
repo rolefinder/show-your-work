@@ -1,8 +1,3 @@
-export type ProfileLink = {
-  label: string;
-  href: string;
-};
-
 export type SiteProfile = {
   name: string;
   tagline: string;
@@ -10,7 +5,11 @@ export type SiteProfile = {
   email: string;
   summary: string;
   skills: string[];
-  links: ProfileLink[];
+  /* Profile URLs, first-class alongside email. Both optional — omit either and
+     it simply doesn't render. Full URLs, not handles: the site never has to
+     guess how a platform builds a profile address. */
+  github?: string;
+  linkedin?: string;
 };
 
 /** Deployment identity, from content/config/site.yaml. Never hardcode these. */

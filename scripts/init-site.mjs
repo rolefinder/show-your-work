@@ -111,12 +111,11 @@ demo: false
 }
 
 function profileYaml(a) {
-  const links = [];
-  if (a.github) links.push({ label: "GitHub", href: a.github });
-  if (a.linkedin) links.push({ label: "LinkedIn", href: a.linkedin });
-  const linkBlock = links.length
-    ? "\nlinks:\n" + links.map((l) => `  - label: ${l.label}\n    href: ${l.href}`).join("\n") + "\n"
-    : "\n# links:\n#   - label: GitHub\n#     href: https://github.com/you\n";
+  // Named fields, so the YAML mirrors what init already asks for.
+  const profileBlock =
+    "\n# Profile URLs for the contact row and JSON-LD sameAs. Both optional.\n" +
+    (a.github ? `github: ${a.github}\n` : "# github: https://github.com/you\n") +
+    (a.linkedin ? `linkedin: ${a.linkedin}\n` : "# linkedin: https://www.linkedin.com/in/you\n");
   return `name: ${yamlString(a.name)}
 tagline: ${yamlString(a.tagline)}
 location: ${yamlString(a.location)}
@@ -129,7 +128,7 @@ skills:
   - Add
   - your
   - skills
-${linkBlock}`;
+${profileBlock}`;
 }
 
 const STARTER_WORK = `slug: first-project

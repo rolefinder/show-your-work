@@ -47,7 +47,9 @@ export function identityGraph(): Record<string, unknown>[] {
   };
   if (SITE_PROFILE.email) person.email = `mailto:${SITE_PROFILE.email}`;
   if (SITE_PROFILE.location) person.address = SITE_PROFILE.location;
-  const sameAs = SITE_PROFILE.links.map((l) => l.href).filter(Boolean);
+  // sameAs is schema.org's property for "other URLs for this same entity" —
+  // sourced from the named profile fields, not authored as a list.
+  const sameAs = [SITE_PROFILE.github, SITE_PROFILE.linkedin].filter(Boolean);
   if (sameAs.length) person.sameAs = sameAs;
 
   return [

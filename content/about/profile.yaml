@@ -14,15 +14,12 @@ skills:
   - Python
   - YAML content pipelines
 
-# Contact row on home + about. Optional — omit the key for email only.
-# Anything here renders as an outbound link, so keep it to profiles you
-# actually want a recruiter to open.
+# Profile URLs for the contact row, and for sameAs in the emitted JSON-LD.
+# Both optional — delete either line and it stops rendering. Full URLs, so the
+# site never has to guess how a platform builds a profile address.
 #
 # The demo points at example.com on purpose: it is IANA-reserved for
 # documentation, so these can never resolve to a real person's account the way
 # a plausible-looking github.com/<handle> would.
-links:
-  - label: GitHub
-    href: https://example.com/fake-github-profile
-  - label: LinkedIn
-    href: https://example.com/fake-linkedin-profile
+github: https://example.com/fake-github-profile
+linkedin: https://example.com/fake-linkedin-profile

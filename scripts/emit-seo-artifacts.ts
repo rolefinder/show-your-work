@@ -44,9 +44,8 @@ function llmsTxt(): string {
     `Location: ${SITE_PROFILE.location}`,
     `Contact: ${SITE_PROFILE.email}`,
   ];
-  if (SITE_PROFILE.links.length) {
-    lines.push(...SITE_PROFILE.links.map((l) => `${l.label}: ${l.href}`));
-  }
+  if (SITE_PROFILE.github) lines.push(`GitHub: ${SITE_PROFILE.github}`);
+  if (SITE_PROFILE.linkedin) lines.push(`LinkedIn: ${SITE_PROFILE.linkedin}`);
   lines.push("", "## Work", "");
   for (const w of visibleWork) {
     lines.push(`- [${w.title}](${SITE}/work/${w.slug}): ${w.summary.replace(/\s+/g, " ").trim()}`);

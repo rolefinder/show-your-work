@@ -28,30 +28,24 @@ def ts_string_array(items: list[str]) -> str:
     return "[" + ", ".join(ts_string(x) for x in items) + "]"
 
 
-def emit_links(links: list[dict[str, Any]]) -> str:
-    if not links:
-        return "  links: [],"
-    rows = ",\n".join(
-        f"    {{ label: {ts_string(str(l['label']))}, href: {ts_string(str(l['href']))} }}"
-        for l in links
-    )
-    return "  links: [\n" + rows + "\n  ],"
-
-
 def emit_profile(data: dict[str, Any]) -> str:
-    return "\n".join(
-        [
-            "export const SITE_PROFILE: SiteProfile = {",
-            f"  name: {ts_string(data['name'])},",
-            f"  tagline: {ts_string(data['tagline'])},",
-            f"  location: {ts_string(data['location'])},",
-            f"  email: {ts_string(data['email'])},",
-            f"  summary: {ts_string(str(data['summary']).strip())},",
-            f"  skills: {ts_string_array(list(data.get('skills') or []))},",
-            emit_links(list(data.get("links") or [])),
-            "};",
-        ]
-    )
+    lines = [
+        "export const SITE_PROFILE: SiteProfile = {",
+        f"  name: {ts_string(data['name'])},",
+        f"  tagline: {ts_string(data['tagline'])},",
+        f"  location: {ts_string(data['location'])},",
+        f"  email: {ts_string(data['email'])},",
+        f"  summary: {ts_string(str(data['summary']).strip())},",
+        f"  skills: {ts_string_array(list(data.get('skills') or []))},",
+    ]
+    # Optional profile URLs — omitted entirely rather than emitted empty, so
+    # `SITE_PROFILE.github` is undefined and every consumer's falsy check works.
+    for key in ("github", "linkedin"):
+        value = str(data.get(key) or "").strip()
+        if value:
+            lines.append(f"  {key}: {ts_string(value)},")
+    lines.append("};")
+    return "\n".join(lines)
 
 
 def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
