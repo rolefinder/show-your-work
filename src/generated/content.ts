@@ -17,6 +17,8 @@ export const SITE_CONFIG: SiteConfig = {
   themeColor: "#f7f4ef",
   themeColorDark: "#131211",
   demo: true,
+  deployTarget: "github-pages",
+  customDomain: "",
 };
 
 export const SITE_PROFILE: SiteProfile = {

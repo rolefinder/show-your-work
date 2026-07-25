@@ -63,7 +63,8 @@ Do not hand-edit these; edit their source and rebuild.
 
 ```
 corpus:check -> content:check -> secrets:check -> style:check -> build
-  -> config:check -> fit:smoke -> graph:smoke -> seo:smoke -> ux:check
+  -> config:check -> pages:check -> fit:smoke -> graph:smoke -> seo:smoke
+  -> csp:smoke -> ux:check
 ```
 
 plus a `lint` job: every script parses, content YAML parses, documented numbers

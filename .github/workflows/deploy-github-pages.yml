@@ -1,0 +1,79 @@
+# Build and publish to GitHub Pages.
+#
+# Enabled by setting Pages' build source to "GitHub Actions" — which
+# `npm run pages:setup` does over the API, so no dashboard visit is required.
+#
+# This deliberately does NOT reuse ci.yml's artifact. A deploy must be built
+# from the commit being deployed, with PRERENDER_REQUIRED set, so a missing
+# browser fails the deploy instead of silently shipping an SPA-only site whose
+# every route carries the home page's metadata.
+
+name: deploy-github-pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; never cancel one in flight, or Pages can be left
+# pointing at a half-uploaded artifact.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+        env:
+          PRERENDER_REQUIRED: "1"
+
+      # The gates that can run without a second browser session. A deploy that
+      # ships an unreviewed draft, a dangling cross-link or a 404 canonical is
+      # worse than a deploy that does not happen.
+      - name: Verify
+        run: |
+          set -e
+          npm run config:check
+          npm run seo:smoke
+          npm run fit:smoke
+
+      # Root-path only: every asset href in the document is absolute, so a
+      # project site served under /<repo>/ would 404 on all of them. Checked
+      # here as well as in preflight, because this is the last point before
+      # something goes public.
+      - name: Confirm the site will serve at the root
+        run: node scripts/check-pages-target.mjs
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

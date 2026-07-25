@@ -4,7 +4,7 @@
 
 Start here: **[Building your site](./guide/README.md)** —
 [setup](./guide/setup.md) · [authoring](./guide/authoring.md) ·
-[theming](./guide/theming.md) · [deploying](../.claude/skills/deploy-pages/SKILL.md)
+[theming](./guide/theming.md) · [deploying](./guide/deploy.md)
 
 ## I want to understand or change the code
 
@@ -31,6 +31,7 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [017](architecture/adr/017-prerender-and-editorial-contract.md) | **Prerendering, the editorial contract, one-command setup** |
 | [018](architecture/adr/018-build-command-and-source-drafting.md) | `/build-recruit-me` and source drafting |
 | [019](architecture/adr/019-fit-highlight-mode.md) | Fit is a highlight, not an audit |
+| [020](architecture/adr/020-github-pages-target-and-agent-autonomy.md) | **GitHub Pages as the default target**, and what an agent may do alone |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The

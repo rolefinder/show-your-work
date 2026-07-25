@@ -137,6 +137,8 @@ something real:
 | `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
 | `fit:smoke` | An `aligned` requirement without a citation; a dequalifying verdict leaking into highlight mode; the browser and Worker evidence packs disagreeing |
 | `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
+| `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids — this caught the skill-bank dots being silently stripped |
+| `pages:check` | A GitHub Pages deploy that would land on a subpath and load blank |
 | `content:check` | A cross-link that would 404; a missing required field; a skill spelled two ways |
 | `check-ready` | Placeholder identity, an unreviewed draft, or a published `TODO` |
 
@@ -202,7 +204,7 @@ corpus is yours.
 [setup](./docs/guide/setup.md) ·
 [authoring](./docs/guide/authoring.md) ·
 [theming](./docs/guide/theming.md) ·
-[deploying](./.claude/skills/deploy-pages/SKILL.md)
+[deploying](./docs/guide/deploy.md)
 
 **Changing the template:** [`ARCHITECTURE.md`](./ARCHITECTURE.md) has the
 diagrams — the build pipeline, the request path at the edge, how Fit's two

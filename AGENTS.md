@@ -11,7 +11,7 @@ code at all. Everything that identifies a deployment lives in `content/`, and
 `npm run config:check` fails the build if a name, email or title suffix appears
 under `src/`, `functions/`, `graph/` or `public/`. If a task seems to require a
 code edit to stand up a site, that is a bug in the template — report it rather
-than working around it. Use `/build-recruit-me`, then `/deploy-pages`.
+than working around it. Use **`/launch`** for the whole path, fork to live URL.
 
 **Changing the template itself.** Read [CONTRIBUTING.md](./CONTRIBUTING.md).
 
@@ -22,9 +22,30 @@ Available in any fork with no install step, because they live in
 
 | Command | Does |
 |---|---|
+| `/launch` | **The whole path** — identity, build, one authorization, live on GitHub Pages |
 | `/build-recruit-me` | Preflight config, optionally draft content from named sources, build with prerendering, verify |
-| `/deploy-pages` | Fork to a live site on Cloudflare Pages |
+| `/deploy-pages` | Cloudflare Pages, for real response headers and `/api/fit` |
 | `/ui-review` | The design judgement `ux:check` cannot make |
+
+## Working on the human's behalf
+
+The design goal is that a person answers questions once and then leaves. Two
+rules make that safe rather than reckless.
+
+**Ask everything up front, in one batch.** Use AskUserQuestion, not a trickle of
+prompts. Then take a single explicit authorization before anything leaves the
+machine — naming the repository, its visibility, and each action — and do not
+interrupt again until you have a URL or a real blocker.
+
+**Never handle a credential.** Not a password, not a token, not a 2FA code; not
+into a browser, a prompt, or a file. Authentication is the human's, in their own
+terminal. `pages:setup` has no prompt path at all: it asks `gh` whether they
+already authenticated and exits `2` with the exact command if not.
+
+Scripts meant for you separate the two failure kinds by exit code — **`1` failed,
+`2` needs a human** — and take `--json` so you branch on structure instead of
+parsing prose. `check-ready --json` and `pages:setup --json` both do this. Use
+`--dry-run` first where it exists.
 
 > Note for anyone porting this layout: plugin repos put `skills/` at the root
 > with a `.claude-plugin/` manifest, because they are *installed* into another

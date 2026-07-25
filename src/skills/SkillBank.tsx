@@ -16,7 +16,7 @@ export type SkillCategoryConfig = {
 export type SkillBankItem = {
   label: string;
   count: number;
-  color: string;
+  dotClass: string;
   pressed: boolean;
   onClick: () => void;
 };
@@ -28,13 +28,20 @@ export type SkillBankGroup = {
 
 /* Dots are decorative — the chip label always carries the meaning — so
    these read the --cat-* category tokens instead of hardcoding hex. The
-   count is fixed at 8 to match tokens/colors.css. */
+   count is fixed at 8 to match tokens/colors.css.
+
+   A CLASS, not an inline style. This used to render
+   `style={{ background: "var(--cat-3)" }}`, which the CSP blocks: both
+   targets set `style-src 'self'`, and with no `style-src-attr` to relax it
+   that covers style attributes too. So the dots were being stripped on the
+   live site while rendering fine in every local check that did not enforce
+   the policy. `csp:smoke` now enforces it. */
 const SKILL_PALETTE_SIZE = 8;
 
-export function skillColor(name: string): string {
+export function skillDotClass(name: string): string {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
-  return `var(--cat-${(Math.abs(h) % SKILL_PALETTE_SIZE) + 1})`;
+  return `cat-${(Math.abs(h) % SKILL_PALETTE_SIZE) + 1}`;
 }
 
 export function skillCategory(
@@ -81,7 +88,7 @@ export function buildSkillBankGroups(
     const item: SkillBankItem = {
       label,
       count: counts[label] || 0,
-      color: skillColor(label),
+      dotClass: skillDotClass(label),
       pressed: active.has(label),
       onClick: () => onToggle(label),
     };
@@ -126,8 +133,7 @@ export function SkillBank(props: SkillBankProps) {
                   onClick: sk.onClick,
                 },
                 React.createElement("span", {
-                  className: "skill-dot",
-                  style: { background: sk.color },
+                  className: `skill-dot ${sk.dotClass}`,
                 }),
                 sk.label,
                 React.createElement(

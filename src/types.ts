@@ -22,6 +22,13 @@ export type SiteConfig = {
   themeColor: string;
   themeColorDark: string;
   demo: boolean;
+  /* Where this deploys. GitHub Pages cannot set response headers at all, so
+     `_headers` is inert there and the CSP has to ship as a <meta http-equiv>
+     instead — a weaker policy, and the build says so rather than implying
+     parity. See docs/guide/deploy.md and ADR 021. */
+  deployTarget: "github-pages" | "cloudflare-pages";
+  /** Optional custom domain. On GitHub Pages this is emitted as dist/CNAME. */
+  customDomain: string;
 };
 
 export type WorkItem = {

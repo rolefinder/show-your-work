@@ -240,6 +240,14 @@ try {
         colorScheme: scheme,
         viewport: { width, height: 900 },
         reducedMotion: "reduce",
+        /* This checker is instrumentation, not a visitor: it injects a
+           transition-killing stylesheet so it can measure settled colors. On
+           the github-pages target the CSP now ships as a <meta> tag inside the
+           document, which the local preview honours, and `style-src 'self'`
+           correctly blocks that injection. Bypass it for the probe only.
+           Whether the CSP breaks the real page is a different question, and
+           `csp:smoke` is what answers it. */
+        bypassCSP: true,
       });
       const page = await ctx.newPage();
       for (const path of paths) {
