@@ -34,13 +34,33 @@ export type FitMatchConfig = {
    * carry one, or every adopter ships it to their own recruiters.
    */
   extraCaveats?: string[];
+  /**
+   * Whether the brief surfaces requirements it found no evidence for.
+   *
+   * The matcher always EVALUATES every requirement; this controls only what is
+   * shown. false (the default) presents the brief as a highlight of what the
+   * published work covers — a portfolio is advocacy, and no résumé enumerates
+   * what its author cannot do. true turns it back into a full audit, listing
+   * unevidenced requirements and a Gaps section.
+   *
+   * The caveats change with it, so the brief never implies a completeness it
+   * isn't offering — see resolveCaveats.
+   */
+  showGaps?: boolean;
 };
 
-/** The two caveats that are true of the engine itself, for any corpus. */
-export const ENGINE_CAVEATS: readonly string[] = [
-  "Deterministic keyword matcher — not an LLM. Citations come only from published site content.",
-  "Absence of evidence is not proof of absence of skill.",
-];
+/** True of the engine itself, for any corpus. The second depends on the mode. */
+const CAVEAT_ENGINE =
+  "Deterministic keyword matcher — not an LLM. Citations come only from published site content.";
+const CAVEAT_AUDIT = "Absence of evidence is not proof of absence of skill.";
+const CAVEAT_HIGHLIGHT =
+  "Shows the requirements covered by published work; it is not an exhaustive review of the role.";
+
+export const ENGINE_CAVEATS: readonly string[] = [CAVEAT_ENGINE, CAVEAT_AUDIT];
+
+export function showGaps(cfg?: FitMatchConfig): boolean {
+  return cfg?.showGaps === true;
+}
 
 export const DEFAULT_STOP: ReadonlySet<string> = new Set([
   "a", "an", "the", "and", "or", "to", "of", "in", "on", "for", "with", "at",
@@ -97,5 +117,9 @@ export function resolveCaveats(cfg?: FitMatchConfig): string[] {
   const extra = (cfg?.extraCaveats || [])
     .map((c) => String(c || "").trim())
     .filter(Boolean);
-  return [...ENGINE_CAVEATS, ...extra];
+  // In highlight mode the brief no longer lists what it didn't match, so it
+  // says so. Without this it would read as a full evaluation while quietly
+  // omitting rows — the one thing that would make hiding gaps dishonest.
+  const second = showGaps(cfg) ? CAVEAT_AUDIT : CAVEAT_HIGHLIGHT;
+  return [CAVEAT_ENGINE, second, ...extra];
 }

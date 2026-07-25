@@ -22,6 +22,18 @@ weights:
   alignedMin: 20
   partialMin: 10
 
+# What the brief SHOWS. The matcher always evaluates every requirement it
+# extracts; this only controls the surface.
+#
+#   false (default) - highlight mode. Shows the requirements your published
+#                     work covers, and nothing else. A portfolio is advocacy;
+#                     no resume enumerates what its author cannot do. The
+#                     caveats say the brief isn't an exhaustive review, so it
+#                     never reads as a full audit while omitting rows.
+#   true            - audit mode. Also lists requirements with no published
+#                     evidence, plus a Gaps section.
+showGaps: false
+
 # Appended after the two engine caveats on every brief. The demo disclaimer
 # lives HERE, not in src/fit/ — an adopter who forgets to remove a hardcoded
 # one would ship "this corpus is fictional" to their own recruiters.

@@ -9,7 +9,8 @@
 
 **A personal site that answers the recruiter's actual question.**
 Paste a job description; get a brief where every aligned claim cites a page you
-actually published — and every gap says so out loud.
+actually published, quoted from it. Nothing is asserted that isn't already
+on the site.
 
 Apache-2.0 · self-hosted React + WebGL graph, no CDN · strict CSP · every route
 prerendered · no LLM anywhere in the matching path.
@@ -28,17 +29,24 @@ mockup:
      "Delivery runs through merge gates rather than trusting a green
       local build."
 
-[not_evidenced_on_site]  Rust systems programming for embedded devices
-     no citation -- No published site evidence matched this requirement.
+[aligned]  Strong YAML content pipeline experience
+     cites Fake Project: Content Emit
+     "Humans edit YAML and the build owns the emitted module, so a copy
+      change can no longer break the application."
 ```
 
-Two rules make that trustworthy:
+Three rules make that trustworthy:
 
 - **`aligned` requires at least one citation.** No citation, no claim. Enforced
   in `fit-smoke`, not just intended.
-- **A requirement is never dropped.** If nothing matches, it is reported as
-  unevidenced. Hiding a gap would make you look like a better fit than the
-  evidence supports, which is the failure this whole project is built against.
+- **Every quote is real text from a real page.** The matcher can only surface
+  sentences that already exist in your `content/`, so a brief can't invent an
+  employer, a date, or a metric.
+- **It highlights, it does not audit.** By default the brief shows the
+  requirements your published work covers and stays quiet about the rest — a
+  portfolio is advocacy, not a self-assessment. The caveats say so, so it never
+  reads as an exhaustive review while omitting rows. Set `showGaps: true` in
+  `content/config/fit.yaml` for the full audit, gaps included.
 
 The matcher is deterministic keyword retrieval, not a model. It cannot
 hallucinate an employer, a date, or a metric, because it can only quote text
@@ -117,7 +125,7 @@ something real:
 | `corpus:check` | Real-person fingerprints in the demo corpus — and a demo persona that isn't obviously fake |
 | `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |
 | `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
-| `fit:smoke` | An `aligned` requirement without a citation; the browser and Worker evidence packs disagreeing |
+| `fit:smoke` | An `aligned` requirement without a citation; a dequalifying verdict leaking into highlight mode; the browser and Worker evidence packs disagreeing |
 | `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
 | `check-ready` | Placeholder identity, an unreviewed draft, or a published `TODO` |
 

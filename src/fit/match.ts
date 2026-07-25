@@ -1,7 +1,7 @@
 import { extractRequirements } from "./extract";
 import { retrieveEvidence } from "./index";
 import type { FitMatchConfig } from "./config";
-import { resolveCaveats, resolveWeights } from "./config";
+import { resolveCaveats, resolveWeights, showGaps } from "./config";
 import type { EvidenceDoc, FitBrief, FitEvidence, FitRequirement, FitStatus } from "./types";
 
 /**
@@ -66,11 +66,29 @@ export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig):
     }
   }
 
+  /*
+   * Every requirement above was evaluated; this decides what the brief SHOWS.
+   * In highlight mode (the default) it presents only what published work
+   * covers — `missing` and `not_evidenced_on_site` are both dequalifying
+   * verdicts, and both feed the Gaps list, so all three go together. The
+   * caveats shift with the mode so the brief never reads as a full audit while
+   * omitting rows.
+   *
+   * Note this is a DISPLAY filter, deliberately not a change to extraction:
+   * silently dropping requirements before evaluation is a real bug that was
+   * fixed in extract.ts, and re-introducing it here would also skew the
+   * scoring the surviving rows are ranked by.
+   */
+  const audit = showGaps(cfg);
+  const visible = audit
+    ? mapped
+    : mapped.filter((r) => r.status === "aligned" || r.status === "partial");
+
   return {
     role_read,
-    requirements: mapped,
+    requirements: visible,
     strongest_matches: strongest.slice(0, 6),
-    gaps: [...new Set(gaps)].slice(0, 12),
+    gaps: audit ? [...new Set(gaps)].slice(0, 12) : [],
     caveats: resolveCaveats(cfg),
   };
 }
