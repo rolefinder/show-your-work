@@ -8,10 +8,11 @@ Four steps, in order. Each page assumes the one before it.
    holds, how cross-links work, and which fields Fit quotes to a recruiter.
 3. **[Theming](./theming.md)** — four variables that drive every color, and
    what the build refuses to let you do.
-4. **Deploying** — see the [`/deploy-pages`](../../.claude/skills/deploy-pages/SKILL.md)
-   skill. It is ordinary markdown and reads fine on its own; keeping it in one
-   place means the steps an agent follows and the steps you follow cannot
-   drift apart.
+4. **[Deploying](./deploy.md)** — GitHub Pages by default, Cloudflare Pages for
+   real security headers, and an honest account of what differs.
+
+Or skip all four: **`/launch`** in Claude Code asks for your details once, takes
+one authorization before anything goes public, and hands back a live URL.
 
 ## The shape of the thing
 
@@ -36,3 +37,6 @@ each prints what it found rather than just a status. Start with the message.
 | `check-adopter-config: FAILED` | You edited code where you meant to edit `content/` — the message names the file and line |
 | `check-style-tokens: FAILED` | [Theming](./theming.md#the-rule) |
 | `check-ux: FAILED` | Run `/ui-review`; the finding is real and names a route, scheme and viewport |
+| `check-pages-target: FAILED` | [Deploying](./deploy.md#the-root-path-requirement) — the site would land on a subpath and load blank |
+| `pages:setup: NEEDS YOU` | Something only you can do. The message names the exact command |
+| `csp:smoke: FAILED` | Something on the page violates its own CSP. Usually an inline `style=` attribute — use a class |

@@ -535,6 +535,19 @@ a.tag:hover {
   border-radius: 50%;
 }
 
+/* One rule per category slot, because the alternative — style="background:
+   var(--cat-3)" from SkillBank.tsx — is a style attribute, and `style-src
+   'self'` blocks those. The dots were silently stripped wherever the CSP was
+   actually enforced. Purely decorative; the chip label carries the meaning. */
+.skill-dot.cat-1 { background: var(--cat-1); }
+.skill-dot.cat-2 { background: var(--cat-2); }
+.skill-dot.cat-3 { background: var(--cat-3); }
+.skill-dot.cat-4 { background: var(--cat-4); }
+.skill-dot.cat-5 { background: var(--cat-5); }
+.skill-dot.cat-6 { background: var(--cat-6); }
+.skill-dot.cat-7 { background: var(--cat-7); }
+.skill-dot.cat-8 { background: var(--cat-8); }
+
 .skill-count {
   color: var(--fg-subtle);
   font-size: var(--text-2xs);

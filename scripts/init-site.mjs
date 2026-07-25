@@ -116,7 +116,39 @@ theme_color_dark: "#131211"
 
 # Demo chrome off: this is a real corpus now.
 demo: false
+
+# Where this deploys. See docs/guide/deploy.md.
+#   github-pages     no new account; needs a <user>.github.io repo or a custom
+#                    domain, because the site serves at the root only. GitHub
+#                    Pages cannot set response headers, so the CSP ships as a
+#                    <meta http-equiv> — weaker, and no frame-ancestors.
+#   cloudflare-pages real headers, so the strict CSP in public/_headers applies.
+deploy:
+  target: ${deployTarget(a)}
+  custom_domain: ${yamlString(customDomain(a))}
 `;
+}
+
+/** `github-pages` unless the config asked for Cloudflare. */
+function deployTarget(a) {
+  const value = String(a.deploy_target || a.deployTarget || "github-pages").trim();
+  if (value !== "github-pages" && value !== "cloudflare-pages") {
+    console.error(`init: deploy_target must be github-pages or cloudflare-pages, got ${JSON.stringify(value)}`);
+    process.exit(1);
+  }
+  return value;
+}
+
+/**
+ * Derived from `origin` rather than prompted for: on GitHub Pages a custom
+ * domain IS the origin's host, and asking for the same fact twice is how the
+ * two end up disagreeing. `<user>.github.io` needs no CNAME.
+ */
+function customDomain(a) {
+  if (a.custom_domain !== undefined) return a.custom_domain;
+  if (deployTarget(a) !== "github-pages") return "";
+  const host = String(a.origin || "").replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+  return /\.github\.io$/i.test(host) ? "" : host;
 }
 
 /**

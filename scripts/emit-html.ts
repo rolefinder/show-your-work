@@ -41,10 +41,73 @@ function applyGlobalHead(html: string): string {
   return doc;
 }
 
+/**
+ * The CSP, as a meta tag, for targets that cannot set response headers.
+ *
+ * GitHub Pages serves static files and offers no header configuration at all,
+ * so public/_headers is inert there. A <meta http-equiv> is the only remaining
+ * channel, and it is strictly weaker:
+ *
+ *   - `frame-ancestors` is invalid in meta and is ignored, so clickjacking
+ *     protection is gone. X-Frame-Options is a header too, so that is gone as
+ *     well. Nothing in the meta tag replaces it.
+ *   - HSTS, COOP and CORP are headers only. Unavailable.
+ *
+ * Everything else in the policy survives, which is most of what matters for a
+ * static site with no inline script. The directives are kept identical to
+ * _headers so the two cannot drift; the header path is still the real one.
+ */
+const CSP_META =
+  "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; " +
+  "img-src 'self' data:; connect-src 'self'; manifest-src 'self'; base-uri 'self'; " +
+  "form-action 'self'; object-src 'none'; upgrade-insecure-requests";
+
+/**
+ * Insert the policy immediately after <meta charset>. Position is load-bearing:
+ * a meta CSP does not apply to anything that appears before it, so putting it
+ * after the stylesheet and script tags would enforce nothing while looking
+ * like it did.
+ */
+function applyMetaCsp(html: string): string {
+  if (SITE_CONFIG.deployTarget !== "github-pages") return html;
+  if (html.includes('http-equiv="Content-Security-Policy"')) return html;
+  const charset = html.match(/<meta charset="[^"]*"\s*\/?>/);
+  if (!charset) throw new Error("emit-html: no <meta charset> to anchor the CSP meta tag to");
+  return html.replace(
+    charset[0],
+    `${charset[0]}\n  <meta http-equiv="Content-Security-Policy" content="${esc(CSP_META)}" />`,
+  );
+}
+
+/* The template carries a "these are placeholders, edit the YAML" comment for
+   whoever opens public/index.html. Once identity is applied it is not true any
+   more, and it was shipping to every adopter's live page telling readers the
+   content was a placeholder. */
+const TEMPLATE_NOTE = /\s*<!--\s*TEMPLATE\.[\s\S]*?-->/;
+
 function emitIndex(): void {
   const file = join(dist, "index.html");
   const home = buildRoutes()[0];
-  writeFileSync(file, applyRouteHead(applyGlobalHead(readFileSync(file, "utf8")), home), "utf8");
+  const doc = applyRouteHead(applyGlobalHead(readFileSync(file, "utf8")), home);
+  writeFileSync(file, applyMetaCsp(doc.replace(TEMPLATE_NOTE, "")), "utf8");
+}
+
+/**
+ * Files GitHub Pages needs and Cloudflare does not.
+ *
+ * .nojekyll is not optional: without it Pages runs the output through Jekyll,
+ * which drops every path beginning with an underscore. That would silently
+ * delete _headers and _redirects from the deploy — harmless here, since
+ * neither does anything on Pages — but it is the same rule that would eat any
+ * future underscore-prefixed asset, and the failure looks like a missing file
+ * rather than a build error.
+ */
+function emitPagesFiles(): void {
+  if (SITE_CONFIG.deployTarget !== "github-pages") return;
+  writeFileSync(join(dist, ".nojekyll"), "", "utf8");
+  if (SITE_CONFIG.customDomain) {
+    writeFileSync(join(dist, "CNAME"), SITE_CONFIG.customDomain + "\n", "utf8");
+  }
 }
 
 function emit404(): void {
@@ -80,9 +143,11 @@ export function emitHtml(): void {
   emitIndex();
   emit404();
   emitManifest();
+  emitPagesFiles();
   console.log(
     `emit-html: ok - identity applied to dist/{index,404}.html + manifest.json ` +
-      `(name=${SITE_PROFILE.name}, demo=${SITE_CONFIG.demo})`,
+      `(name=${SITE_PROFILE.name}, demo=${SITE_CONFIG.demo}, target=${SITE_CONFIG.deployTarget}` +
+      `${SITE_CONFIG.customDomain ? `, CNAME=${SITE_CONFIG.customDomain}` : ""})`,
   );
 }
 

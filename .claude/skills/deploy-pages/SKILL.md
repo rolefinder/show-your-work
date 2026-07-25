@@ -29,6 +29,12 @@ exists to fail the build when identity leaks into code.
 ## Steps
 
 1. **Fork or copy the template**, then `npm ci`.
+
+   Set `deploy.target: cloudflare-pages` in `content/config/site.yaml`. The
+   default is `github-pages`, which makes the build inject the CSP as a
+   `<meta http-equiv>` because Pages cannot set headers. On Cloudflare that
+   tag is redundant and `public/_headers` carries the real, stronger policy —
+   `csp:smoke` fails if the meta tag ships to this target.
 2. **Run the scaffolder.**
 
    ```bash

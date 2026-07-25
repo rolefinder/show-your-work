@@ -21,6 +21,8 @@
     "secrets:check": "python scripts/check-secrets.py",
     "style:check": "node scripts/check-style-tokens.mjs",
     "config:check": "node scripts/check-adopter-config.mjs",
+    "pages:check": "node scripts/check-pages-target.mjs",
+    "pages:setup": "node scripts/setup-github-pages.mjs",
     "typecheck": "tsc --noEmit",
     "build:graph": "node scripts/build-graph-vendor.mjs",
     "bundle": "node scripts/build.mjs",
@@ -34,10 +36,11 @@
     "fit:smoke": "npx --yes tsx scripts/fit-smoke.ts",
     "graph:smoke": "node scripts/graph-smoke.mjs",
     "seo:smoke": "node scripts/seo-smoke.mjs",
+    "csp:smoke": "node scripts/csp-smoke.mjs",
     "ux:check": "node scripts/check-ux.mjs",
     "docs:check": "node scripts/check-doc-drift.mjs",
     "docs:links": "node scripts/check-doc-links.mjs",
-    "test": "npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke && npm run ux:check"
+    "test": "npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run pages:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",

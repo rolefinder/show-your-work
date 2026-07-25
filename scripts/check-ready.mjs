@@ -140,6 +140,29 @@ if (pw.status !== 0) {
 }
 
 // ---------- report ----------
+/* --json exists so an agent driving the setup flow branches on structure
+   rather than on parsed prose. The exit code is unchanged either way: it is
+   still the contract, and --json is a second view of the same answer. */
+if (process.argv.includes("--json")) {
+  const exit = missingDeps.length ? 2 : blockers.length ? 1 : 0;
+  console.log(
+    JSON.stringify(
+      {
+        ready: exit === 0,
+        exit,
+        blockers,
+        missingDependencies: missingDeps,
+        warnings,
+        profile: { name, email, origin },
+        corpus: { work: work.length, blog: blog.length, workDrafts },
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(exit);
+}
+
 for (const w of warnings) console.warn(`check-ready: WARN  ${w}`);
 
 // Toolchain first, and with its own exit code: "your machine isn't set up" is

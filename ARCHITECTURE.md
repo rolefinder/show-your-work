@@ -164,6 +164,7 @@ recruit-me/
 │   ├── skills/build-recruit-me/   /build-recruit-me — config → deployable site
 │   ├── skills/deploy-pages/       /deploy-pages — fork → live on Cloudflare
 │   ├── skills/ui-review/          /ui-review — the judgement ux:check can't make
+│   ├── skills/launch/             /launch — fork to live URL, one authorization
 │   └── workflows/draft-content.mjs subagent drafting workflow
 │
 ├── docs/                        ▓ routed by audience
@@ -687,8 +688,9 @@ publish structured data asserting a plausible human exists.
 
 ```mermaid
 flowchart LR
-    A["corpus:check"] --> B["secrets:check"] --> C["style:check"] --> D["build"]
-    D --> E["config:check"] --> F["fit:smoke"] --> G["graph:smoke"] --> H["seo:smoke"]
+    A["corpus:check"] --> B["content:check"] --> C["secrets:check"] --> D["style:check"] --> E["build"]
+    E --> F["config:check"] --> G["pages:check"] --> H["fit:smoke"] --> I["graph:smoke"]
+    I --> J["seo:smoke"] --> K["csp:smoke"] --> L["ux:check"]
 
     style D fill:#eef2f7,stroke:#334155,color:#1e293b
 ```
@@ -698,11 +700,13 @@ flowchart LR
 | `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a missing required field; a bad date; one skill spelled two ways. Warns on skills missing from `skills.yaml` |
 | `corpus:check` | Real-person fingerprints in the demo corpus; a persona name that isn't self-evidently fake; a non-`fake-` slug — all only while `demo: true` |
 | `secrets:check` | Private keys, `ghp_`/`gh[ours]_` tokens, `AKIA…`, Slack `xox…`, `sk-…`, Cloudflare tokens, and generic `api_key=`/`secret_key=` assignments |
-| `style:check` | A raw color in `styles.css`; a `var(--x)` no token defines; a missing `--cat-N` that TypeScript builds by name |
-| `config:check` | Your identity appearing anywhere under `src/`, `functions/`, `graph/`, or the HTML templates |
+| `style:check` | A raw color in `styles.css`, or a `var(--x)` no token defines |
+| `config:check` | Your identity appearing anywhere under `src/`, `functions/`, `graph/`, or `public/` |
+| `pages:check` | A GitHub Pages deploy that would land on a subpath and load blank; an `origin` that disagrees with where the site is actually served. Skipped while `demo: true` |
 | `fit:smoke` | An `aligned` requirement with no citation; the two evidence packs disagreeing; a dequalifying status leaking into highlight mode; the non-exhaustive caveat going missing; audit mode losing the ability to report gaps |
 | `graph:smoke` | A missing bundle; a bundle without `RMPortfolioGraph`/`create`; a regression to the retired `window.HHPG_FORCES` global; `resolveForces` ignoring `opts.forces`, the compact preset, or the defaults |
 | `seo:smoke` | Sitemap/known-paths count mismatch; a 404 without `noindex`; an indexable route without its own document, canonical, or JSON-LD |
+| `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids, with the policy enforced; a meta CSP that is missing, wrongly present, or placed after the first stylesheet or script |
 | `ux:check` | Text below WCAG AA against its real composited background; horizontal overflow; an undersized touch target that also fails the 2.5.8 spacing rule; no keyboard focus ring; a route without exactly one `h1`, a `lang`, or a title. 9 routes x light/dark x 375/1280px |
 | `docs:check` | A number quoted in the docs that no longer matches source |
 | `docs:links` | A relative doc link or in-page anchor that does not resolve |

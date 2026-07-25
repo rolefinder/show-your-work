@@ -30,3 +30,24 @@ theme_color_dark: "#131211"
 # footer line). Set to false — and clear extraCaveats in config/fit.yaml — the
 # moment content/ holds your real work.
 demo: true
+
+# Where this deploys. See docs/guide/deploy.md for the full comparison.
+#
+#   github-pages     No new account. Needs a <username>.github.io repo or a
+#                    custom domain, because the site must live at the root —
+#                    every asset path here is absolute. GitHub Pages cannot
+#                    set response headers, so the CSP ships as a
+#                    <meta http-equiv>, which cannot express frame-ancestors,
+#                    and HSTS / X-Frame-Options / COOP / CORP are unavailable.
+#                    /api/fit is unavailable too; browser Fit works.
+#
+#   cloudflare-pages Real response headers, so _headers applies and the strict
+#                    CSP is enforced as designed. Optional /api/fit Function.
+#                    Needs a Cloudflare account.
+deploy:
+  target: github-pages
+
+  # Optional. On GitHub Pages this is emitted as dist/CNAME, which is how a
+  # custom domain is configured. Leave blank to serve at <username>.github.io.
+  # If you set this, `origin` above must be the same host.
+  custom_domain: ""

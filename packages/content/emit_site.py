@@ -54,6 +54,25 @@ def emit_profile(data: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+TARGETS = ("github-pages", "cloudflare-pages")
+
+
+def deploy_target(cfg: dict[str, Any]) -> str:
+    """Where this site deploys. Unknown values fail rather than defaulting.
+
+    A typo here would silently pick the wrong security posture: on the
+    cloudflare path the CSP arrives as a response header, on GitHub Pages it
+    can only be a <meta http-equiv>, which cannot express frame-ancestors.
+    Guessing between those is not a reasonable thing for a build to do.
+    """
+    value = str((cfg.get("deploy") or {}).get("target") or "github-pages").strip()
+    if value not in TARGETS:
+        raise SystemExit(
+            f"content/config/site.yaml: deploy.target {value!r} is not one of {', '.join(TARGETS)}"
+        )
+    return value
+
+
 def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
     """Everything that identifies this deployment, for src/ and emit-html."""
     return "\n".join(
@@ -66,6 +85,8 @@ def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
             f"  themeColor: {ts_string(str(cfg.get('theme_color') or '#ffffff'))},",
             f"  themeColorDark: {ts_string(str(cfg.get('theme_color_dark') or '#000000'))},",
             f"  demo: {'true' if cfg.get('demo', False) else 'false'},",
+            f"  deployTarget: {ts_string(deploy_target(cfg))},",
+            f"  customDomain: {ts_string(str((cfg.get('deploy') or {}).get('custom_domain') or '').strip())},",
             "};",
         ]
     )

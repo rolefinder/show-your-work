@@ -47,6 +47,11 @@ that is the point, it proves nothing is invented.
 
 ## Make it yours
 
+If you have Claude Code, **`/launch`** does everything from here to a live
+URL: it asks for your details in one pass, builds, takes a single
+authorization before anything goes public, and hands back the link. The rest
+of this page is what it runs.
+
 ```bash
 npm run init
 ```

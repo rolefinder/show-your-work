@@ -10,9 +10,13 @@
  *   2. Every var(--x) actually resolves to a token defined under tokens/.
  *      Catches the silent-fallback bug where a renamed token leaves
  *      `var(--line, #ddd5c8)` quietly painting a stale color.
- *   3. Tokens that TypeScript reads by name still exist (the skill-bank dot
- *      palette builds `var(--cat-N)` strings at runtime, so CSS-only
- *      analysis would never see the reference).
+ *
+ * There used to be a third property here: tokens that TypeScript built by
+ * name at runtime had to be asserted separately, because the skill-bank dots
+ * rendered `style="background: var(--cat-3)"` and CSS-only analysis could not
+ * see the reference. That inline style violated `style-src 'self'`, so the
+ * palette now lives in styles.css as eight real rules — which property 2
+ * already covers.
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -23,8 +27,6 @@ const tokensDir = join(root, "tokens");
 
 /** Files whose values must be tokens, not literals. */
 const COMPONENT_LAYER = ["styles.css"];
-/** Tokens referenced from TypeScript rather than CSS. */
-const RUNTIME_TOKENS = Array.from({ length: 8 }, (_, i) => `--cat-${i + 1}`);
 
 const COLOR_LITERAL =
   /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color-mix)\s*\(/gi;
@@ -61,12 +63,6 @@ for (const rel of [...COMPONENT_LAYER, ...tokenFiles.map((f) => `tokens/${f}`)])
       }
     }
   });
-}
-
-for (const name of RUNTIME_TOKENS) {
-  if (!defined.has(name)) {
-    errors.push(`tokens/: ${name} is missing but src/skills/SkillBank.tsx builds it at runtime`);
-  }
 }
 
 if (errors.length) {
