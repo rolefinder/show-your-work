@@ -33,7 +33,7 @@ recruiter reads, and `outcome` / `evidence` are what Fit quotes verbatim.
 
 | Category | Looks like | Why it leaks |
 |---|---|---|
-| **Codenames** | `project-nightingale`, `ai-hub`, `atlas-v2` | Names an internal system. Often maps to a team, a roadmap, or an acquisition |
+| **Codenames** | `project-nightingale`, `atlas-v2`, `orchard` | Names an internal system. Often maps to a team, a roadmap, or an acquisition |
 | **Clients and partners** | a named customer, an unannounced vendor | Frequently under NDA, and not yours to disclose |
 | **Internal topology** | hostnames, repo paths, dashboard URLs, queue names, index names | A map of the estate. Useless to a recruiter, useful to an attacker |
 | **Identifiers** | ticket prefixes (`DATA-1234`), incident numbers, PR links to private repos | Confirms tooling and often resolves to real content |
@@ -48,8 +48,8 @@ real trouble, and no pattern finds them.
 The claim is usually fine; the specificity is the problem. Keep the outcome,
 drop the proper noun:
 
-> **Before** — "Cut p95 latency on `ai-hub` from 800ms to 340ms by moving the
-> ForgeRock token exchange behind a Kong rate limiter."
+> **Before** — "Cut p95 latency on `atlas-v2` from 800ms to 340ms by moving
+> the Vendorly token exchange behind a Gatekeeper rate limiter."
 >
 > **After** — "Cut p95 latency on an internal identity service from 800ms to
 > 340ms by moving token exchange behind a rate limiter."
@@ -95,6 +95,10 @@ Then paste a real job description at `/fit` and read the brief. Fit quotes
 `outcome` and `evidence` verbatim, so it is the fastest way to see what a
 recruiter will actually be shown — and the fastest way to notice that a
 sanitized sentence now reads as vague.
+
+> The examples above are invented. Writing a *real* codename into a skill, a
+> doc, or a guard list publishes it — which is the mistake this whole page
+> exists to prevent, and one this file made in its first draft.
 
 ## Constraints
 
