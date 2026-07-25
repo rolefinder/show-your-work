@@ -13,6 +13,8 @@ Strategy and architecture for the OSS template + Fit product.
 
 ## Architecture
 
+- [ARCHITECTURE.md](../ARCHITECTURE.md) — diagrams: build pipeline, edge request path, Fit data flow, directory tree
+
 - [Extraction analysis](architecture/EXTRACTION_ANALYSIS.md) (harrison-site → OSS lessons)
 - [Package boundaries](architecture/PACKAGE_BOUNDARIES.md)
 - [Site → OSS gap list](architecture/SITE_OSS_GAP_LIST.md)

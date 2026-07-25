@@ -172,6 +172,10 @@ corpus is yours.
 
 ## Docs
 
+[`ARCHITECTURE.md`](./ARCHITECTURE.md) has the diagrams: the build pipeline,
+the request path at the edge, how Fit's two implementations stay in sync, and an
+annotated directory tree.
+
 [`docs/README.md`](./docs/README.md) indexes the ADRs. The ones worth reading
 first: [015](./docs/architecture/adr/015-design-token-system.md) (design
 tokens), [016](./docs/architecture/adr/016-adopter-config-boundary.md) (why
