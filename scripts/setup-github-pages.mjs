@@ -110,9 +110,14 @@ function repoSlug() {
 
 const slug = repoSlug();
 if (!slug) {
+  /* --public, not --private: GitHub Pages on a free account requires a public
+     repository, so suggesting private sends the adopter down a path that
+     cannot work. Say it in the instruction, because it means their content/
+     YAML becomes world-readable and that should be a decision. */
   needsHuman(
     "this directory has no GitHub repository",
-    "gh repo create <owner>/<owner>.github.io --private --source=. --remote=origin --push",
+    "gh repo create <owner>/<owner>.github.io --public --source=. --remote=origin --push\n" +
+      "    (public — Pages needs it on a free account, and it makes content/ world-readable)",
   );
 }
 record("repo", `repository is ${slug}`);

@@ -31,15 +31,46 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
   process.exit(0);
 }
 
-const generated = readFileSync(join(root, "src", "generated", "content.ts"), "utf8");
-const value = (key) => {
-  const m = generated.match(new RegExp(`\\b${key}:\\s*"((?:[^"\\\\]|\\\\.)*)"`));
-  return m ? JSON.parse(`"${m[1]}"`) : "";
-};
+/* Read site.yaml, NOT src/generated/content.ts.
+   `init` writes YAML and does not run the emitter, so on the very common
+   `init` then `pages:setup` path the generated module still says demo: true
+   and carries the demo origin. Reading it there would skip this check exactly
+   when it first starts to matter, and could enable Pages on a subpath repo.
+   Config's source of truth is the YAML; that is what this must see.
 
-const target = value("deployTarget");
+   Minimal reader rather than a YAML dependency, matching check-ready.mjs:
+   only four scalars are needed, two of them one level deep. */
+const siteYaml = readFileSync(join(root, "content", "config", "site.yaml"), "utf8");
+
+const unquote = (s) => s.trim().replace(/\s+#.*$/, "").trim().replace(/^["']|["']$/g, "");
+
+/** A top-level `key: value`. */
+function scalar(key) {
+  const m = siteYaml.match(new RegExp(`^${key}:[ \\t]*(.*)$`, "m"));
+  return m ? unquote(m[1]) : "";
+}
+
+/**
+ * A `key: value` nested one level under `parent:`.
+ *
+ * The block is "every following line that is indented or blank" — consumed
+ * explicitly rather than with a lazy match up to `(?=^\S|$)`, because under
+ * the `m` flag `$` matches at the end of every line, so that lookahead
+ * succeeds immediately and the block is always empty. It read as correct and
+ * silently returned "" for both deploy keys.
+ */
+function nested(parent, key) {
+  const block = siteYaml.match(
+    new RegExp(`^${parent}:[ \\t]*\\r?\\n((?:[ \\t]+.*\\r?\\n|[ \\t]*\\r?\\n)*)`, "m"),
+  );
+  if (!block) return "";
+  const m = block[1].match(new RegExp(`^[ \\t]+${key}:[ \\t]*(.*)$`, "m"));
+  return m ? unquote(m[1]) : "";
+}
+
+const target = nested("deploy", "target") || "github-pages";
 if (target !== "github-pages") {
-  console.log(`check-pages-target: skipped (deploy.target is ${target || "unset"})`);
+  console.log(`check-pages-target: skipped (deploy.target is ${target})`);
   process.exit(0);
 }
 
@@ -47,7 +78,7 @@ if (target !== "github-pages") {
    named recruit-me and origin is example.com, both correctly. Enforcing the
    root-path rule here would fail the template's own test run forever. `init`
    sets demo: false, which is exactly the moment the rule starts to matter. */
-if (/\bdemo:\s*true\b/.test(generated)) {
+if (/^(true|yes|on)$/i.test(scalar("demo"))) {
   console.log("check-pages-target: skipped (demo: true — still the template, not a deployment)");
   process.exit(0);
 }
@@ -62,8 +93,14 @@ function repoSlug() {
 }
 
 const slug = repoSlug();
-const customDomain = value("customDomain");
-const origin = value("origin");
+const customDomain = nested("deploy", "custom_domain");
+const origin = scalar("origin");
+
+/* Hostnames are case-insensitive, so every comparison below is made on a
+   lowercased host. `https://Octocat.github.io` is the same site as
+   `https://octocat.github.io`, and failing on that would be the check being
+   wrong rather than the config. */
+const originHost = origin.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase();
 
 const errors = [];
 const notes = [];
@@ -72,8 +109,7 @@ if (customDomain) {
   notes.push(`custom domain ${customDomain} — dist/CNAME is emitted, so the site serves at the root`);
   // A CNAME that disagrees with `origin` means every canonical URL, the
   // sitemap and every OG image URL point at a host the site is not on.
-  const host = origin.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-  if (host && host !== customDomain) {
+  if (originHost && originHost !== customDomain.toLowerCase()) {
     errors.push(
       `deploy.custom_domain is ${customDomain} but origin is ${origin} — canonical URLs, ` +
         "the sitemap and every OG image URL would point at a different host than the site is served from",
@@ -98,7 +134,7 @@ if (customDomain) {
     );
   } else {
     notes.push(`${slug} is a user site, so it publishes at https://${userSite}/`);
-    if (origin.replace(/\/+$/, "") !== `https://${userSite}`) {
+    if (originHost !== userSite) {
       errors.push(
         `origin is ${origin} but this repo publishes at https://${userSite} — ` +
           "canonical URLs and the sitemap would point somewhere the site is not",
