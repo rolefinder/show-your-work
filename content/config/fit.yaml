@@ -1,8 +1,10 @@
 # Tenant Fit matcher overrides for the Fake Name demo.
+# Keys are snake_case like every other config here; scripts/emit-fit-config.py
+# translates them to the matcher's camelCase fields (ADR 020).
 # Core English stops + generic tech synonyms live in src/fit/config.ts.
 # Person-name stops and skill weighting belong here — never hardcoded in fit-core.
 
-extraStops:
+extra_stops:
   - fake
   - name
 
@@ -10,7 +12,7 @@ extraStops:
 synonyms: {}
 
 # Optional per-skill multipliers (lowercased skill label → factor on skill hits).
-skillWeights:
+skill_weights:
   ci/cd: 1.2
   typescript: 1.1
 
@@ -32,11 +34,11 @@ weights:
 #                     never reads as a full audit while omitting rows.
 #   true            - audit mode. Also lists requirements with no published
 #                     evidence, plus a Gaps section.
-showGaps: false
+show_gaps: false
 
 # Appended after the two engine caveats on every brief. The demo disclaimer
 # lives HERE, not in src/fit/ — an adopter who forgets to remove a hardcoded
 # one would ship "this corpus is fictional" to their own recruiters.
 # Delete this list (or empty it) once content/ is your real corpus.
-extraCaveats:
+extra_caveats:
   - Demo corpus is a placeholder (Fake Name) — replace content/ with your own YAML.

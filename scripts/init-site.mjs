@@ -218,11 +218,17 @@ function main(answers) {
   // Fit: the demo persona's stop words and disclaimer become yours / nothing.
   const fitPath = join(root, "content", "config", "fit.yaml");
   let fit = readFileSync(fitPath, "utf8");
+  /* \r?\n, not \n: git checks these files out with CRLF on Windows, so a
+     \n-only pattern matched nothing and init silently left the DEMO persona's
+     stop words in place on every Windows fork. This predates the snake_case
+     rename — the old camelCase pattern had the identical flaw. [ \t]+ rather
+     than \s+ for the same class of reason: \s swallows line breaks. */
+  const eol = fit.includes("\r\n") ? "\r\n" : "\n";
   fit = fit.replace(
-    /^extraStops:\n(?:\s+- .*\n)*/m,
-    "extraStops:\n" + nameStops(answers.name).map((s) => `  - ${s}\n`).join(""),
+    /^extra_stops:\r?\n(?:[ \t]+- .*\r?\n)*/m,
+    "extra_stops:" + eol + nameStops(answers.name).map((s) => `  - ${s}${eol}`).join(""),
   );
-  fit = fit.replace(/^extraCaveats:\n(?:\s+- .*\n)*/m, "extraCaveats: []\n");
+  fit = fit.replace(/^extra_caveats:\r?\n(?:[ \t]+- .*\r?\n)*/m, "extra_caveats: []" + eol);
   writes.push(["content/config/fit.yaml", fit]);
 
   // The accent is the one token an adopter is most likely to want changed, and

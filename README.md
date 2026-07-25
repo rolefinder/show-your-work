@@ -45,7 +45,7 @@ Three rules make that trustworthy:
 - **It highlights, it does not audit.** By default the brief shows the
   requirements your published work covers and stays quiet about the rest — a
   portfolio is advocacy, not a self-assessment. The caveats say so, so it never
-  reads as an exhaustive review while omitting rows. Set `showGaps: true` in
+  reads as an exhaustive review while omitting rows. Set `show_gaps: true` in
   `content/config/fit.yaml` for the full audit, gaps included.
 
 The matcher is deterministic keyword retrieval, not a model. It cannot

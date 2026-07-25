@@ -84,7 +84,7 @@ recruit-me/
 │   └── config/
 │       ├── site.yaml              origin · title_suffix · description · theme colors · demo
 │       ├── skills.yaml            category order/map + per-skill descriptions
-│       ├── fit.yaml               extraStops · synonyms · skillWeights · weights · showGaps
+│       ├── fit.yaml               extra_stops · synonyms · skill_weights · weights · show_gaps
 │       └── sources.yaml           optional: GitHub user / resume for drafting
 │
 ├── src/                         ▓ CODE — contains no identity
@@ -539,7 +539,7 @@ Claim matching uses whole-token containment, not substring: a two-letter token
 like `ci` (from splitting `CI/CD`) would otherwise match inside "de**ci**sions"
 and outrank a relevant skill note.
 
-**Surface modes.** `showGaps` (default `false`) filters what the brief
+**Surface modes.** `show_gaps` in fit.yaml (`showGaps` on the config object; default `false`) filters what the brief
 *returns*; extraction and scoring always run in full. Highlight mode shows only
 `aligned`/`partial` and swaps the second caveat to say the brief is not an
 exhaustive review — so omitting rows never reads as a completed audit
@@ -713,7 +713,7 @@ own OG card. No other file changes.
 follows automatically.
 
 **Tune Fit.** `content/config/fit.yaml` — stop words, synonyms, per-skill
-weights, score thresholds, caveats, and `showGaps`.
+weights, score thresholds, caveats, and `show_gaps`.
 
 **Add a route.** This one *is* a code change, in three places: the `View` union
 and `viewFor`/`routeFor`/`titleFor` in `app.tsx`, and the route table in
