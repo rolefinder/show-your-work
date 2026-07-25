@@ -11,7 +11,9 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+// RM_ROOT exists so scripts/check-parity.mjs can point both resolvers at a
+// fixture tree and assert they agree. Nothing in the build sets it.
+export const ROOT = process.env.RM_ROOT || join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const CONTENT = join(ROOT, "content");
 export const DEMO = join(CONTENT, "demo");
 

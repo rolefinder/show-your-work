@@ -26,9 +26,12 @@ still resolves to content/demo/. There is no flag to forget to flip.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+# RM_ROOT exists so scripts/check-parity.mjs can point both resolvers at a
+# fixture tree and assert they agree. Nothing in the build sets it.
+ROOT = Path(os.environ.get("RM_ROOT") or Path(__file__).resolve().parents[2])
 CONTENT = ROOT / "content"
 DEMO = CONTENT / "demo"
 

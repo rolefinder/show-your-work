@@ -690,7 +690,7 @@ publish structured data asserting a plausible human exists.
 
 ```mermaid
 flowchart LR
-    A0["additive:check"] --> A["corpus:check"] --> B["content:check"] --> C["secrets:check"] --> D["style:check"] --> E["build"]
+    A0["additive:check"] --> A00["parity:check"] --> A["corpus:check"] --> B["content:check"] --> C["secrets:check"] --> D["style:check"] --> E["build"]
     E --> F["config:check"] --> G["pages:check"] --> H["fit:smoke"] --> I["graph:smoke"]
     I --> J["seo:smoke"] --> K["csp:smoke"] --> L["ux:check"]
 
@@ -699,6 +699,7 @@ flowchart LR
 
 | Gate | Fails on |
 |---|---|
+| `parity:check` | The Python and Node content resolvers disagreeing, on any of 15 questions across 7 adopter states. Where one fact must have two readers, this is what keeps them honest |
 | `additive:check` | A file committed at an adopter path (it would have to be edited, and every template update would conflict); a missing demo fallback; `tokens/adopter.css` not imported last |
 | `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a missing required field; a bad date; one skill spelled two ways. Warns on skills missing from `skills.yaml` |
 | `corpus:check` | Real-person fingerprints in `content/demo/`; a persona name that isn't self-evidently fake; a non-`fake-` slug. Scoped by directory, so it needs no flag and never switches off |

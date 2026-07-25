@@ -24,6 +24,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isDemo, rel, resolve } from "./lib/content-paths.mjs";
+import { nested as yNested, scalar as yScalar } from "./lib/yaml-lite.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -39,41 +40,16 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
    when it first starts to matter, and could enable Pages on a subpath repo.
    Config's source of truth is the YAML; that is what this must see.
 
-   Minimal reader rather than a YAML dependency, matching check-ready.mjs:
-   only four scalars are needed, two of them one level deep.
+   Parsed by scripts/lib/yaml-lite.mjs, which is the ONLY minimal YAML reader
+   in the Node gates. This file used to carry its own, and it disagreed with
+   check-ready.mjs about inline comments.
 
    Resolved, not hardcoded: content/config/site.yaml does not exist until an
    adopter adds it, and until then the demo's is what the build uses. */
 const sitePath = resolve("config", "site.yaml");
 const siteYaml = readFileSync(sitePath, "utf8");
 
-const unquote = (s) => s.trim().replace(/\s+#.*$/, "").trim().replace(/^["']|["']$/g, "");
-
-/** A top-level `key: value`. */
-function scalar(key) {
-  const m = siteYaml.match(new RegExp(`^${key}:[ \\t]*(.*)$`, "m"));
-  return m ? unquote(m[1]) : "";
-}
-
-/**
- * A `key: value` nested one level under `parent:`.
- *
- * The block is "every following line that is indented or blank" — consumed
- * explicitly rather than with a lazy match up to `(?=^\S|$)`, because under
- * the `m` flag `$` matches at the end of every line, so that lookahead
- * succeeds immediately and the block is always empty. It read as correct and
- * silently returned "" for both deploy keys.
- */
-function nested(parent, key) {
-  const block = siteYaml.match(
-    new RegExp(`^${parent}:[ \\t]*\\r?\\n((?:[ \\t]+.*\\r?\\n|[ \\t]*\\r?\\n)*)`, "m"),
-  );
-  if (!block) return "";
-  const m = block[1].match(new RegExp(`^[ \\t]+${key}:[ \\t]*(.*)$`, "m"));
-  return m ? unquote(m[1]) : "";
-}
-
-const target = nested("deploy", "target") || "github-pages";
+const target = yNested(siteYaml, "deploy", "target") || "github-pages";
 
 /* While this is still the template it is not somebody's site: the repo is
    named recruit-me and origin is example.com, both correctly. Enforcing the
@@ -127,8 +103,8 @@ function repoSlug() {
 }
 
 const slug = repoSlug();
-const customDomain = nested("deploy", "custom_domain");
-const origin = scalar("origin");
+const customDomain = yNested(siteYaml, "deploy", "custom_domain");
+const origin = yScalar(siteYaml, "origin");
 
 /* Hostnames are case-insensitive, so every comparison below is made on a
    lowercased host. `https://Octocat.github.io` is the same site as

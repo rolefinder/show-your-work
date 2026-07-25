@@ -132,6 +132,7 @@ something real:
 
 | Gate | Refuses to ship |
 |------|-----------------|
+| `parity:check` | The two content resolvers drifting apart — the failure mode that produced four separate bugs before it was gated |
 | `additive:check` | A template file committed where an adopter is supposed to add one — the thing that makes a fork un-updatable |
 | `corpus:check` | Real-person fingerprints in `content/demo/` — and a demo persona that isn't obviously fake |
 | `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |

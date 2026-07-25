@@ -15,16 +15,10 @@ import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEMO, corpusDir, isDemo, isOwn, rel, resolve } from "./lib/content-paths.mjs";
+import { scalar } from "./lib/yaml-lite.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (...p) => readFileSync(join(root, ...p), "utf8");
-
-/** Minimal YAML scalar reader — avoids a Node YAML dep for a preflight. */
-function scalar(text, key) {
-  const m = text.match(new RegExp(`^${key}:\\s*(.*)$`, "m"));
-  if (!m) return "";
-  return m[1].trim().replace(/^["']|["']$/g, "");
-}
 
 const blockers = [];   // content/config problems -> exit 1
 const missingDeps = []; // toolchain problems     -> exit 2
