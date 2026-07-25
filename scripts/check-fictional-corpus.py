@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 """Fail if content/ contains real-person / real-employer fingerprints.
 
-Demo corpus must stay fictional (Avery Quill). Strategy docs may mention
-harrison-site as the private dogfood — this gate only scans content/.
+Two directions, both only while site.yaml says demo: true.
+
+NEGATIVE: no real identity may appear in the shipped demo corpus. Strategy
+docs may mention harrison-site as the private dogfood — this gate only scans
+content/.
+
+POSITIVE: the demo persona must be self-evidently fake. Every route is now
+prerendered with Person JSON-LD, so a demo deploy that was never customized
+would publish structured data asserting a plausible-sounding human exists. A
+name like "Fake Name" fails loudly; a name like "Avery Quill" fails plausibly.
 """
 
 from __future__ import annotations
@@ -40,6 +48,28 @@ def is_demo() -> bool:
     return True
 
 
+def check_obviously_fake() -> list[str]:
+    """The demo persona and its work must announce themselves as placeholders."""
+    problems: list[str] = []
+    profile = ROOT / "content" / "about" / "profile.yaml"
+    if profile.is_file():
+        for line in profile.read_text(encoding="utf-8").splitlines():
+            if line.startswith("name:") and "fake" not in line.lower():
+                problems.append(
+                    f"content/about/profile.yaml: demo persona name {line.split(':', 1)[1].strip()!r} "
+                    "is not self-evidently fake - a stale demo deploy would publish "
+                    "Person JSON-LD for a plausible-sounding human. Use e.g. 'Fake Name'."
+                )
+    for sub in ("work", "blog"):
+        for path in sorted((ROOT / "content" / sub).glob("*.yaml")):
+            if "fake" not in path.stem.lower():
+                problems.append(
+                    f"content/{sub}/{path.name}: demo slug is not self-evidently fake "
+                    "- prefix it with 'fake-'."
+                )
+    return problems
+
+
 def main() -> int:
     if not CONTENT.is_dir():
         print("content/ missing", file=sys.stderr)
@@ -54,7 +84,8 @@ def main() -> int:
         print("fictional-corpus skipped (site.yaml demo: false - corpus is the adopter's own)")
         return 0
 
-    failures: list[str] = []
+    failures = check_obviously_fake()
+
     for path in sorted(CONTENT.rglob("*")):
         if not path.is_file():
             continue

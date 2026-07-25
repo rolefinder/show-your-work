@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
+    "init": "node scripts/init-site.mjs",
     "emit": "python scripts/emit-content.py",
     "emit:evidence": "python scripts/emit-evidence.py",
     "emit:fit-config": "python scripts/emit-fit-config.py",
@@ -19,7 +20,8 @@
     "build:fit-worker": "node scripts/build-fit-worker.mjs",
     "emit:html": "npx --yes tsx scripts/emit-html.ts",
     "emit:seo": "npx --yes tsx scripts/emit-seo-artifacts.ts",
-    "build": "npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:html && npm run emit:seo && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker",
+    "prerender": "npx --yes tsx scripts/prerender-routes.ts",
+    "build": "npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:html && npm run emit:seo && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker && node scripts/run-prerender.mjs",
     "preview": "node scripts/preview.mjs",
     "fit:smoke": "npx --yes tsx scripts/fit-smoke.ts",
     "graph:smoke": "node scripts/graph-smoke.mjs",
@@ -32,6 +34,7 @@
     "esbuild": "^0.25.0",
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
+    "playwright": "^1.62.0",
     "sigma": "^3.0.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"

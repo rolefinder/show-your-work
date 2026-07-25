@@ -10,6 +10,7 @@ declare global {
 
   namespace React {
     type ReactNode = ReactNS.ReactNode;
+    type ReactElement = ReactNS.ReactElement;
     type MouseEvent = ReactNS.MouseEvent;
     type KeyboardEvent = ReactNS.KeyboardEvent;
     type ChangeEvent<T = Element> = ReactNS.ChangeEvent<T>;

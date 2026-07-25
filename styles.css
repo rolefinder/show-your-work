@@ -388,6 +388,79 @@ a.tag:hover {
   border-color: var(--border);
 }
 
+/* A described skill is worth hovering — hint it without shouting. */
+.tag--described {
+  border-style: dashed;
+  cursor: help;
+}
+
+/* ------------------------------------------------------------
+   Project brief — the editorial contract every work page shares
+   ------------------------------------------------------------ */
+
+.project-brief {
+  margin: var(--space-8) 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-2xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.project-brief__grid {
+  display: grid;
+  gap: 0 var(--space-6);
+}
+
+.project-brief__cell {
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.project-brief__cell:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.project-brief__cell h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.project-brief__cell p,
+.project-brief__cell li {
+  font-size: var(--text-body);
+  line-height: var(--line-body);
+  color: var(--fg-reading);
+}
+
+.project-brief__cell ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.project-brief__cell li + li {
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .project-brief {
+    padding: var(--space-6);
+  }
+
+  .project-brief__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-brief__cell--wide {
+    grid-column: 1 / -1;
+  }
+}
+
 /* ------------------------------------------------------------
    Skill bank
    ------------------------------------------------------------ */
@@ -610,6 +683,26 @@ a.tag:hover {
 
 .fit-cites a:hover {
   text-decoration-color: var(--accent);
+}
+
+/* ------------------------------------------------------------
+   Knowledge lens — the compact graph embedded on content pages
+   ------------------------------------------------------------ */
+
+.knowledge-lens {
+  margin-top: var(--section-gap);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.knowledge-lens__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+}
+
+.knowledge-lens__hint {
+  font-size: var(--text-xs);
 }
 
 /* ------------------------------------------------------------

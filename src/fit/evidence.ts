@@ -19,13 +19,23 @@ export function buildEvidencePack(
 
   for (const w of work) {
     if (w.visible === false) continue;
+    // Outcome and evidence bullets are already whole, self-contained
+    // statements — exactly what a citation should be — so they are carried
+    // separately from the flattened text and preferred as quotes.
+    const claims = [w.outcome, ...(w.evidence || [])]
+      .map((c) => String(c || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
     docs.push({
       id: `work:${w.slug}`,
       kind: "work",
       title: w.title,
       url: `/work/${w.slug}`,
-      text: [w.title, w.summary, w.body, w.skills.join(" ")].join(" "),
+      text: [w.title, w.summary, w.body, w.problem, ...claims, ...(w.decisions || []), w.skills.join(" ")]
+        .filter(Boolean)
+        .join(" "),
       skills: w.skills.slice(),
+      claims,
+      skillNotes: w.skillNotes,
     });
   }
 

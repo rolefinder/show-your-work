@@ -11,54 +11,62 @@ export const SITE_ORIGIN = "https://example.com";
 
 export const SITE_CONFIG: SiteConfig = {
   origin: "https://example.com",
-  titleSuffix: "Avery Quill",
-  description: "Demo portfolio for the recruit-me open-source template (fictional Avery Quill persona).",
-  shortName: "Avery Quill",
+  titleSuffix: "Fake Name",
+  description: "Demo portfolio for the recruit-me open-source template. Fake Name is a placeholder, not a real person.",
+  shortName: "Fake Name",
   themeColor: "#f7f4ef",
   themeColorDark: "#131211",
   demo: true,
 };
 
 export const SITE_PROFILE: SiteProfile = {
-  name: "Avery Quill",
+  name: "Fake Name",
   tagline: "Platform engineer who ships evidence-backed portfolios",
-  location: "Portland, OR (fictional demo)",
-  email: "avery.quill@example.com",
-  summary: "Avery Quill is a fictional demo persona for the recruit-me template. They focus on CI/CD, Cloudflare Pages, and turning published work into recruiter-ready evidence — never inventing employers or years.",
+  location: "Fake City, XX",
+  email: "fake.name@example.com",
+  summary: "Fake Name is a placeholder persona for the recruit-me template — not a real person. The naming is deliberately obvious so a demo deploy can never be mistaken for someone's actual portfolio. Replace this file with your own.",
   skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "YAML content pipelines"],
-  links: [
-    { label: "GitHub", href: "https://github.com/averyquill" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/averyquill" }
-  ],
+  github: "https://example.com/fake-github-profile",
+  linkedin: "https://example.com/fake-linkedin-profile",
 };
 
 export const WORK: WorkItem[] = [
   {
-    slug: "harbor-gate",
-    title: "Harbor Gate",
-    summary: "A CI/CD gate that blocks merges until smoke checks and content emit pass on Cloudflare Pages.",
-    body: "Harbor Gate wires GitHub Actions to a Pages preview deploy, runs fit-smoke and build gates, and publishes a deterministic evidence pack. It pairs with {{work:quill-emit|Quill Emit}} for content regeneration and the {{blog:cite-or-missing|cite-or-missing}} Fit contract. It demonstrates continuous integration, continuous delivery, and pipeline design without claiming Kubernetes or multi-cloud ops.",
-    skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "pipelines", "TypeScript"],
-    visible: true,
-    date: "2026-06",
-  },
-  {
-    slug: "quill-emit",
-    title: "Quill Emit",
+    slug: "fake-project-content-emit",
+    title: "Fake Project: Content Emit",
     summary: "YAML-to-SPA content emitter that keeps portfolio copy out of hand-edited bundles.",
-    body: "Quill Emit reads content/about, content/work, and content/blog YAML, validates slugs, and writes a typed generated module (src/generated/content.ts) via packages/content. Humans edit YAML; the build owns the emitted module. Cross-links use {{work:harbor-gate|Harbor Gate}} and {{blog:cite-or-missing|cite-or-missing}} tokens rendered CSP-safe in the SPA.",
+    body: "Fake Project: Content Emit reads content/about, content/work, and content/blog YAML, validates slugs, and writes a typed generated module (src/generated/content.ts) via packages/content. Humans edit YAML; the build owns the emitted module. Cross-links use {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{blog:fake-post-cite-or-missing|cite or missing}} tokens rendered CSP-safe in the SPA.",
     skills: ["Python", "YAML", "content pipelines", "TypeScript"],
     visible: true,
     date: "2026-05",
+    problem: "Portfolio copy lived inside a hand-edited bundle, so editing a sentence meant editing code and every content change carried the risk of a code change.",
+    outcome: "Humans edit YAML and the build owns the emitted module, so a copy change can no longer break the application.",
+    evidence: ["Slugs are validated against filenames, so a mistyped cross-link fails the build.", "The generated module is typed, so a content-shape change surfaces at compile time.", "Cross-links are rendered from tokens, keeping them CSP-safe with no inline HTML."],
+    decisions: ["Emit a typed module rather than splicing strings into the bundle, so the compiler checks the content contract.", "Keep the generator in Python next to the YAML instead of adding a Node YAML dependency to the site build."],
+    skillNotes: { "Python": "The generator reads and validates the YAML corpus.", "YAML": "YAML is the authoring surface humans actually edit.", "content pipelines": "Content moves through one emit step with an explicit contract.", "TypeScript": "The emitted module is typed, so content shape is compiler-checked." },
+  },
+  {
+    slug: "fake-project-merge-gate",
+    title: "Fake Project: Merge Gate",
+    summary: "A CI/CD gate that blocks merges until smoke checks and content emit pass on Cloudflare Pages.",
+    body: "Fake Project: Merge Gate wires GitHub Actions to a Pages preview deploy, runs fit-smoke and build gates, and publishes a deterministic evidence pack. It pairs with {{work:fake-project-content-emit|Fake Project: Content Emit}} for content regeneration and the {{blog:fake-post-cite-or-missing|cite or missing}} Fit contract. It demonstrates continuous integration, continuous delivery, and pipeline design without claiming Kubernetes or multi-cloud ops.",
+    skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "pipelines", "TypeScript"],
+    visible: true,
+    date: "2026-06",
+    problem: "Content and config drifted from what was deployed. A green local build said nothing about whether the emitted site matched the YAML it came from.",
+    outcome: "Merges are blocked until the emitted content, the built bundle, and the deployed preview all agree, so a drifted build cannot reach production.",
+    evidence: ["Smoke checks and content emit run on every pull request, not on a schedule.", "The evidence pack is deterministic, so two runs on one commit are identical.", "A failed gate names the drifted file rather than reporting a generic failure."],
+    decisions: ["Gate on the emitted artifact, not the source, because drift shows up in what ships rather than in what was written.", "Keep the checks deterministic instead of adding a model, so a red build is always reproducible."],
+    skillNotes: { "CI/CD": "Delivery runs through merge gates rather than trusting a green local build.", "GitHub Actions": "Actions wires the preview deploy and runs the gates on each PR.", "Cloudflare Pages": "The gate checks a real Pages preview deploy, not a local server.", "pipelines": "The emit-build-verify sequence is one pipeline with explicit stages.", "TypeScript": "The gate scripts are typed, so a contract change fails at build." },
   }
 ];
 
 export const BLOG: BlogPost[] = [
   {
-    slug: "cite-or-missing",
-    title: "Cite or missing: recruiter Fit without hallucination",
+    slug: "fake-post-cite-or-missing",
+    title: "Fake Post: cite or missing",
     summary: "Why a JD fit brief should refuse aligned claims without citations.",
-    body: "Recruiters need requirement-to-evidence mapping, not a chatty bio bot. The cite-or-missing contract marks gaps honestly and links only to published /work and /blog pages — for example {{work:harbor-gate|Harbor Gate}} and {{work:quill-emit|Quill Emit}}. Deterministic matchers are a safe v1; RAG can swap in later behind the same JSON shape.",
+    body: "Recruiters need requirement-to-evidence mapping, not a chatty bio bot. The cite-or-missing contract marks gaps honestly and links only to published /work and /blog pages — for example {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{work:fake-project-content-emit|Fake Project: Content Emit}}. Deterministic matchers are a safe v1; RAG can swap in later behind the same JSON shape.",
     skills: ["Fit", "evidence", "CI/CD"],
     visible: true,
     date: "2026-07",
@@ -80,5 +88,17 @@ export const SKILL_CATEGORIES: SkillCategoryConfig = {
     "YAML content pipelines": "Languages & content",
     "Fit": "Fit & evidence",
     "evidence": "Fit & evidence"
+  },
+  descriptions: {
+    "CI/CD": "Delivery gated by automated checks rather than by a green local build.",
+    "GitHub Actions": "Workflow automation for builds, gates, and preview deploys.",
+    "Cloudflare Pages": "Static hosting with edge functions and preview deployments.",
+    "pipelines": "Multi-stage build and delivery flows with explicit contracts between stages.",
+    "TypeScript": "Typed application and tooling code.",
+    "Python": "Content generation and verification tooling.",
+    "YAML": "Structured, human-authored content and configuration.",
+    "content pipelines": "Turning authored content into typed, buildable artifacts.",
+    "Fit": "Matching a job description against published evidence.",
+    "evidence": "Claims that link back to something published rather than asserted."
   },
 };

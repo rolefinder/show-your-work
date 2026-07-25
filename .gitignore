@@ -16,6 +16,10 @@ eggs/
 .eggs/
 lib/
 lib64/
+# ...but that Python-build pattern is unanchored, so it also swallows source
+# directories named lib/ anywhere in the tree. scripts/lib/ holds the shared
+# route table and head-tag helpers that the build genuinely needs.
+!scripts/lib/
 parts/
 sdist/
 var/

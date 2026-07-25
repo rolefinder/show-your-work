@@ -4,18 +4,34 @@ Open-source (Apache-2.0) personal portfolio **site template** + recruiter **Fit*
 surface: paste a job description → cite-or-missing evidence brief against your
 published `/work` and `/blog`.
 
-Demo persona: fictional **Avery Quill** (not a real person).
+Demo persona: **Fake Name**, with **Fake Project** / **Fake Post** content. The
+naming is deliberate — every route ships prerendered `Person` JSON-LD, so a demo
+deploy that was never customized must be obviously a placeholder rather than a
+plausible-sounding human. `npm run corpus:check` enforces it while `demo: true`.
 
 ## Quick start
 
 ```powershell
 pip install --user pyyaml
 npm ci
+npx playwright install chromium   # enables prerendering
 npm run test
 npm run preview
 ```
 
 Open http://localhost:4173/fit and paste a sample JD.
+
+## Make it yours
+
+```powershell
+npm run init
+```
+
+One pass: writes your identity into `content/config/site.yaml` and
+`content/about/profile.yaml`, swaps the demo persona's Fit stop words for
+yours, clears the demo disclaimer, and turns demo mode off. `--replace-content`
+also swaps the demo corpus for starter files; `--dry-run` shows the plan;
+`--config me.json` runs it non-interactively. It never touches `src/`.
 
 ## Layout
 
@@ -42,10 +58,9 @@ runbook and [ADR 016](./docs/architecture/adr/016-adopter-config-boundary.md)
 for why the boundary is drawn there. `npm run config:check` fails the build if
 your identity leaks into `src/`.
 
-Not yet at parity with a full personal site: no prerendering (per-route
-metadata is client-set, so non-JS crawlers see only the home shell), no JSON-LD,
-and work pages carry no structured outcome/evidence fields. ADR 016 lists the
-open set.
+Every route is prerendered to its own HTML with per-route title, canonical,
+OG tags, JSON-LD and a generated social card, so crawlers and link unfurls see
+real content without running JS ([ADR 017](./docs/architecture/adr/017-prerender-and-editorial-contract.md)).
 
 ## Theming
 

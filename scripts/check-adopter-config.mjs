@@ -11,8 +11,8 @@
  * needs no hardcoded blocklist and keeps working after a fork renames the
  * persona: whatever your identity is, it belongs in YAML, not in src/.
  *
- * Regression guard for two real bugs: the "Demo corpus is fictional (Avery
- * Quill)" caveat baked into src/fit/match.ts (shipped to adopters' recruiters),
+ * Regression guard for two real bugs: the "Demo corpus is fictional (<persona>)"
+ * caveat baked into src/fit/match.ts (shipped to adopters' recruiters),
  * and the hand-edited <title>/og:* block in index.html.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";

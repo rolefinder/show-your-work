@@ -19,4 +19,12 @@ jobs:
           python-version: "3.12"
       - run: pip install pyyaml
       - run: npm ci
+      # Prerendering needs a real browser. Without this the build degrades to
+      # an SPA-only dist with a warning, and seo-smoke's prerender coverage
+      # check would never run.
+      - run: npx playwright install --with-deps chromium
       - run: npm run test
+        # Having installed Chromium above, a skipped prerender now means
+        # something broke — fail instead of silently shipping SPA-only.
+        env:
+          PRERENDER_REQUIRED: "1"

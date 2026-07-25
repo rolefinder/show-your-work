@@ -1,8 +1,9 @@
+import type { WorkItem } from "./types";
 import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
-import { GraphPage } from "./graph/GraphPage";
+import { GraphPage, KnowledgeLens } from "./graph/GraphPage";
 import { richText } from "./search/richText";
 import { buildSearchGraph, runSearch } from "./search/searchGraph";
 import { SearchPalette } from "./search/SearchPalette";
@@ -76,10 +77,108 @@ function titleFor(view: View): string {
 }
 
 /**
- * One outlined strip: the email, then whatever profile.links holds. Outbound
+ * The editorial contract every project page shares: problem, outcome,
+ * evidence, decisions. Renders only the cells the YAML actually fills, so a
+ * half-authored project degrades to a shorter brief rather than empty headings.
+ */
+function ProjectBrief({ item }: { item: WorkItem }) {
+  const cells: { head: string; body: React.ReactNode; wide?: boolean }[] = [];
+  if (item.problem) cells.push({ head: "Problem", body: React.createElement("p", null, item.problem) });
+  if (item.outcome) cells.push({ head: "Outcome", body: React.createElement("p", null, item.outcome) });
+  if (item.evidence?.length) {
+    cells.push({
+      head: "Evidence",
+      body: React.createElement(
+        "ul",
+        null,
+        item.evidence.map((e, i) => React.createElement("li", { key: i }, e)),
+      ),
+    });
+  }
+  if (item.decisions?.length) {
+    cells.push({
+      head: "Key decisions",
+      body: React.createElement(
+        "ul",
+        null,
+        item.decisions.map((d, i) => React.createElement("li", { key: i }, d)),
+      ),
+      wide: true,
+    });
+  }
+  if (!cells.length) return null;
+
+  return React.createElement(
+    "section",
+    { className: "project-brief", "aria-label": "Project brief" },
+    React.createElement(
+      "div",
+      { className: "project-brief__grid" },
+      cells.map((c) =>
+        React.createElement(
+          "div",
+          {
+            key: c.head,
+            className: c.wide ? "project-brief__cell project-brief__cell--wide" : "project-brief__cell",
+          },
+          React.createElement("h3", null, c.head),
+          c.body,
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Skill chip with a native tooltip: the site-wide description, plus how the
+ * skill applied on this page when the work item supplies a note. `title` keeps
+ * it CSP-safe and keyboard/screen-reader reachable with no JS or portal.
+ */
+function SkillTags({
+  item,
+  Link,
+}: {
+  item: WorkItem;
+  Link: (props: {
+    href: string;
+    className?: string;
+    title?: string;
+    children?: React.ReactNode;
+  }) => React.ReactElement;
+}) {
+  const descriptions = SKILL_CATEGORIES.descriptions || {};
+  return React.createElement(
+    "ul",
+    { className: "tags" },
+    item.skills.map((s) => {
+      const applied = item.skillNotes?.[s];
+      const tip = [descriptions[s], applied].filter(Boolean).join(" — ");
+      return React.createElement(
+        "li",
+        { key: s },
+        React.createElement(
+          Link,
+          {
+            href: "/work" + searchFromSkills([s]),
+            className: tip ? "tag tag--described" : "tag",
+            title: tip || undefined,
+          },
+          s,
+        ),
+      );
+    }),
+  );
+}
+
+/**
+ * One outlined strip: email, then whichever profile URLs are set. Outbound
  * links get rel="noopener noreferrer" — they are adopter-authored URLs.
  */
 function ContactRow() {
+  const profiles: [label: string, href: string | undefined][] = [
+    ["GitHub", SITE_PROFILE.github],
+    ["LinkedIn", SITE_PROFILE.linkedin],
+  ];
   return React.createElement(
     "div",
     { className: "contact-row", role: "group", "aria-label": "Contact" },
@@ -91,19 +190,21 @@ function ContactRow() {
       },
       SITE_PROFILE.email,
     ),
-    SITE_PROFILE.links.map((l) =>
-      React.createElement(
-        "a",
-        {
-          key: l.href,
-          className: "contact-row__item",
-          href: l.href,
-          target: "_blank",
-          rel: "noopener noreferrer",
-        },
-        l.label,
+    profiles
+      .filter(([, href]) => !!href)
+      .map(([label, href]) =>
+        React.createElement(
+          "a",
+          {
+            key: label,
+            className: "contact-row__item",
+            href,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+          label,
+        ),
       ),
-    ),
   );
 }
 
@@ -243,6 +344,7 @@ function App() {
     href: string;
     children?: React.ReactNode;
     className?: string;
+    title?: string;
     "aria-current"?: "page";
   }) {
     return React.createElement(
@@ -250,6 +352,7 @@ function App() {
       {
         href: props.href,
         className: props.className,
+        title: props.title,
         "aria-current": props["aria-current"],
         onClick: (e: React.MouseEvent) => {
           // Let the browser own modified clicks (new tab, download, …).
@@ -387,6 +490,11 @@ function App() {
               "No work matches these skills.",
             ),
       ),
+      React.createElement(KnowledgeLens, {
+        nodes: kg.nodes,
+        edges: kg.edges,
+        onNavigate: navigate,
+      }),
       React.createElement(SkillBank, {
         groups: workSkillGroups,
         intro: "Click a skill to toggle the ?skill= filter on this list.",
@@ -401,22 +509,9 @@ function App() {
           React.createElement(Link, { href: "/work", className: "page-back" }, "← Work"),
           React.createElement("h1", null, w.title),
           React.createElement("p", { className: "lede" }, w.summary),
+          React.createElement(ProjectBrief, { item: w }),
           React.createElement("p", { className: "prose" }, richText(w.body, navigate)),
-          React.createElement(
-            "ul",
-            { className: "tags" },
-            w.skills.map((s) =>
-              React.createElement(
-                "li",
-                { key: s },
-                React.createElement(
-                  Link,
-                  { href: "/work" + searchFromSkills([s]), className: "tag" },
-                  s,
-                ),
-              ),
-            ),
-          ),
+          React.createElement(SkillTags, { item: w, Link }),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
   } else if (view.name === "blog") {

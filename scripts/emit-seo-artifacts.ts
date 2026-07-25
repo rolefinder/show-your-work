@@ -1,16 +1,20 @@
 #!/usr/bin/env -S npx tsx
-// Build-time SEO artifacts: sitemap.xml, robots.txt, and known-paths.json
-// (the last one is load-bearing here, not cosmetic — see functions/_middleware.js
-// for why: this template has no prerendering, so every route is virtual, and
-// the 404 middleware needs a real list of valid paths to tell "unknown route"
-// apart from "known route the SPA will render client-side").
+// Build-time SEO artifacts: sitemap.xml, robots.txt, llms.txt, and
+// known-paths.json.
+//
+// known-paths.json is load-bearing, not cosmetic — functions/_middleware.js
+// uses it to tell "unknown route" apart from "known route", and to decide
+// 200 vs 404. Every artifact here is derived from scripts/lib/routes.ts, the
+// same table the prerenderer walks, so they cannot drift apart.
 //
 // Usage: npx tsx scripts/emit-seo-artifacts.ts
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { BLOG, SITE_ORIGIN, WORK } from "../src/generated/content";
+import { SITE_CONFIG, SITE_PROFILE } from "../src/generated/content";
+import { buildRoutes, knownPaths, visibleBlog, visibleWork } from "./lib/routes";
+import { SITE } from "./lib/site-meta";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -24,44 +28,78 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function main() {
-  const visibleWork = WORK.filter((w) => w.visible !== false);
-  const visibleBlog = BLOG.filter((b) => b.visible !== false);
+/**
+ * llms.txt — the AEO counterpart to robots.txt: a plain-text map of the site
+ * for language models, so an assistant asked about this person can cite real
+ * pages instead of guessing. https://llmstxt.org
+ */
+function llmsTxt(): string {
+  const lines = [
+    `# ${SITE_PROFILE.name}`,
+    "",
+    `> ${SITE_PROFILE.tagline}`,
+    "",
+    SITE_PROFILE.summary,
+    "",
+    `Location: ${SITE_PROFILE.location}`,
+    `Contact: ${SITE_PROFILE.email}`,
+  ];
+  if (SITE_PROFILE.github) lines.push(`GitHub: ${SITE_PROFILE.github}`);
+  if (SITE_PROFILE.linkedin) lines.push(`LinkedIn: ${SITE_PROFILE.linkedin}`);
+  lines.push("", "## Work", "");
+  for (const w of visibleWork) {
+    lines.push(`- [${w.title}](${SITE}/work/${w.slug}): ${w.summary.replace(/\s+/g, " ").trim()}`);
+  }
+  lines.push("", "## Writing", "");
+  for (const b of visibleBlog) {
+    lines.push(`- [${b.title}](${SITE}/blog/${b.slug}): ${b.summary.replace(/\s+/g, " ").trim()}`);
+  }
+  lines.push("", "## Skills", "", SITE_PROFILE.skills.join(", "), "");
+  lines.push("## Tools", "");
+  lines.push(
+    `- [Fit](${SITE}/fit): paste a job description, get a brief where every aligned claim cites a page above.`,
+    `- [Graph](${SITE}/graph): how the work connects.`,
+    "",
+  );
+  return lines.join("\n");
+}
 
-  const staticPaths = ["/", "/about", "/work", "/blog", "/fit", "/graph"];
-  const workPaths = visibleWork.map((w) => `/work/${w.slug}`);
-  const blogPaths = visibleBlog.map((b) => `/blog/${b.slug}`);
-  const knownPaths = [...staticPaths, ...workPaths, ...blogPaths];
+function main(): void {
+  const routes = buildRoutes();
+  const paths = knownPaths();
 
-  const isPlaceholderOrigin = SITE_ORIGIN.includes("example.com");
-  if (isPlaceholderOrigin) {
+  if (SITE_CONFIG.origin.includes("example.com")) {
     console.warn(
       "emit-seo-artifacts: content/config/site.yaml still has the placeholder " +
-        `origin (${SITE_ORIGIN}) — sitemap.xml/robots.txt will ship with it. ` +
-        "Set your real domain before deploying somewhere adopters will actually crawl.",
+        `origin (${SITE_CONFIG.origin}) - sitemap.xml/robots.txt/llms.txt will ship with it. ` +
+        "Set your real domain before deploying somewhere that will actually be crawled.",
     );
   }
 
-  const urls = knownPaths.map((p) => `${SITE_ORIGIN}${p}`);
   const sitemap =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    urls.map((loc) => `  <url>\n    <loc>${escapeXml(loc)}</loc>\n  </url>`).join("\n") +
+    routes
+      .filter((r) => !r.noindex)
+      .map((r) => `  <url>\n    <loc>${escapeXml(SITE + r.path)}</loc>\n  </url>`)
+      .join("\n") +
     "\n</urlset>\n";
 
   const robots =
     "User-agent: *\n" +
     "Allow: /\n" +
     "\n" +
-    `Sitemap: ${SITE_ORIGIN}/sitemap.xml\n`;
+    `Sitemap: ${SITE}/sitemap.xml\n`;
 
   mkdirSync(dist, { recursive: true });
   writeFileSync(join(dist, "sitemap.xml"), sitemap, "utf8");
   writeFileSync(join(dist, "robots.txt"), robots, "utf8");
-  writeFileSync(join(dist, "known-paths.json"), JSON.stringify(knownPaths), "utf8");
+  writeFileSync(join(dist, "llms.txt"), llmsTxt(), "utf8");
+  writeFileSync(join(dist, "known-paths.json"), JSON.stringify(paths), "utf8");
 
   console.log(
-    `emit-seo-artifacts: ok - ${urls.length} sitemap URLs, ${knownPaths.length} known paths (origin=${SITE_ORIGIN})`,
+    `emit-seo-artifacts: ok - ${paths.length} sitemap URLs, ${paths.length} known paths, ` +
+      `llms.txt (origin=${SITE})`,
   );
 }
 

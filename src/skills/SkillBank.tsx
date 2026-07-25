@@ -5,6 +5,12 @@ export type SkillCategoryConfig = {
   map: Record<string, string>;
   /** Category for unmapped skills (default "Other") */
   fallback?: string;
+  /**
+   * skill label → what the skill means, site-wide. Pairs with a work item's
+   * `skillNotes` (how it applied on that project) to form the two halves of a
+   * skill tooltip. Optional: chips render fine without it.
+   */
+  descriptions?: Record<string, string>;
 };
 
 export type SkillBankItem = {
