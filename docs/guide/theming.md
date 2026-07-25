@@ -2,8 +2,8 @@
 
 ## Four variables
 
-Every color on the site derives from four declarations at the top of
-[`tokens/colors.css`](../../tokens/colors.css):
+Every color on the site derives from four variables, declared with the shipped
+defaults at the top of [`tokens/colors.css`](../../tokens/colors.css):
 
 ```css
 --rm-brand: #0f5c4c;      /* accent — links, focus ring, active state */
@@ -12,8 +12,27 @@ Every color on the site derives from four declarations at the top of
 --rm-fg: #1c1a17;         /* primary ink (light) */
 ```
 
-`npm run init` sets `--rm-brand` for you if you answer the accent prompt. It
-touches only those declarations, never a component rule.
+**You do not edit that file.** Override them from your config instead:
+
+```yaml
+# content/config/site.yaml
+theme:
+  accent: "#7a3ea1"
+  accent_deep: "#4e2769"   # optional
+  bg: "#faf7f2"            # optional
+  fg: "#1a1a1a"            # optional
+```
+
+The build writes those into `dist/tokens/adopter.css`, which `tokens.css`
+imports **last**, so they win. `npm run init` fills in `accent` for you if you
+answer the accent prompt.
+
+Config rather than CSS because a palette edit inside `tokens/colors.css` is a
+change to a file the template keeps improving — and then every upstream fix
+arrives as a merge conflict in your own colors. A value that only ever lives in
+`content/` cannot conflict with anything. `additive:check` asserts
+`adopter.css` is imported last, since anything after it would silently
+override you.
 
 Dark mode follows `prefers-color-scheme` and is derived, not hand-painted —
 there is no second palette to keep in sync.

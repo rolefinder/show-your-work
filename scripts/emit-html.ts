@@ -93,6 +93,32 @@ function emitIndex(): void {
 }
 
 /**
+ * Adopter palette overrides -> dist/tokens/adopter.css.
+ *
+ * tokens/adopter.css ships empty and is @imported last, so writing the four
+ * --rm-* variables here beats the shipped palette without touching
+ * tokens/colors.css. That is the difference between "add a theme: block to
+ * your config" and "edit a file the template owns and then fight a merge
+ * conflict on every update".
+ */
+function emitThemeTokens(): void {
+  const entries = Object.entries(SITE_CONFIG.theme ?? {}).filter(([, v]) => v);
+  if (!entries.length) return;
+  const vars: Record<string, string> = {
+    accent: "--rm-brand",
+    accentDeep: "--rm-brand-deep",
+    bg: "--rm-bg",
+    fg: "--rm-fg",
+  };
+  const body = entries.map(([k, v]) => `  ${vars[k]}: ${v};`).join("\n");
+  writeFileSync(
+    join(dist, "tokens", "adopter.css"),
+    `/* GENERATED from content/config/site.yaml \`theme:\` — do not edit. */\n:root {\n${body}\n}\n`,
+    "utf8",
+  );
+}
+
+/**
  * Files GitHub Pages needs and Cloudflare does not.
  *
  * .nojekyll is not optional: without it Pages runs the output through Jekyll,
@@ -143,6 +169,7 @@ export function emitHtml(): void {
   emitIndex();
   emit404();
   emitManifest();
+  emitThemeTokens();
   emitPagesFiles();
   console.log(
     `emit-html: ok - identity applied to dist/{index,404}.html + manifest.json ` +

@@ -21,6 +21,9 @@ except ImportError:
     sys.exit(1)
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from packages.content.paths import corpus_files, is_demo, resolve  # noqa: E402
 OUT = ROOT / "dist" / "evidence.json"
 
 
@@ -30,7 +33,7 @@ def normalize(value: object) -> str:
 
 
 def main() -> int:
-    profile = yaml.safe_load((ROOT / "content" / "about" / "profile.yaml").read_text(encoding="utf-8")) or {}
+    profile = yaml.safe_load(resolve("about", "profile.yaml").read_text(encoding="utf-8")) or {}
     docs = [
         {
             "id": "about",
@@ -48,7 +51,7 @@ def main() -> int:
         }
     ]
 
-    for path in sorted((ROOT / "content" / "work").glob("*.yaml")):
+    for path in corpus_files("work"):
         w = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         if w.get("visible") is False:
             continue
@@ -87,7 +90,7 @@ def main() -> int:
             }
         )
 
-    for path in sorted((ROOT / "content" / "blog").glob("*.yaml")):
+    for path in corpus_files("blog"):
         b = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         if b.get("visible") is False:
             continue

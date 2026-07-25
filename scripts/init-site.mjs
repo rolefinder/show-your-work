@@ -2,23 +2,26 @@
  * `npm run init` — turn this template into YOUR site.
  *
  * Everything the setup runbook asks a human to do by hand, done in one pass:
- * writes content/config/site.yaml and content/about/profile.yaml, swaps the
- * demo persona's Fit stop words for yours, clears the demo disclaimer, flips
- * demo mode off, and optionally replaces the demo corpus with starter files
- * that show the editorial contract.
+ * creates content/config/site.yaml, content/about/profile.yaml and
+ * content/config/fit.yaml, and optionally starter project/post files showing
+ * the editorial contract. Demo mode turns itself off, because it is derived
+ * from whether content/about/profile.yaml exists rather than declared.
  *
  * Two modes, because a scaffolder you cannot script is only half a tool:
  *   node scripts/init-site.mjs                     interactive prompts
  *   node scripts/init-site.mjs --config me.json    non-interactive
- * Add --dry-run to print what would change and write nothing, or
- * --replace-content to also rewrite content/work and content/blog.
+ * Add --dry-run to print what would be created, --starter-content to also add
+ * example project/post files, or --force to replace answers you already gave.
  *
- * It never touches src/. If it did, it would be re-introducing exactly the
- * code-edit burden ADR 016 removed.
+ * It only ever CREATES files, and only under content/. It does not touch src/,
+ * it does not touch tokens/, and it does not touch content/demo/ — the demo
+ * corpus stays exactly as it shipped and simply stops being used once you have
+ * added your own. Refusing to overwrite is the point: a template you have to
+ * edit or delete is one you cannot safely re-run or update.
  */
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { banner } from "./banner.mjs";
@@ -26,7 +29,11 @@ import { banner } from "./banner.mjs";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const replaceContent = args.includes("--replace-content");
+/* --starter-content ADDS example files. It replaced --replace-content, which
+   deleted the demo corpus: nothing needs deleting now, because adding one
+   project switches the site off the demo corpus by itself. */
+const starterContent = args.includes("--starter-content");
+const force = args.includes("--force");
 const configFlag = args.indexOf("--config");
 const configPath = configFlag >= 0 ? args[configFlag + 1] : null;
 
@@ -114,9 +121,6 @@ short_name: ${yamlString(a.name)}
 theme_color: "#f7f4ef"
 theme_color_dark: "#131211"
 
-# Demo chrome off: this is a real corpus now.
-demo: false
-
 # Where this deploys. See docs/guide/deploy.md.
 #   github-pages     no new account; needs a <user>.github.io repo or a custom
 #                    domain, because the site serves at the root only. GitHub
@@ -126,6 +130,56 @@ demo: false
 deploy:
   target: ${deployTarget(a)}
   custom_domain: ${yamlString(customDomain(a))}
+${themeBlock(a)}`;
+}
+
+/**
+ * Accent lives here, not in tokens/colors.css.
+ *
+ * init used to rewrite the --rm-brand declaration in that file, which made
+ * theming an edit to a tracked template file — exactly what this repo now
+ * refuses to require. The build turns these into tokens/adopter.css instead.
+ * Omitted entirely when you did not pick one, so the shipped palette applies.
+ */
+function themeBlock(a) {
+  if (!a.accent) return "";
+  return `
+# Overrides the four adopter variables in tokens/colors.css, without editing
+# it. The build writes these into tokens/adopter.css, which loads last.
+theme:
+  accent: ${yamlString(a.accent)}
+`;
+}
+
+/**
+ * A fresh fit.yaml, written rather than derived from the demo's.
+ *
+ * init used to read content/config/fit.yaml, regex out the demo persona's stop
+ * words, and write it back — an edit to a shipped file, and the source of the
+ * CRLF bug where the regex silently matched nothing on every Windows fork.
+ * Creating the file outright has neither problem: there is nothing to match.
+ *
+ * Only the two keys that are genuinely per-person are emitted. Everything else
+ * (synonyms, weights, thresholds, show_gaps) falls back to the defaults in
+ * src/fit/config.ts, so an adopter tunes matching only if they want to.
+ */
+function fitYaml(a) {
+  const stops = nameStops(a.name).map((s) => `  - ${s}`).join("\n");
+  return `# Fit matcher overrides for this site. Keys are snake_case; the emitter
+# translates them to the matcher's camelCase fields (ADR 020).
+#
+# Only what is person-specific lives here. Core English stops, generic tech
+# synonyms, weights and thresholds all come from src/fit/config.ts — add a key
+# here only to override one.
+
+# Your own name tokens, or every job description scores a match on your name.
+extra_stops:
+${stops}
+
+# Sentences appended after the two engine caveats on every brief. The demo's
+# "this corpus is fictional" disclaimer is NOT copied here — it belongs to
+# content/demo/config/fit.yaml and stays there.
+extra_caveats: []
 `;
 }
 
@@ -242,80 +296,57 @@ function main(answers) {
     process.exit(1);
   }
 
+  /* Every entry is a file that does not exist yet. init CREATES; it never
+     edits and never deletes. content/demo/ is left exactly as it shipped, and
+     each file written here takes over from its demo counterpart because the
+     resolver prefers content/<path> when it is present. */
   const writes = [
     ["content/config/site.yaml", siteYaml(answers)],
     ["content/about/profile.yaml", profileYaml(answers)],
+    ["content/config/fit.yaml", fitYaml(answers)],
   ];
 
-  // Fit: the demo persona's stop words and disclaimer become yours / nothing.
-  const fitPath = join(root, "content", "config", "fit.yaml");
-  let fit = readFileSync(fitPath, "utf8");
-  /* \r?\n, not \n: git checks these files out with CRLF on Windows, so a
-     \n-only pattern matched nothing and init silently left the DEMO persona's
-     stop words in place on every Windows fork. This predates the snake_case
-     rename — the old camelCase pattern had the identical flaw. [ \t]+ rather
-     than \s+ for the same class of reason: \s swallows line breaks. */
-  /* Match BOTH spellings. emit-fit-config.py still accepts the deprecated
-     camelCase keys for a release, so a fork made before the rename has
-     `extraStops:` — and a snake_case-only pattern would silently no-op there,
-     which is precisely the failure above. Rewriting to snake_case also
-     migrates the file, so the next emit stops warning. */
-  const eol = fit.includes("\r\n") ? "\r\n" : "\n";
-  fit = fit.replace(
-    /^(?:extra_stops|extraStops):\r?\n(?:[ \t]+- .*\r?\n)*/m,
-    "extra_stops:" + eol + nameStops(answers.name).map((s) => `  - ${s}${eol}`).join(""),
-  );
-  fit = fit.replace(
-    /^(?:extra_caveats|extraCaveats):\r?\n(?:[ \t]+- .*\r?\n)*/m,
-    "extra_caveats: []" + eol,
-  );
-  writes.push(["content/config/fit.yaml", fit]);
-
-  // The accent is the one token an adopter is most likely to want changed, and
-  // it is a documented override surface — but it lives in CSS, so only the
-  // four --rm-* lines are touched, never a component rule.
-  if (answers.accent) {
-    const colorsPath = join(root, "tokens", "colors.css");
-    const colors = readFileSync(colorsPath, "utf8").replace(
-      /(--rm-brand:\s*)#[0-9a-f]{6}/i,
-      `$1${answers.accent}`,
-    );
-    writes.push(["tokens/colors.css", colors]);
-  }
-
-  const removals = [];
-  if (replaceContent) {
-    for (const dir of ["content/work", "content/blog"]) {
-      for (const f of readdirSync(join(root, dir))) {
-        if (f.endsWith(".yaml")) removals.push(`${dir}/${f}`);
-      }
-    }
+  if (starterContent) {
     writes.push(["content/work/first-project.yaml", STARTER_WORK]);
     writes.push(["content/blog/first-post.yaml", STARTER_POST]);
   }
 
+  /* Refuse rather than clobber. Re-running init after you have written real
+     content used to overwrite site.yaml and profile.yaml wholesale, which is
+     the one way this tool could destroy work. --force is there for the case
+     where you genuinely want to start the answers over. */
+  const collisions = writes.map(([p]) => p).filter((p) => existsSync(join(root, p)));
+  if (collisions.length && !force) {
+    console.error("init: these already exist, and init does not overwrite:");
+    for (const c of collisions) console.error(`  - ${c}`);
+    console.error("\nEdit them directly, or re-run with --force to replace them.");
+    process.exit(1);
+  }
+
   if (dryRun) {
     console.log("init: --dry-run, nothing written\n");
-    for (const r of removals) console.log(`  delete  ${r}`);
-    for (const [p] of writes) console.log(`  write   ${p}`);
+    for (const [p] of writes) console.log(`  ${existsSync(join(root, p)) ? "REPLACE" : "create "}  ${p}`);
+    console.log("\nNothing under content/demo/ is touched.");
     return;
   }
 
-  for (const r of removals) rmSync(join(root, r), { force: true });
-  for (const [p, body] of writes) writeFileSync(join(root, p), body, "utf8");
+  for (const [p, body] of writes) {
+    mkdirSync(dirname(join(root, p)), { recursive: true });
+    writeFileSync(join(root, p), body, "utf8");
+  }
 
   console.log("init: done.");
-  for (const r of removals) console.log(`  deleted ${r}`);
   for (const [p] of writes) console.log(`  wrote   ${p}`);
+  console.log("\nNothing under content/demo/ was touched — it is still there, and still");
+  console.log("what the site falls back to for anything you have not added yet.");
   console.log("\nNext:");
-  console.log("  1. Fill in your skills in content/about/profile.yaml");
-  if (!replaceContent && readdirSync(join(root, "content/work")).some((f) => f.startsWith("fake-"))) {
-    console.log("  2. Replace content/work/*.yaml and content/blog/*.yaml (still the demo corpus)");
-    console.log("     — or re-run with --replace-content to swap in starter files");
-  } else {
-    console.log("  2. Write your real projects and posts in content/work and content/blog");
-  }
-  console.log("  3. npm test");
+  console.log("  1. Add your skills in content/about/profile.yaml");
+  console.log(
+    starterContent
+      ? "  2. Fill in content/work/first-project.yaml — the demo projects are already out of the site"
+      : "  2. Add content/work/<slug>.yaml — the demo projects drop out as soon as you add one",
+  );
+  console.log("  3. npm run ready");
 }
 
 main(await collect());

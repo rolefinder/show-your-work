@@ -26,7 +26,9 @@ except ImportError:
     sys.exit(1)
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTENT = ROOT / "content"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from packages.content.paths import DEMO  # noqa: E402
 
 # Identity / employer fingerprints that must never appear in shipped corpus.
 FORBIDDEN = [
@@ -43,73 +45,45 @@ FORBIDDEN = [
 ALLOWED_EMAIL_DOMAINS = {"example.com", "example.org", "example.net"}
 
 
-def is_demo() -> bool:
-    """content/config/site.yaml demo flag.
-
-    Parsed with PyYAML, not split on ':'. A naive split leaves the comment
-    attached in `demo: false  # …`, so the value never equals "false" and the
-    gate stays on for a site that has explicitly turned demo off.
-
-    A missing KEY defaults to False, matching emit_site_config's
-    cfg.get("demo", False) — the same file must not drive opposite behaviour in
-    the gate and in the emitted SITE_CONFIG. A missing or unparseable FILE is
-    the one asymmetry: there is nothing to read, so it fails closed and keeps
-    protecting the demo corpus rather than silently disabling the gate.
-    """
-    cfg = ROOT / "content" / "config" / "site.yaml"
-    if not cfg.is_file():
-        return True
-    try:
-        data = yaml.safe_load(cfg.read_text(encoding="utf-8"))
-    except yaml.YAMLError:
-        return True
-    # A scalar or list is truthy, so `or {}` would not catch it and .get would
-    # raise. Anything that isn't a mapping is a broken config: fail closed
-    # rather than crash the gate.
-    if not isinstance(data, dict):
-        return True
-    return bool(data.get("demo", False))
-
-
 def check_obviously_fake() -> list[str]:
     """The demo persona and its work must announce themselves as placeholders."""
     problems: list[str] = []
-    profile = ROOT / "content" / "about" / "profile.yaml"
+    profile = DEMO / "about" / "profile.yaml"
     if profile.is_file():
         for line in profile.read_text(encoding="utf-8").splitlines():
             if line.startswith("name:") and "fake" not in line.lower():
                 problems.append(
-                    f"content/about/profile.yaml: demo persona name {line.split(':', 1)[1].strip()!r} "
+                    f"content/demo/about/profile.yaml: demo persona name {line.split(':', 1)[1].strip()!r} "
                     "is not self-evidently fake - a stale demo deploy would publish "
                     "Person JSON-LD for a plausible-sounding human. Use e.g. 'Fake Name'."
                 )
     for sub in ("work", "blog"):
-        for path in sorted((ROOT / "content" / sub).glob("*.yaml")):
+        for path in sorted((DEMO / sub).glob("*.yaml")):
             if "fake" not in path.stem.lower():
                 problems.append(
-                    f"content/{sub}/{path.name}: demo slug is not self-evidently fake "
+                    f"content/demo/{sub}/{path.name}: demo slug is not self-evidently fake "
                     "- prefix it with 'fake-'."
                 )
     return problems
 
 
 def main() -> int:
-    if not CONTENT.is_dir():
-        print("content/ missing", file=sys.stderr)
+    if not DEMO.is_dir():
+        print("content/demo/ missing", file=sys.stderr)
         return 1
 
-    # This gate protects the SHIPPED DEMO corpus from acquiring real-person
-    # fingerprints. On an adopter's fork the corpus is supposed to be a real
-    # person, so the gate would fail on correct content — and making them edit
-    # this file's FORBIDDEN list would be exactly the kind of code change the
-    # template promises they'll never need (ADR 016).
-    if not is_demo():
-        print("fictional-corpus skipped (site.yaml demo: false - corpus is the adopter's own)")
-        return 0
-
+    # Scoped to content/demo/, always. This gate protects the SHIPPED demo
+    # corpus from acquiring real-person fingerprints; an adopter's own content
+    # is SUPPOSED to name a real person, so scanning it would fail on correct
+    # content.
+    #
+    # It used to scan all of content/ and switch itself off on a `demo: false`
+    # flag. That was strictly worse in both directions: the flag was an edit
+    # someone had to remember, and once flipped the demo corpus stopped being
+    # protected at all. Directory scope needs no flag and never stops.
     failures = check_obviously_fake()
 
-    for path in sorted(CONTENT.rglob("*")):
+    for path in sorted(DEMO.rglob("*")):
         if not path.is_file():
             continue
         if path.suffix.lower() not in {".yaml", ".yml", ".md", ".txt", ".json"}:
@@ -130,7 +104,7 @@ def main() -> int:
             print(f"  - {f}", file=sys.stderr)
         return 1
 
-    print("fictional-corpus OK (content/ clean)")
+    print("fictional-corpus OK (content/demo/ clean and self-evidently fake)")
     return 0
 
 

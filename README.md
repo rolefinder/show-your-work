@@ -132,7 +132,9 @@ something real:
 
 | Gate | Refuses to ship |
 |------|-----------------|
-| `corpus:check` | Real-person fingerprints in the demo corpus — and a demo persona that isn't obviously fake |
+| `parity:check` | The two content resolvers drifting apart — the failure mode that produced four separate bugs before it was gated |
+| `additive:check` | A template file committed where an adopter is supposed to add one — the thing that makes a fork un-updatable |
+| `corpus:check` | Real-person fingerprints in `content/demo/` — and a demo persona that isn't obviously fake |
 | `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |
 | `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
 | `fit:smoke` | An `aligned` requirement without a citation; a dequalifying verdict leaking into highlight mode; the browser and Worker evidence packs disagreeing |
@@ -166,6 +168,9 @@ intended experience.**
 
 ### Yours
 
+You **add** these. Nothing the template ships is edited or deleted, and each
+file you add takes over from its counterpart in `content/demo/` ([ADR 021](./docs/architecture/adr/021-additive-only-adoption.md)).
+
 | Path | Role |
 |------|------|
 | `content/work\|blog/` | One YAML file per project or post. The bulk of your site |
@@ -174,7 +179,7 @@ intended experience.**
 | `content/config/skills.yaml` | Skill-bank grouping + descriptions |
 | `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
 | `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
-| `tokens/colors.css` | Four `--rm-*` variables that drive every color |
+| `content/config/site.yaml` → `theme:` | Accent and palette, without editing `tokens/` |
 
 ### The engine
 
@@ -184,6 +189,7 @@ intended experience.**
 | `graph/` | The CSP-safe WebGL engine, bundled to a self-hosted file |
 | `tokens/` + `styles.css` | Design tokens, then a component layer that reads only tokens |
 | `scripts/` | The build, the emitters, and every gate below. `lib/routes.ts` is the single route table |
+| `content/demo/` | The shipped demo corpus. Permanent — it is what the site falls back to for anything you have not added |
 | `public/` | Web-root boilerplate — HTML templates, manifest, `_headers`, `_redirects`. Identity is injected into the copies in `dist/`, so **you never edit these** |
 | `functions/` | Pages middleware (404 status + route docs) and optional `/api/fit` |
 | `packages/` | The YAML→TypeScript emitter, and resume/GitHub ingest |

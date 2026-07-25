@@ -4,15 +4,41 @@ Everything you publish lives in `content/`. One file per project, one per post.
 
 ```
 content/
-  about/profile.yaml      you
-  work/<slug>.yaml        one project each
-  blog/<slug>.yaml        one post each
-  config/*.yaml           site identity, skills taxonomy, Fit tuning
+  about/profile.yaml      ← you add
+  work/<slug>.yaml        ← you add: one project each
+  blog/<slug>.yaml        ← you add: one post each
+  config/*.yaml           ← you add: identity, skills taxonomy, Fit tuning
+  demo/                   shipped. Never edited, never deleted
 ```
 
-The four files in `content/config/` are commented in place and are the
+## You only add files
+
+`content/demo/` holds everything the template ships. You never edit it and
+never delete it — you write a file at the matching path outside `demo/`, and it
+takes over. ([ADR 021](../architecture/adr/021-additive-only-adoption.md).)
+
+| You add | What happens |
+|---|---|
+| `content/about/profile.yaml` | Your identity replaces the demo persona's, everywhere. Demo mode turns itself off — there is no flag to flip |
+| `content/config/site.yaml` | Your origin, title suffix, deploy target and theme. The demo's copy is not consulted at all, not even for keys you leave out |
+| the first `content/work/*.yaml` | **All** demo projects leave the site at once. Not merged, not appended |
+| the first `content/blog/*.yaml` | Same, for posts |
+
+Two rules there are worth stating plainly, because they are deliberate:
+
+**A config file you add is used whole.** Leave `title_suffix` out and it is
+empty — it does not fall back to `Fake Name`. A site with your origin and the
+demo's name in every page title is a *wrong* site; a site with no title suffix
+is merely an incomplete one, and `npm run ready` names it.
+
+**A corpus you add replaces, never merges.** One real project means the two
+fictional ones are gone. A portfolio listing two of your projects alongside two
+invented ones is worse than one listing two.
+
+The files under `content/demo/config/` are commented in place and are the
 authoritative description of their own fields — read them there rather than
-here, so there is only one copy to keep true. This page covers the content
+here, so there is only one copy to keep true. Copy one out to
+`content/config/` when you want to change it. This page covers the content
 model, which lives in code and therefore needs documenting.
 
 ## A project

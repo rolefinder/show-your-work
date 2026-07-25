@@ -13,6 +13,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { corpusDir, resolve } from "./lib/content-paths.mjs";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
   console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("*/")[0].replace(/^\/\*\*?/, ""));
@@ -34,7 +35,7 @@ function skillsIn(text) {
 const counts = new Map();
 const where = new Map();
 for (const kind of ["work", "blog"]) {
-  const dir = join(root, "content", kind);
+  const dir = corpusDir(kind);
   if (!existsSync(dir)) continue;
   for (const f of readdirSync(dir).filter((x) => x.endsWith(".yaml"))) {
     for (const s of skillsIn(readFileSync(join(dir, f), "utf8"))) {
@@ -45,7 +46,7 @@ for (const kind of ["work", "blog"]) {
 }
 // Same vocabulary: profile skills render on /about and become the `about`
 // doc's skills in the Fit evidence pack.
-const profile = join(root, "content", "about", "profile.yaml");
+const profile = resolve("about", "profile.yaml");
 if (existsSync(profile)) {
   for (const s of skillsIn(readFileSync(profile, "utf8"))) {
     counts.set(s, (counts.get(s) || 0) + 1);
@@ -59,7 +60,7 @@ if (!counts.size) {
 }
 
 const mapped = new Set();
-const cfg = join(root, "content", "config", "skills.yaml");
+const cfg = resolve("config", "skills.yaml");
 if (existsSync(cfg)) {
   for (const line of readFileSync(cfg, "utf8").split("\n")) {
     const m = line.match(/^\s{2}(.+?):\s*\S/);

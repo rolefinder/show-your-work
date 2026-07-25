@@ -7,7 +7,13 @@ want [CONTRIBUTING.md](./CONTRIBUTING.md) or
 ## Which job are you doing?
 
 **Building someone's site from this template.** Then you should not be editing
-code at all. Everything that identifies a deployment lives in `content/`, and
+anything at all — only adding. `content/demo/` holds everything the template
+ships; you write files at the matching paths outside it and they take over
+(ADR 021). If a task seems to need you to edit or delete a shipped file, that
+is a bug worth reporting, not a step. `init` refuses to overwrite for the same
+reason.
+
+You should not be editing code either. Everything that identifies a deployment lives in `content/`, and
 `npm run config:check` fails the build if a name, email or title suffix appears
 under `src/`, `functions/`, `graph/` or `public/`. If a task seems to require a
 code edit to stand up a site, that is a bug in the template — report it rather
@@ -84,6 +90,19 @@ Two failure modes worth knowing about, because both are quiet:
   `command -v`, and exits non-zero. Probe by running an interpreter, not by
   looking it up on `PATH`.
 
+## One fact, one reader
+
+Before adding a regex, a `grep`, or a second parser for something the codebase
+already knows: **it already knows it, so ask it.** Four bugs in this repo came
+from one fact acquiring two readers that then drifted — the full table is in
+[CONTRIBUTING.md](./CONTRIBUTING.md#one-fact-one-reader).
+
+- Node-side YAML scalars: `scripts/lib/yaml-lite.mjs`. Do not write another.
+- A workflow needing a decision the code makes: call the code
+  (`check-pages-target.mjs --deploy-guard`), do not re-derive it in bash.
+- A second implementation that is genuinely unavoidable: add it to
+  `scripts/check-parity.mjs`, which asserts the pair agree.
+
 ## Do not
 
 - Hand-edit anything in the generated table in
@@ -91,6 +110,7 @@ Two failure modes worth knowing about, because both are quiet:
 - Put a raw color in `styles.css`. Add a token in `tokens/`.
 - Widen the CSP, or load React, the graph engine, or a model host from a CDN.
 - Rewrite an ADR to match a later decision. Add a new one.
+- Adjust `parity:check` to make it pass. Fix the divergence it found.
 - Update `docs/history/`. It is a dated record; that is the point.
 - Change a token to make `ux:check` pass. The check composites alpha against
   the real background — if it fails, it is right. State the proposed value and

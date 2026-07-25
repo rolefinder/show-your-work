@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -11,12 +12,13 @@ try:
 except ImportError as exc:  # pragma: no cover
     raise SystemExit("PyYAML required: pip install --user pyyaml") from exc
 
-ROOT = Path(__file__).resolve().parents[2]
-ABOUT = ROOT / "content" / "about" / "profile.yaml"
-SKILLS_CFG = ROOT / "content" / "config" / "skills.yaml"
-SITE_CFG = ROOT / "content" / "config" / "site.yaml"
-WORK_DIR = ROOT / "content" / "work"
-BLOG_DIR = ROOT / "content" / "blog"
+from .paths import ROOT, corpus_dir, is_demo, is_own, rel, resolve
+
+ABOUT = resolve("about", "profile.yaml")
+SKILLS_CFG = resolve("config", "skills.yaml")
+SITE_CFG = resolve("config", "site.yaml")
+WORK_DIR = corpus_dir("work")
+BLOG_DIR = corpus_dir("blog")
 OUT = ROOT / "src" / "generated" / "content.ts"
 
 
@@ -31,11 +33,11 @@ def ts_string_array(items: list[str]) -> str:
 def emit_profile(data: dict[str, Any]) -> str:
     lines = [
         "export const SITE_PROFILE: SiteProfile = {",
-        f"  name: {ts_string(data['name'])},",
-        f"  tagline: {ts_string(data['tagline'])},",
-        f"  location: {ts_string(data['location'])},",
-        f"  email: {ts_string(data['email'])},",
-        f"  summary: {ts_string(str(data['summary']).strip())},",
+        f"  name: {ts_string(data.get('name') or '')},",
+        f"  tagline: {ts_string(data.get('tagline') or '')},",
+        f"  location: {ts_string(data.get('location') or '')},",
+        f"  email: {ts_string(data.get('email') or '')},",
+        f"  summary: {ts_string(str(data.get('summary') or '').strip())},",
         f"  skills: {ts_string_array(list(data.get('skills') or []))},",
     ]
     # Profile URLs, keyed by platform. Authoring order is preserved (dicts are
@@ -73,6 +75,37 @@ def deploy_target(cfg: dict[str, Any]) -> str:
     return value
 
 
+# site.yaml `theme:` key -> the --rm-* variable it overrides in tokens/colors.css.
+THEME_VARS = {
+    "accent": "--rm-brand",
+    "accent_deep": "--rm-brand-deep",
+    "bg": "--rm-bg",
+    "fg": "--rm-fg",
+}
+HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+def emit_theme(cfg: dict[str, Any]) -> str:
+    """Adopter palette overrides, validated here so a typo cannot reach CSS.
+
+    A bad value would otherwise be written into tokens/adopter.css verbatim and
+    silently do nothing — or worse, break the declaration after it. Rejecting
+    it names the key instead."""
+    theme = cfg.get("theme") or {}
+    out = []
+    for key in THEME_VARS:
+        value = str(theme.get(key) or "").strip()
+        if not value:
+            continue
+        if not HEX.match(value):
+            raise SystemExit(
+                f"{rel(SITE_CFG)}: theme.{key} must be a 6-digit hex color like #0f5c4c, got {value!r}"
+            )
+        camel = key.split("_")[0] + "".join(p.title() for p in key.split("_")[1:])
+        out.append(f"{camel}: {ts_string(value)}")
+    return "{ " + ", ".join(out) + " }" if out else "{}"
+
+
 def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
     """Everything that identifies this deployment, for src/ and emit-html."""
     return "\n".join(
@@ -84,9 +117,14 @@ def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
             f"  shortName: {ts_string(str(cfg.get('short_name') or ''))},",
             f"  themeColor: {ts_string(str(cfg.get('theme_color') or '#ffffff'))},",
             f"  themeColorDark: {ts_string(str(cfg.get('theme_color_dark') or '#000000'))},",
-            f"  demo: {'true' if cfg.get('demo', False) else 'false'},",
+            # DERIVED, not read from config. A `demo: true` key was something
+            # an adopter had to remember to flip, and forgetting shipped the
+            # "this corpus is fictional" chrome on a real site. It is now true
+            # exactly while content/about/profile.yaml has not been added.
+            f"  demo: {'true' if is_demo() else 'false'},",
             f"  deployTarget: {ts_string(deploy_target(cfg))},",
             f"  customDomain: {ts_string(str((cfg.get('deploy') or {}).get('custom_domain') or '').strip())},",
+            f"  theme: {emit_theme(cfg)},",
             "};",
         ]
     )
@@ -125,9 +163,9 @@ def emit_work_item(w: dict[str, Any]) -> str:
     return (
         "  {\n"
         f"    slug: {ts_string(w['slug'])},\n"
-        f"    title: {ts_string(w['title'])},\n"
-        f"    summary: {ts_string(str(w['summary']).strip())},\n"
-        f"    body: {ts_string(str(w['body']).strip())},\n"
+        f"    title: {ts_string(w.get('title') or w['slug'])},\n"
+        f"    summary: {ts_string(str(w.get('summary') or '').strip())},\n"
+        f"    body: {ts_string(str(w.get('body') or '').strip())},\n"
         f"    skills: {ts_string_array(list(w.get('skills') or []))},\n"
         f"    visible: {visible},\n"
         f"{date_line}"
@@ -152,9 +190,9 @@ def emit_blog_item(b: dict[str, Any]) -> str:
     return (
         "  {\n"
         f"    slug: {ts_string(b['slug'])},\n"
-        f"    title: {ts_string(b['title'])},\n"
-        f"    summary: {ts_string(str(b['summary']).strip())},\n"
-        f"    body: {ts_string(str(b['body']).strip())},\n"
+        f"    title: {ts_string(b.get('title') or b['slug'])},\n"
+        f"    summary: {ts_string(str(b.get('summary') or '').strip())},\n"
+        f"    body: {ts_string(str(b.get('body') or '').strip())},\n"
         f"    skills: {ts_string_array(list(b.get('skills') or []))},\n"
         f"    visible: {visible},\n"
         f"{date_line}"

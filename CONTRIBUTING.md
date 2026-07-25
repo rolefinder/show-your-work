@@ -45,6 +45,37 @@ npm test         # every gate — run this before you push
    see [ADR 016](./docs/architecture/adr/016-adopter-config-boundary.md).
 6. Prefer small, verifiable PRs over large speculative refactors.
 
+## One fact, one reader
+
+This repo has shipped the same bug four times: some fact acquired a second
+reader, the two drifted, and the disagreement was invisible until it caused
+damage.
+
+| The fact | The two readers | What it did |
+|---|---|---|
+| "is this still the template?" | the deploy workflow's `grep` vs `check-pages-target`'s parser | `demo: "true"`, `demo: True` and a trailing `# comment` evaded the grep — the workflow would have deployed a placeholder site while the root-path check inside it skipped |
+| "is this the demo persona?" | `check-ready`'s `/fake/` vs `corpus:check`'s `fake` substring | `Fakeperson Doe` satisfied one and evaded the other |
+| a YAML scalar | `check-ready`'s regex vs `check-pages-target`'s | one stripped inline comments, one did not, so both gates read `origin` differently |
+| the Fit evidence pack | `src/fit/evidence.ts` vs `scripts/emit-evidence.py` | **nothing** — `fit-smoke` asserts the two are equal |
+
+The fourth is the only one that never bit, and the reason is the rule:
+
+1. **Prefer one implementation.** Node-side YAML scalars come from
+   `scripts/lib/yaml-lite.mjs`. A workflow that needs a decision the code
+   already makes calls the code (`check-pages-target.mjs --deploy-guard`), it
+   does not re-derive it in bash.
+2. **When a second implementation is genuinely unavoidable** — the emitters are
+   Python, the preflight is Node, and neither can call the other cheaply —
+   **a test asserts the two agree.** `parity:check` does this for the content
+   resolvers across seven adopter states; `fit-smoke` does it for the evidence
+   packs.
+3. **Never encode the same concept as two patterns.** If you are about to write
+   a regex for something another file already recognises, read that file's
+   value instead. `check-ready` compares against
+   `content/demo/about/profile.yaml` rather than matching for "fake".
+
+If `parity:check` fails, fix the divergence. Do not adjust the test to match.
+
 ## Things that are generated
 
 Do not hand-edit these; edit their source and rebuild.
@@ -62,7 +93,8 @@ Do not hand-edit these; edit their source and rebuild.
 `npm test` — ten gates, in this order:
 
 ```
-corpus:check -> content:check -> secrets:check -> style:check -> build
+additive:check -> parity:check -> corpus:check -> content:check -> secrets:check -> style:check
+  -> build
   -> config:check -> pages:check -> fit:smoke -> graph:smoke -> seo:smoke
   -> csp:smoke -> ux:check
 ```

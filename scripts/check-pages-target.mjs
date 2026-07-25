@@ -23,6 +23,8 @@ import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDemo, rel, resolve } from "./lib/content-paths.mjs";
+import { nested as yNested, scalar as yScalar } from "./lib/yaml-lite.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -38,48 +40,56 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
    when it first starts to matter, and could enable Pages on a subpath repo.
    Config's source of truth is the YAML; that is what this must see.
 
-   Minimal reader rather than a YAML dependency, matching check-ready.mjs:
-   only four scalars are needed, two of them one level deep. */
-const siteYaml = readFileSync(join(root, "content", "config", "site.yaml"), "utf8");
+   Parsed by scripts/lib/yaml-lite.mjs, which is the ONLY minimal YAML reader
+   in the Node gates. This file used to carry its own, and it disagreed with
+   check-ready.mjs about inline comments.
 
-const unquote = (s) => s.trim().replace(/\s+#.*$/, "").trim().replace(/^["']|["']$/g, "");
+   Resolved, not hardcoded: content/config/site.yaml does not exist until an
+   adopter adds it, and until then the demo's is what the build uses. */
+const sitePath = resolve("config", "site.yaml");
+const siteYaml = readFileSync(sitePath, "utf8");
 
-/** A top-level `key: value`. */
-function scalar(key) {
-  const m = siteYaml.match(new RegExp(`^${key}:[ \\t]*(.*)$`, "m"));
-  return m ? unquote(m[1]) : "";
-}
+const target = yNested(siteYaml, "deploy", "target") || "github-pages";
+
+/* While this is still the template it is not somebody's site: the repo is
+   named recruit-me and origin is example.com, both correctly. Enforcing the
+   root-path rule here would fail the template's own test run forever. Adding
+   content/about/profile.yaml is exactly the moment the rule starts to matter
+   (ADR 021). */
+const stillTemplate = isDemo();
 
 /**
- * A `key: value` nested one level under `parent:`.
+ * `--deploy-guard`: answer "should the deploy workflow run at all?" in
+ * GITHUB_OUTPUT form, and nothing else.
  *
- * The block is "every following line that is indented or blank" — consumed
- * explicitly rather than with a lazy match up to `(?=^\S|$)`, because under
- * the `m` flag `$` matches at the end of every line, so that lookahead
- * succeeds immediately and the block is always empty. It read as correct and
- * silently returned "" for both deploy keys.
+ * The workflow used to decide this with its own
+ * `grep -Eq '^demo:[[:space:]]*(true|yes|on)[[:space:]]*$' content/config/site.yaml`.
+ * Two readers of one fact is two chances to disagree, and they did:
+ * `demo: "true"`, `demo: True` and a trailing `# comment` all evaded that
+ * anchored, case-sensitive pattern while this file read them as true — so the
+ * workflow would have deployed a placeholder site while the root-path check
+ * inside it skipped.
+ *
+ * ADR 021 then removed the `demo:` key outright, and content/config/site.yaml
+ * does not exist at all until an adopter adds it — so that grep would now hit
+ * a missing file, exit 2, and let the TEMPLATE repo deploy itself. One reader,
+ * and it is the one that already owns the question.
  */
-function nested(parent, key) {
-  const block = siteYaml.match(
-    new RegExp(`^${parent}:[ \\t]*\\r?\\n((?:[ \\t]+.*\\r?\\n|[ \\t]*\\r?\\n)*)`, "m"),
-  );
-  if (!block) return "";
-  const m = block[1].match(new RegExp(`^[ \\t]+${key}:[ \\t]*(.*)$`, "m"));
-  return m ? unquote(m[1]) : "";
+if (process.argv.includes("--deploy-guard")) {
+  console.log(`deploy=${stillTemplate ? "false" : "true"}`);
+  process.exit(0);
 }
 
-const target = nested("deploy", "target") || "github-pages";
 if (target !== "github-pages") {
   console.log(`check-pages-target: skipped (deploy.target is ${target})`);
   process.exit(0);
 }
 
-/* While demo is true this IS the template, not somebody's site: the repo is
-   named recruit-me and origin is example.com, both correctly. Enforcing the
-   root-path rule here would fail the template's own test run forever. `init`
-   sets demo: false, which is exactly the moment the rule starts to matter. */
-if (/^(true|yes|on)$/i.test(scalar("demo"))) {
-  console.log("check-pages-target: skipped (demo: true — still the template, not a deployment)");
+if (stillTemplate) {
+  console.log(
+    `check-pages-target: skipped (no content/about/profile.yaml yet, so this is still the ` +
+      `template — config is coming from ${rel(sitePath)})`,
+  );
   process.exit(0);
 }
 
@@ -93,8 +103,8 @@ function repoSlug() {
 }
 
 const slug = repoSlug();
-const customDomain = nested("deploy", "custom_domain");
-const origin = scalar("origin");
+const customDomain = yNested(siteYaml, "deploy", "custom_domain");
+const origin = yScalar(siteYaml, "origin");
 
 /* Hostnames are case-insensitive, so every comparison below is made on a
    lowercased host. `https://Octocat.github.io` is the same site as
