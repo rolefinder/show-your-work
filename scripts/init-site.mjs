@@ -18,7 +18,7 @@
  */
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { readFileSync, writeFileSync, readdirSync, rmSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -240,7 +240,7 @@ function main(answers) {
   for (const [p] of writes) console.log(`  wrote   ${p}`);
   console.log("\nNext:");
   console.log("  1. Fill in your skills in content/about/profile.yaml");
-  if (!replaceContent && existsSync(join(root, "content/work/harbor-gate.yaml"))) {
+  if (!replaceContent && readdirSync(join(root, "content/work")).some((f) => f.startsWith("fake-"))) {
     console.log("  2. Replace content/work/*.yaml and content/blog/*.yaml (still the demo corpus)");
     console.log("     — or re-run with --replace-content to swap in starter files");
   } else {

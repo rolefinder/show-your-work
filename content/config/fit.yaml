@@ -1,10 +1,10 @@
-# Tenant Fit matcher overrides for the Avery Quill demo.
+# Tenant Fit matcher overrides for the Fake Name demo.
 # Core English stops + generic tech synonyms live in src/fit/config.ts.
 # Person-name stops and skill weighting belong here — never hardcoded in fit-core.
 
 extraStops:
-  - avery
-  - quill
+  - fake
+  - name
 
 # Optional synonym additions / overrides (merged over defaults).
 synonyms: {}
@@ -27,4 +27,4 @@ weights:
 # one would ship "this corpus is fictional" to their own recruiters.
 # Delete this list (or empty it) once content/ is your real corpus.
 extraCaveats:
-  - Demo corpus is fictional (Avery Quill) — replace content/ with your own YAML.
+  - Demo corpus is a placeholder (Fake Name) — replace content/ with your own YAML.

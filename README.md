@@ -4,7 +4,10 @@ Open-source (Apache-2.0) personal portfolio **site template** + recruiter **Fit*
 surface: paste a job description → cite-or-missing evidence brief against your
 published `/work` and `/blog`.
 
-Demo persona: fictional **Avery Quill** (not a real person).
+Demo persona: **Fake Name**, with **Fake Project** / **Fake Post** content. The
+naming is deliberate — every route ships prerendered `Person` JSON-LD, so a demo
+deploy that was never customized must be obviously a placeholder rather than a
+plausible-sounding human. `npm run corpus:check` enforces it while `demo: true`.
 
 ## Quick start
 

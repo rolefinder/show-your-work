@@ -1,4 +1,4 @@
-# Tenant skill-bank taxonomy (Avery Quill demo).
+# Tenant skill-bank taxonomy (Fake Name demo).
 # Adopters replace this file — core never hardcodes a person-specific map.
 fallback: Other
 order:

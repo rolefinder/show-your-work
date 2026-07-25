@@ -1,12 +1,12 @@
-slug: cite-or-missing
-title: "Cite or missing: recruiter Fit without hallucination"
+slug: fake-post-cite-or-missing
+title: "Fake Post: cite or missing"
 summary: >
   Why a JD fit brief should refuse aligned claims without citations.
 body: >
   Recruiters need requirement-to-evidence mapping, not a chatty bio bot.
   The cite-or-missing contract marks gaps honestly and links only to published
-  /work and /blog pages — for example {{work:harbor-gate|Harbor Gate}} and
-  {{work:quill-emit|Quill Emit}}. Deterministic matchers are a safe v1; RAG can
+  /work and /blog pages — for example {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and
+  {{work:fake-project-content-emit|Fake Project: Content Emit}}. Deterministic matchers are a safe v1; RAG can
   swap in later behind the same JSON shape.
 skills:
   - Fit

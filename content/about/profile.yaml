@@ -1,11 +1,11 @@
-name: Avery Quill
+name: Fake Name
 tagline: Platform engineer who ships evidence-backed portfolios
-location: Portland, OR (fictional demo)
-email: avery.quill@example.com
+location: Fake City, XX
+email: fake.name@example.com
 summary: >
-  Avery Quill is a fictional demo persona for the recruit-me template.
-  They focus on CI/CD, Cloudflare Pages, and turning published work into
-  recruiter-ready evidence — never inventing employers or years.
+  Fake Name is a placeholder persona for the recruit-me template — not a real
+  person. The naming is deliberately obvious so a demo deploy can never be
+  mistaken for someone's actual portfolio. Replace this file with your own.
 skills:
   - CI/CD
   - GitHub Actions
@@ -17,8 +17,12 @@ skills:
 # Contact row on home + about. Optional — omit the key for email only.
 # Anything here renders as an outbound link, so keep it to profiles you
 # actually want a recruiter to open.
+#
+# The demo points at example.com on purpose: it is IANA-reserved for
+# documentation, so these can never resolve to a real person's account the way
+# a plausible-looking github.com/<handle> would.
 links:
   - label: GitHub
-    href: https://github.com/averyquill
+    href: https://example.com/fake-github-profile
   - label: LinkedIn
-    href: https://www.linkedin.com/in/averyquill
+    href: https://example.com/fake-linkedin-profile

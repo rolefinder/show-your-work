@@ -93,7 +93,7 @@ brief).
 | Architecture | **Copy** patterns into recruit-me; do **not** convert harrison-site into the public template |
 | LinkedIn | Official **data-export ZIP ΓåÆ parser** only. No scrapers / Voyager / cookie bots |
 | Fit UX | Still open: single-shot panel (current) vs thin multi-turn shell later |
-| Demo data | Fictional **Avery Quill** only ΓÇö never HarrisonΓÇÖs real bio/projects |
+| Demo data | **Fake Name** / **Fake Project** placeholders only ΓÇö never HarrisonΓÇÖs real bio/projects |
 
 Strategy docs live on **harrison-site** draft PRs (may be unmerged):
 

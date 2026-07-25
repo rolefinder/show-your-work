@@ -9,17 +9,17 @@
 # own domain — replace this before deploying somewhere real.
 origin: "https://example.com"
 
-# Appended after the page name in <title> ("Work — Avery Quill").
+# Appended after the page name in <title> ("Work — Fake Name").
 # Leave empty for no suffix.
-title_suffix: "Avery Quill"
+title_suffix: "Fake Name"
 
 # Fallback <meta name="description"> and og:description, for the initial HTML
 # and for routes that don't supply their own (the client sets per-route values
 # on navigation).
-description: "Demo portfolio for the recruit-me open-source template (fictional Avery Quill persona)."
+description: "Demo portfolio for the recruit-me open-source template. Fake Name is a placeholder, not a real person."
 
 # PWA manifest identity.
-short_name: "Avery Quill"
+short_name: "Fake Name"
 
 # Browser chrome color per scheme. Keep in sync with --rm-bg in
 # tokens/colors.css and the dark --bg — they are the same two surfaces.

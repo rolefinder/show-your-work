@@ -1,6 +1,6 @@
 /**
  * Fit smoke tests against the demo corpus.
- * - CI/CD JD must cite Harbor Gate and produce ≥1 aligned with citation
+ * - CI/CD JD must cite the merge-gate project and produce ≥1 aligned with citation
  * - Kubernetes must NOT be aligned
  * - Empty / nonsense JD must not invent aligned claims
  * - Tenant fit-config loads (extraStops / weights / extraCaveats)
@@ -90,7 +90,7 @@ assert(
  * nonsense produces nothing aligned, caveats come from config, the two
  * evidence packs agree.
  *
- * DEMO expectations ("a CI/CD JD must cite Harbor Gate") are about THIS
+ * DEMO expectations ("a CI/CD JD must cite the merge-gate project") are about THIS
  * repo's fictional corpus. On an adopter's own content they are meaningless
  * and fail, which would mean a correctly-initialized site cannot pass
  * `npm test` — the same trap the fictional-corpus gate had.
@@ -113,15 +113,15 @@ for (const r of cicdAligned) {
   assert(r.evidence.length >= 1, `aligned requires citation: ${r.text}`);
 }
 
-let citesHarbor = false;
+let citesMergeGate = false;
 if (SITE_CONFIG.demo) {
   assert(cicdAligned.length >= 1, "CI/CD JD should produce ≥1 aligned requirement");
-  citesHarbor = cicd.requirements.some(
+  citesMergeGate = cicd.requirements.some(
     (r) =>
       (r.status === "aligned" || r.status === "partial") &&
-      r.evidence.some((e) => /harbor gate/i.test(e.title) || /harbor-gate/i.test(e.url)),
+      r.evidence.some((e) => /merge.gate/i.test(e.title) || /merge-gate/i.test(e.url)),
   );
-  assert(citesHarbor, "CI/CD JD must cite Harbor Gate");
+  assert(citesMergeGate, "CI/CD JD must cite the merge-gate project");
 }
 
 const k8sJd = `
@@ -166,12 +166,12 @@ assert(nonsense.gaps.length >= 1 || nonsense.requirements.some((r) => r.status !
 // Caveats must be tenant data, not engine constants. An adopter who never
 // touches fit.yaml still gets a clean brief; the demo disclaimer only appears
 // because THIS repo's fit.yaml asks for it. Regression guard for the bug where
-// "Demo corpus is fictional (Avery Quill)" was hardcoded in src/fit/match.ts
+// "Demo corpus is fictional (<persona>)" was hardcoded in src/fit/match.ts
 // and therefore shipped in every adopter's recruiter-facing brief.
 const bare = matchFit("Platform engineer with CI/CD experience.", docs);
 assert(bare.caveats.length === 2, `engine must emit exactly 2 caveats, got ${bare.caveats.length}`);
 assert(
-  !bare.caveats.some((c) => /fictional|avery|quill|demo/i.test(c)),
+  !bare.caveats.some((c) => /fictional|placeholder|fake|demo/i.test(c)),
   "engine caveats must not mention the demo corpus",
 );
 const tenant = matchFit("Platform engineer with CI/CD experience.", docs, fitCfg);
@@ -181,7 +181,7 @@ assert(
 );
 
 console.log("fit-smoke OK");
-console.log(`  CI/CD aligned=${cicdAligned.length} harbor-cited=${citesHarbor}`);
+console.log(`  CI/CD aligned=${cicdAligned.length} merge-gate-cited=${citesMergeGate}`);
 console.log(`  K8s aligned=${k8sAligned.length} (expected 0)`);
 console.log(`  nonsense aligned=${nonsenseAligned.length} (expected 0)`);
 console.log(`  fit-config extraStops=${(fitCfg.extraStops || []).join(",")}`);
