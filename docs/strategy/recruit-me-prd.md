@@ -3,7 +3,7 @@
 **Status:** Draft (decisions locked 2026-07-09)  
 **Date:** 2026-07-09  
 **Owner:** Harrison Halperin  
-**Public name / repo:** `hhalperin/recruit-me` (private until hardened, then public)
+**Public name / repo:** `<owner>/recruit-me` (private until hardened, then public)
 
 Related: Fit module [`recruiter-fit-prd.md`](./recruiter-fit-prd.md) + ADR 010–013;
 packaging [`recruiter-fit-oss-plan.md`](../history/recruiter-fit-oss-plan.md);
@@ -24,7 +24,7 @@ description to cited evidence on *your* site.
 | Topic | Decision |
 |-------|----------|
 | Template routes | **`/work`** and **`/blog`** (not `/projects` / `/writing`) |
-| Repo | **`hhalperin/recruit-me`** — **private now, public later** |
+| Repo | **`<owner>/recruit-me`** — **private now, public later** |
 | Architecture vs harrison-site | **Copy** template/Fit onto the recruit-me harness. **harrison-site stays a separate private repo** and dogfoods Fit against real content. Not “make harrison-site the public template.” |
 | License | **Fully open source:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) (OSI). Commercial use, forks, and paid hosting by others are **allowed**. See §9. Trademark on the name `recruit-me` is separate from the code license. |
 | LinkedIn | Goal is **automatic pull** of profile/career data. Supported path is **official data-export ZIP → parser → content YAML** (semi-automatic). Full silent API sync of experience/education is **not** available on self-serve LinkedIn APIs today. Scrapers are **out of supported scope**. See §8. |
@@ -156,12 +156,12 @@ hostnames in the public tree.
 ## 12. Work project on harrisonhalperin.com
 
 After public launch: `content/projects/recruit-me.yaml` with `note.href` to
-`https://github.com/hhalperin/recruit-me`. Until then `visible: false` or
+`https://github.com/<owner>/recruit-me`. Until then `visible: false` or
 omit the file.
 
 ## 13. Sequencing
 
-1. Private `hhalperin/recruit-me` scaffold + demo corpus + theme + CSP.  
+1. Private `<owner>/recruit-me` scaffold + demo corpus + theme + CSP.  
 2. Security baseline (Dependabot, secret scanning, gitleaks, Scorecard-ready
    defaults) **before** public.  
 3. Infra skill → throwaway Pages demo.  

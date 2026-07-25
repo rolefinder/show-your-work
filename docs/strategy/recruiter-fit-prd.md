@@ -6,7 +6,7 @@
 **Site:** harrisonhalperin.com (static SPA, Cloudflare Pages, strict CSP)
 
 **Umbrella product:** [`recruit-me-prd.md`](./recruit-me-prd.md) (Apache-2.0
-open-source site template + toolkit; repo `hhalperin/recruit-me`). Fit is a
+open-source site template + toolkit; repo `<owner>/recruit-me`). Fit is a
 **module** inside recruit-me. Dogfood on **private** harrison-site; public
 recruit-me ships demo corpus only. Security:
 [`recruit-me-security.md`](./recruit-me-security.md).

@@ -4,7 +4,7 @@
 > pushed to `recruit-me`. This file is the harrison-site mirror for agents
 > that only have this repo.
 
-**For:** any agent with **push access** to [`hhalperin/recruit-me`](https://github.com/hhalperin/recruit-me)  
+**For:** any agent with **push access** to [`<owner>/recruit-me`](https://github.com/<owner>/recruit-me)  
 **From:** cloud agent on `harrison-site` (token scoped to that repo only — cannot push `recruit-me`)  
 **Date:** 2026-07-10  
 **Owner:** Harrison Halperin (`harrison@quant-h2.com`)  
@@ -18,14 +18,14 @@
 
 1. **Confirm access**
    ```bash
-   gh repo view hhalperin/recruit-me
-   git ls-remote https://github.com/hhalperin/recruit-me.git
+   gh repo view <owner>/recruit-me
+   git ls-remote https://github.com/<owner>/recruit-me.git
    ```
 2. **Get the code onto `main`** (pick one):
    - **Preferred if this / a warm agent VM still has the tree:**
      ```bash
      cd /home/ubuntu/recruit-me   # or wherever the scaffold lives
-     git remote -v                # should point at hhalperin/recruit-me
+     git remote -v                # should point at <owner>/recruit-me
      git log --oneline -3         # expect handoff docs on top of 3e77e88
      git push -u origin main
      ```
@@ -35,7 +35,7 @@
      # if tarball has no .git:
      git init && git add . && git commit -m "feat: v0.2 scaffold — TS, Fit, ingest, infra"
      git branch -M main
-     git remote add origin https://github.com/hhalperin/recruit-me.git
+     git remote add origin https://github.com/<owner>/recruit-me.git
      git push -u origin main
      ```
      Prefer `/opt/cursor/artifacts/recruit-me-v0.tgz` (includes `.git`) when available.
@@ -77,8 +77,8 @@ brief).
 
 | Repo | Role | Visibility |
 |------|------|------------|
-| `hhalperin/recruit-me` | Template harness + Fit + ingest + skills + **demo** corpus | Private → public later |
-| `hhalperin/harrison-site` | Personal production site + real content | **Stays private** |
+| `<owner>/recruit-me` | Template harness + Fit + ingest + skills + **demo** corpus | Private → public later |
+| `<owner>/private-site` | Personal production site + real content | **Stays private** |
 
 ---
 
@@ -283,7 +283,7 @@ mirroring ADR 006 projects — see PR #87 / ADR 013.
 
 ## 13. Success criteria for the next agent’s first session
 
-- [ ] `main` on `hhalperin/recruit-me` contains the v0.2 scaffold + this `HANDOFF.md`
+- [ ] `main` on `<owner>/recruit-me` contains the v0.2 scaffold + this `HANDOFF.md`
 - [ ] Remote CI green (`npm run test`)
 - [ ] `/fit` works in `npm run preview` with a sample JD
 - [ ] Short PR or commit note: “landed scaffold from handoff; next = …”

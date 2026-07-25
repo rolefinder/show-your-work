@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Fail if content/ contains real-person / real-employer fingerprints.
+"""Fail if the demo corpus contains real-person / real-employer fingerprints.
 
-Two directions, both only while site.yaml says demo: true.
+Two directions, both scoped to content/demo/.
 
-NEGATIVE: no real identity may appear in the shipped demo corpus. Strategy
-docs may mention harrison-site as the private dogfood — this gate only scans
-content/.
+NEGATIVE: no real identity may appear in the shipped demo corpus. The patterns
+are DERIVED from your own config rather than hardcoded — this file used to
+carry a literal list of one maintainer's name and employer, which is
+adopter-specific data living in the template's source, exactly what ADR 016
+exists to prevent. Anything a regex cannot derive goes in
+content/config/corpus-guard.yaml, which ships empty.
 
 POSITIVE: the demo persona must be self-evidently fake. Every route is now
 prerendered with Person JSON-LD, so a demo deploy that was never customized
@@ -28,21 +31,79 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from packages.content.paths import DEMO  # noqa: E402
+from packages.content.paths import DEMO, is_own, resolve  # noqa: E402
 
-# Identity / employer fingerprints that must never appear in shipped corpus.
-FORBIDDEN = [
-    re.compile(r"\bharrison\b", re.I),
-    re.compile(r"\bhalperin\b", re.I),
-    re.compile(r"\bhhalperi", re.I),
-    re.compile(r"harrisonhalperin", re.I),
-    re.compile(r"quant-h2\.com", re.I),
-    re.compile(r"\blpl\s+financial\b", re.I),
-    re.compile(r"\bforgerock\b", re.I),
-]
 
-# Email domains allowed in demo content (everything else under content/ fails).
-ALLOWED_EMAIL_DOMAINS = {"example.com", "example.org", "example.net"}
+def load_yaml(path) -> dict:
+    if not path.is_file():
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
+
+
+GUARD = load_yaml(resolve("config", "corpus-guard.yaml"))
+
+# Email domains the demo corpus may use. RFC 2606 reserves these so they cannot
+# belong to a real person.
+ALLOWED_EMAIL_DOMAINS = {
+    str(d).lower() for d in (GUARD.get("allowed_email_domains") or [])
+} or {"example.com", "example.org", "example.net"}
+
+
+def derived_patterns() -> list[tuple[re.Pattern, str]]:
+    """Your identity, taken from your own profile — no list to maintain.
+
+    On a fork this is what actually protects the demo corpus: the moment you
+    add content/about/profile.yaml, your name tokens, your email domain and
+    your site host become strings the demo corpus may not contain. On the
+    template itself there is no profile, so this yields nothing and the
+    email-domain rule plus the must-say-fake rule carry the weight.
+    """
+    if not is_own("about", "profile.yaml"):
+        return []
+    profile = load_yaml(resolve("about", "profile.yaml"))
+    site = load_yaml(resolve("config", "site.yaml"))
+    out: list[tuple[re.Pattern, str]] = []
+
+    for token in re.split(r"[^A-Za-z0-9]+", str(profile.get("name") or "")):
+        # Two characters is not a fingerprint, it is a coincidence.
+        if len(token) > 2:
+            out.append((re.compile(rf"\b{re.escape(token)}\b", re.I), "your name"))
+
+    email = str(profile.get("email") or "")
+    if "@" in email:
+        domain = email.split("@", 1)[1].strip()
+        if domain:
+            out.append((re.compile(re.escape(domain), re.I), "your email domain"))
+
+    host = str(site.get("origin") or "").split("//")[-1].split("/")[0]
+    if host:
+        out.append((re.compile(re.escape(host), re.I), "your site host"))
+    return out
+
+
+def forbidden_patterns() -> list[tuple[re.Pattern, str]]:
+    """Derived identity, plus anything a regex could not have guessed.
+
+    The literal list that used to live here — a maintainer's name, their
+    employer, a vendor — was adopter-specific data sitting in the template's
+    source, which is the thing ADR 016 exists to keep out. It also shipped
+    those names to every fork. Extras now live in
+    content/config/corpus-guard.yaml, which ships empty.
+    """
+    patterns = derived_patterns()
+    for raw in GUARD.get("forbidden") or []:
+        term = str(raw).strip()
+        if not term:
+            continue
+        # Word boundaries only where the term starts/ends with a word
+        # character: applied blindly, `\bacme.io\b` would never match.
+        left = r"\b" if term[:1].isalnum() else ""
+        right = r"\b" if term[-1:].isalnum() else ""
+        patterns.append(
+            (re.compile(left + re.escape(term) + right, re.I), "corpus-guard.yaml `forbidden`")
+        )
+    return patterns
 
 
 def check_obviously_fake() -> list[str]:
@@ -82,17 +143,25 @@ def main() -> int:
     # someone had to remember, and once flipped the demo corpus stopped being
     # protected at all. Directory scope needs no flag and never stops.
     failures = check_obviously_fake()
+    patterns = forbidden_patterns()
 
     for path in sorted(DEMO.rglob("*")):
         if not path.is_file():
             continue
         if path.suffix.lower() not in {".yaml", ".yml", ".md", ".txt", ".json"}:
             continue
+        if path.name == "corpus-guard.yaml":
+            # The guard lists the strings that must not appear, so of course it
+            # contains them. Scanning it makes every entry flag itself — and
+            # the shipped file's commented examples would flag an adopter who
+            # happened to forbid the same term.
+            continue
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(ROOT).as_posix()
-        for pat in FORBIDDEN:
-            if pat.search(text):
-                failures.append(f"{rel}: matched forbidden pattern {pat.pattern}")
+        for pat, why in patterns:
+            m = pat.search(text)
+            if m:
+                failures.append(f"{rel}: contains {m.group(0)!r} ({why})")
         for m in re.finditer(r"[\w.+-]+@([\w.-]+\.[a-z]{2,})", text, re.I):
             domain = m.group(1).lower()
             if domain not in ALLOWED_EMAIL_DOMAINS:
@@ -104,7 +173,10 @@ def main() -> int:
             print(f"  - {f}", file=sys.stderr)
         return 1
 
-    print("fictional-corpus OK (content/demo/ clean and self-evidently fake)")
+    print(
+        f"fictional-corpus OK (content/demo/ clean and self-evidently fake; "
+        f"{len(patterns)} forbidden pattern(s) applied)"
+    )
     return 0
 
 

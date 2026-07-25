@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-10  
 **Local path (agent machine):** `/home/ubuntu/recruit-me`  
-**Intended remote:** `https://github.com/hhalperin/recruit-me` (private)  
+**Intended remote:** `https://github.com/<owner>/recruit-me` (private)  
 **HEAD:** `cb2cce6` (v0.2 + comprehensive `HANDOFF.md`)  
 **Agent handoff:** [`recruit-me-handoff.md`](./recruit-me-handoff.md) (mirror of repo-root `HANDOFF.md`)  
 **Originating run:** https://cursor.com/agents/bc-019f48b0-06b2-77e3-a127-658f8a7fe55a
@@ -27,7 +27,7 @@ Verified: `npm run test` (build + fit-smoke) green. Harbor Gate cites for CI/CD 
 
 ## Blocker
 
-Cloud-agent GitHub token for **harrison-site** cannot push `hhalperin/recruit-me`
+Cloud-agent GitHub token for **harrison-site** cannot push `<owner>/recruit-me`
 (`Repository not found` / 404). Harrison created the private repo; next agent
 **with recruit-me access** must push local `main` (or unpack artifact) — see handoff §0.
 
@@ -42,7 +42,7 @@ Cloud-agent GitHub token for **harrison-site** cannot push `hhalperin/recruit-me
 
 ```bash
 cd /home/ubuntu/recruit-me
-git remote -v   # hhalperin/recruit-me
+git remote -v   # <owner>/recruit-me
 git push -u origin main
 ```
 
