@@ -60,8 +60,13 @@ def is_demo() -> bool:
     if not cfg.is_file():
         return True
     try:
-        data = yaml.safe_load(cfg.read_text(encoding="utf-8")) or {}
+        data = yaml.safe_load(cfg.read_text(encoding="utf-8"))
     except yaml.YAMLError:
+        return True
+    # A scalar or list is truthy, so `or {}` would not catch it and .get would
+    # raise. Anything that isn't a mapping is a broken config: fail closed
+    # rather than crash the gate.
+    if not isinstance(data, dict):
         return True
     return bool(data.get("demo", False))
 

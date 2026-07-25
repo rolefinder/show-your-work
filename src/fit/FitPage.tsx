@@ -29,8 +29,17 @@ let fitConfigPromise: Promise<FitMatchConfig | undefined> | null = null;
 function loadFitConfig(): Promise<FitMatchConfig | undefined> {
   if (!fitConfigPromise) {
     fitConfigPromise = fetch("/fit-config.json")
-      .then((r) => (r.ok ? (r.json() as Promise<FitMatchConfig>) : undefined))
-      .catch(() => undefined);
+      .then((r) => {
+        if (!r.ok) throw new Error(`fit-config ${r.status}`);
+        return r.json() as Promise<FitMatchConfig>;
+      })
+      .catch(() => {
+        // Only SUCCESS is memoized. Caching a failure would strand the page on
+        // engine defaults for the rest of the session, so a transient error on
+        // first load could never recover; dropping it lets the next run retry.
+        fitConfigPromise = null;
+        return undefined;
+      });
   }
   return fitConfigPromise;
 }
