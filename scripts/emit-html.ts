@@ -76,7 +76,7 @@ function emitManifest(): void {
   writeFileSync(file, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 }
 
-function main(): void {
+export function emitHtml(): void {
   emitIndex();
   emit404();
   emitManifest();
@@ -86,4 +86,8 @@ function main(): void {
   );
 }
 
-main();
+// Still runnable on its own; scripts/emit-artifacts.ts imports it instead
+// so the build pays tsx's ~1.6s startup once rather than per emitter.
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
+  emitHtml();
+}

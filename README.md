@@ -64,6 +64,16 @@ npm run preview
 
 Open <http://localhost:4173/fit> and paste a real JD.
 
+While writing, use the authoring loop instead:
+
+```powershell
+npm run dev
+```
+
+Watches `content/`, `src/`, `tokens/` and rebuilds only what changed — about
+2s for a content edit, versus ~23s for a full build. Prerendering is skipped
+because it is a publish-time concern; run `npm run build` before deploying.
+
 ## Make it yours
 
 ```powershell
