@@ -15,7 +15,30 @@ This finds the crossings, then makes them un-repeatable.
 from an internal codename. You can, by asking one question per candidate:
 *would this appear in a press release, or only in a wiki behind SSO?*
 
-## 1. What actually ships
+## 1. Work out who you worked for
+
+```bash
+npm run guard:suggest
+```
+
+Reads the sources this site is already built from — the resume and GitHub
+handle in `content/config/sources.yaml` — and prints employer candidates:
+GitHub orgs you belong to, names carrying a company suffix, proper nouns
+sitting on a line with employment dates.
+
+**They are guesses.** A job title and a city look exactly like an employer on a
+resume line, and the filter only removes the obviously-never (`Present`,
+month names, section headings). Read the list and pick.
+
+Nothing is hardcoded, and that is the point: the terms have to come from *your*
+sources, because a template cannot know your employers and shipping one
+person's list to every fork would be both wrong and a disclosure in itself.
+
+If `sources.yaml` is empty, or a name only appears in a LinkedIn export the
+ingest does not read yet, add it by hand. The suggester is a head start, not
+the boundary.
+
+## 2. What actually ships
 
 ```bash
 npm run build
@@ -26,7 +49,7 @@ contains prerendered documents, `evidence.json`, `llms.txt` and the OG card
 text. A term can reach it through a Fit quote or a JSON-LD field without ever
 looking wrong in the YAML you wrote.
 
-## 2. Read for the five categories
+## 3. Read for the five categories
 
 Go through `content/work/*.yaml` and `content/blog/*.yaml`. These are what a
 recruiter reads, and `outcome` / `evidence` are what Fit quotes verbatim.
@@ -43,7 +66,7 @@ Also watch for **unannounced facts** — a product not launched yet, a migration
 in flight, a number that was never made public. Those are the ones that cause
 real trouble, and no pattern finds them.
 
-## 3. Rewrite, do not redact
+## 4. Rewrite, do not redact
 
 The claim is usually fine; the specificity is the problem. Keep the outcome,
 drop the proper noun:
@@ -61,7 +84,7 @@ fragments instead of whole claims, which is a worse portfolio.
 If a number itself was never public, replace it with a shape you can defend:
 "roughly halved p95" instead of an exact figure from an internal dashboard.
 
-## 4. Make it un-repeatable
+## 5. Make it un-repeatable
 
 ```bash
 npm run publication:check
@@ -84,7 +107,7 @@ Three places to declare a term, and **the choice matters**:
 > gitignored rather than merely discouraged. If a term is sensitive, it does
 > not go in a file you push.
 
-## 5. Verify against the artifact
+## 6. Verify against the artifact
 
 ```bash
 npm run build && npm run publication:check

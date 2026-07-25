@@ -18,6 +18,7 @@
     "emit:fit-config": "python scripts/emit-fit-config.py",
     "corpus:check": "python scripts/check-fictional-corpus.py",
     "publication:check": "python scripts/check-publication-safety.py",
+    "guard:suggest": "node scripts/suggest-guard-terms.mjs",
     "content:check": "python scripts/check-content.py",
     "additive:check": "node scripts/check-additive.mjs",
     "parity:check": "node scripts/check-parity.mjs",
