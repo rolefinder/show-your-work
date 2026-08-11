@@ -92,9 +92,41 @@ if (prerendered) {
   }
 }
 
+/*
+ * Every citation lands on the thing it cites.
+ *
+ * Evidence URLs may carry a fragment — a role is cited as
+ * `/experience#<slug>` — and a fragment with no matching element sends the
+ * reader to the top of the page instead. That is invisible in every other
+ * gate: the pack is well-formed, the route exists, the page renders. It broke
+ * exactly once, because the card set React's `key` (a reconciliation hint that
+ * never reaches the DOM) and no `id`.
+ */
+let anchors = 0;
+if (existsSync(join(dist, "evidence.json"))) {
+  const pack = JSON.parse(readFileSync(join(dist, "evidence.json"), "utf8"));
+  for (const doc of pack.docs || []) {
+    const [path, fragment] = String(doc.url || "").split("#");
+    if (!fragment) continue;
+    const file = join(dist, ...path.split("/").filter(Boolean)) + ".html";
+    if (!existsSync(file)) {
+      if (prerendered) fail(`evidence ${doc.id} cites ${doc.url} but dist${path}.html was not prerendered`);
+      continue;
+    }
+    if (!new RegExp(`id="${fragment}"`).test(readFileSync(file, "utf8"))) {
+      fail(
+        `evidence ${doc.id} cites ${doc.url} but dist${path}.html has no id="${fragment}" — ` +
+          "the citation would land at the top of the page instead of on the thing it cites",
+      );
+    }
+    anchors++;
+  }
+}
+
 console.log("seo-smoke ok", {
   urlCount,
   knownPaths: knownPaths.length,
   prerendered,
   checkedRoutes,
+  citationAnchors: anchors,
 });

@@ -55,6 +55,26 @@ function routeFor(view: View): string {
   return "/";
 }
 
+/**
+ * Scroll to a fragment target, or to the top when there is none.
+ *
+ * Deferred a frame: the destination view renders in the same React commit this
+ * runs after, so the element does not exist yet at call time. Falls back to the
+ * top when the id is absent — a stale anchor should land somewhere sensible
+ * rather than leave the reader wherever they happened to be.
+ */
+function scrollToHash(hash: string): void {
+  if (!hash || hash === "#") {
+    window.scrollTo(0, 0);
+    return;
+  }
+  requestAnimationFrame(() => {
+    const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (target) target.scrollIntoView({ block: "start" });
+    else window.scrollTo(0, 0);
+  });
+}
+
 /** "<page> — <titleSuffix>", or just the page name if no suffix is configured. */
 export function withSuffix(pageName: string): string {
   const suffix = SITE_CONFIG.titleSuffix.trim();
@@ -329,16 +349,23 @@ function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  /*
+   * Carries the fragment. A Fit citation to a role is `/experience#<slug>`, and
+   * dropping the hash here sent every one of them to the top of the page — a
+   * citation that does not land on the thing it cites, which is the one promise
+   * this project makes.
+   */
   function navigate(next: string) {
     const url = new URL(next, window.location.origin);
-    const full = url.pathname + url.search;
-    if (window.location.pathname + window.location.search !== full) {
+    const full = url.pathname + url.search + url.hash;
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    if (here !== full) {
       window.history.pushState(null, "", full);
     }
     setPath(url.pathname);
     setSearch(url.search);
     setNavOpen(false);
-    window.scrollTo(0, 0);
+    scrollToHash(url.hash);
   }
 
   function Link(props: {
@@ -460,7 +487,10 @@ function App() {
             roles.map((e) =>
               React.createElement(
                 "li",
-                { key: e.slug, className: "card" },
+                // id, not just key: /experience#<slug> is the citation target in the
+                  // evidence pack and in the ItemList JSON-LD. React's key is a
+                  // reconciliation hint and never reaches the DOM.
+                  { key: e.slug, id: e.slug, className: "card" },
                 React.createElement("h2", null, e.role),
                 React.createElement(
                   "p",
@@ -533,7 +563,7 @@ function App() {
               credentials.map((e) =>
                 React.createElement(
                   "li",
-                  { key: e.slug, className: "card" },
+                  { key: e.slug, id: e.slug, className: "card" },
                   React.createElement("h3", null, e.credential),
                   React.createElement(
                     "p",
