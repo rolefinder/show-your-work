@@ -48,12 +48,26 @@ second matcher to drift — an agent gets exactly the brief the site would rende
 citations included. The job description is untrusted input and reaches nothing
 but the deterministic matcher (ADR 012).
 
-### Zero metered resources
+### One quota, shared with `/api/fit`
 
-No Workers AI, no KV, no secrets, no bindings. The only cost surface is the
-Function invocation itself, which sits under the same free-plan cap that
-backstops `/api/fit` — it errors rather than bills. Input caps are 64 KB of
-body and 12,000 characters of job description, matching `/api/fit`.
+**Amended 2026-08-11.** This section originally said "zero metered resources":
+no Workers AI, no secrets, no bindings, and the invocation itself under the
+free-plan cap. That was true of the *resources* and wrong about the *control*.
+
+`/api/fit` charges 2 briefs per day per IP. This endpoint exposes the same
+matcher through `fit_brief` and, as first written, charged nothing — so the
+limit had a second unmetered door, and anyone wanting unlimited briefs simply
+called MCP instead. A limit with a second door is not a limit.
+
+Both endpoints now call `functions/_shared/quota.ts` and use **the same key**,
+so the budget is per caller rather than per endpoint. Only `fit_brief` is
+charged; `list_pages` and `get_page` are reads of a static file and stay free,
+so an agent can always enumerate and read the corpus even after the matcher is
+exhausted. `mcp-smoke` asserts all three properties.
+
+Still true: no Workers AI, no secrets, no bindings beyond the quota counter,
+which holds a hashed IP and an integer. Input caps are 64 KB of body and 12,000
+characters of job description, matching `/api/fit`.
 
 ### Wildcard CORS, deliberately
 

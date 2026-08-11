@@ -15,6 +15,10 @@ on the site.
 MIT · self-hosted React + WebGL graph, no CDN · strict CSP · every route
 prerendered · no LLM anywhere in the matching path.
 
+**Live:** [harrisonhalperin.com](https://harrisonhalperin.com) — the maintainer's
+own site, built from this template. The demo corpus below is what you get before
+you add anything.
+
 ---
 
 ## The point

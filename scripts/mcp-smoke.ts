@@ -34,14 +34,28 @@ globalThis.fetch = (async (input: RequestInfo | URL) => {
 }) as typeof fetch;
 
 const { onRequestPost, onRequestGet } = await import("../functions/api/mcp.ts");
+const { DAILY_LIMIT: DAILY_LIMIT_SEEN } = await import("../functions/_shared/quota.ts");
+
+/* A KV stand-in, so the quota path can be exercised without wrangler. */
+function stubKv() {
+  const store = new Map<string, string>();
+  return {
+    get: async (k: string) => store.get(k) ?? null,
+    put: async (k: string, v: string) => void store.set(k, v),
+  } as unknown as KVNamespace;
+}
+
+type Ctx = { request: Request; env: { FIT_QUOTA?: KVNamespace } };
+const post = onRequestPost as unknown as (ctx: Ctx) => Promise<Response>;
 
 let nextId = 1;
-async function rpc(method: string, params?: unknown): Promise<Record<string, unknown>> {
+async function rpc(method: string, params?: unknown, env: Ctx["env"] = {}): Promise<Record<string, unknown>> {
   const id = nextId++;
-  const res = await (onRequestPost as (ctx: { request: Request }) => Promise<Response>)({
+  const res = await post({
+    env,
     request: new Request("https://example.test/api/mcp", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "CF-Connecting-IP": "203.0.113.7" },
       body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
     }),
   });
@@ -92,7 +106,8 @@ for (const r of aligned) {
 }
 
 /* Unknown tool and oversized input are refused, not silently tolerated. */
-const unknown = await (onRequestPost as (ctx: { request: Request }) => Promise<Response>)({
+const unknown = await post({
+  env: {},
   request: new Request("https://example.test/api/mcp", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -108,7 +123,8 @@ const big = (await rpc("tools/call", {
 if (!big.isError) fail("a 12001-char job description was not refused");
 
 /* A notification (no id) gets 202 and no body. */
-const notif = await (onRequestPost as (ctx: { request: Request }) => Promise<Response>)({
+const notif = await post({
+  env: {},
   request: new Request("https://example.test/api/mcp", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -117,9 +133,30 @@ const notif = await (onRequestPost as (ctx: { request: Request }) => Promise<Res
 });
 if (notif.status !== 202) fail(`a notification returned ${notif.status}, expected 202`);
 
+/*
+ * The quota is SHARED with POST /api/fit, not per-endpoint.
+ *
+ * This exists because it was once absent: /api/fit charged 2/day and this
+ * endpoint, exposing the same matcher through fit_brief, charged nothing — so
+ * the limit had a second unmetered door. Reads stay free; only the matcher is
+ * charged.
+ */
+const env = { FIT_QUOTA: stubKv() };
+const jd = "Requirements\n- Experience building CI/CD pipelines with GitHub Actions\n";
+for (let i = 1; i <= 2; i++) {
+  const r = (await rpc("tools/call", { name: "fit_brief", arguments: { job_description: jd } }, env)) as any;
+  if (r.isError) fail(`fit_brief was refused on call ${i} of the allowed 2: ${r.content?.[0]?.text}`);
+}
+const overLimit = (await rpc("tools/call", { name: "fit_brief", arguments: { job_description: jd } }, env)) as any;
+if (!overLimit.isError) fail("a third fit_brief in one day was allowed — the /api/fit quota has an unmetered door again");
+
+const stillFree = (await rpc("tools/call", { name: "list_pages", arguments: {} }, env)) as any;
+if (stillFree.isError) fail("list_pages was charged against the Fit quota — reads of a static file must stay free");
+
 console.log("mcp-smoke ok", {
   tools: names.length,
   pages: listed.total,
   work: work.pages.length,
   alignedCited: aligned.length,
+  quota: `${DAILY_LIMIT_SEEN}/day shared with /api/fit, reads free`,
 });
