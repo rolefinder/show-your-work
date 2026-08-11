@@ -46,12 +46,31 @@ const llms = readFileSync(join(dist, "llms.txt"), "utf8");
 if (!llms.includes("## Work")) fail("llms.txt missing the Work section");
 
 /*
+ * No raw "<" inside a JSON-LD block, in any emitted document.
+ *
+ * JSON.stringify does not escape "<", so content containing the literal
+ * "</script>" used to close the block early and turn the rest of the payload
+ * into live markup on every prerendered route. site-meta.ts ldJson() escapes it
+ * to <; this asserts the escaping actually reached the artifact, because
+ * the failure is invisible in the source and only shows up in dist/.
+ */
+function assertLdJsonEscaped(file, doc) {
+  for (const m of doc.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    if (m[1].includes("<")) {
+      fail(`${file}: JSON-LD contains a raw "<" — it must be escaped as \\u003c or it can close the script block early`);
+    }
+  }
+}
+
+/*
  * Prerender coverage. Skipped entirely when the build ran without Playwright
  * (a legitimate state — see scripts/run-prerender.mjs), but once ANY route is
  * prerendered, EVERY indexable route must be, or some URLs would silently ship
  * with the home page's metadata.
  */
 const home = readFileSync(join(dist, "index.html"), "utf8");
+assertLdJsonEscaped("dist/index.html", home);
+assertLdJsonEscaped("dist/404.html", notFound);
 const prerendered = home.includes('data-prerender="1"');
 let checkedRoutes = 0;
 if (prerendered) {
@@ -68,6 +87,7 @@ if (prerendered) {
     if (!/<script type="application\/ld\+json">\s*\{"@context"/.test(doc)) {
       fail(`dist${p}.html missing JSON-LD`);
     }
+    assertLdJsonEscaped(`dist${p}.html`, doc);
     checkedRoutes++;
   }
 }
