@@ -144,6 +144,7 @@ something real:
 | `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
 | `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids — this caught the skill-bank dots being silently stripped |
 | `pages:check` | A GitHub Pages deploy that would land on a subpath and load blank |
+| `copy:check` | A cross-link token that reached the page as literal braces, a published `TODO`, or a doubled word — the prose defects every structural gate is blind to |
 | `content:check` | A cross-link that would 404; a missing required field; a skill spelled two ways |
 | `check-ready` | Placeholder identity, an unreviewed draft, or a published `TODO` |
 

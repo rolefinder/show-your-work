@@ -98,7 +98,7 @@ Do not hand-edit these; edit their source and rebuild.
 layout:check -> additive:check -> parity:check -> corpus:check -> publication:check -> content:check -> secrets:check -> style:check
   -> build
   -> config:check -> pages:check -> fit:smoke -> mcp:smoke -> graph:smoke -> seo:smoke
-  -> csp:smoke -> ux:check
+  -> csp:smoke -> ux:check -> copy:check
 ```
 
 plus a `lint` job: every script parses, content YAML parses, documented numbers

@@ -36,6 +36,7 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [022](architecture/adr/022-mit-license-and-third-party-notices.md) | MIT, and attribution for what is actually redistributed |
 | [023](architecture/adr/023-read-only-mcp-endpoint.md) | **A read-only MCP endpoint** — agents read the corpus without scraping |
 | [024](architecture/adr/024-directory-skeleton-gate.md) | The directory tree is machine-checked against the one documented |
+| [025](architecture/adr/025-copy-quality-gate.md) | Rendered copy is linted, because no other gate reads the words |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The
