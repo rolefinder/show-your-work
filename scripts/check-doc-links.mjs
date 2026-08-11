@@ -31,14 +31,23 @@ function markdown(dir, out = []) {
   return out;
 }
 
-/** GitHub's heading -> anchor slug. */
+/**
+ * GitHub's heading -> anchor slug.
+ *
+ * Each space becomes one hyphen; they are not collapsed. That matters because
+ * stripping punctuation leaves the spaces that surrounded it behind, so
+ * "9. License — fully open source" is `9-license--fully-open-source` on
+ * GitHub, with two hyphens. Collapsing here would accept a link that 404s on
+ * GitHub and reject the one that works — and 42 headings in this repo contain
+ * a spaced em dash, ampersand or slash.
+ */
 const slug = (h) =>
   h
+    .trim()
     .toLowerCase()
     .replace(/`/g, "")
     .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
+    .replace(/\s/g, "-");
 
 const failures = [];
 let checked = 0;

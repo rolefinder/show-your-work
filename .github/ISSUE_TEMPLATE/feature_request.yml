@@ -1,0 +1,55 @@
+name: Feature request
+description: Propose a change to the template.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The [ADRs](https://github.com/rolefinder/recruit-me/blob/main/docs/README.md#decision-records)
+        record what was deliberately **not** built and why. Worth a look — if
+        your idea is in there, arguing against the recorded reasoning is a much
+        stronger issue than proposing it fresh.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you unable to do today?
+      description: >
+        The situation, not the solution. "I cannot publish a talk alongside
+        projects" is actionable; "add a talks collection" pre-decides the shape.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+      description: If you already know how it should work, say so here.
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer would this touch?
+      options:
+        - content/ or config — authoring
+        - src/ — the app (Fit, graph, search, skills)
+        - scripts/ — the build or a gate
+        - tokens/ or styles.css — theming
+        - docs/ or skills
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: How does it survive the constraints?
+      description: >
+        These are the rules a change has to live with. Address the ones your
+        idea touches; skip the rest.
+      value: |
+        - Strict CSP, no CDN: nothing loads scripts or fonts from another origin
+        - Identity is data: nothing under `src/` may name a person
+        - Additive adoption: an adopter adds files, never edits or deletes ours
+        - Fit cites or stays silent: `aligned` requires a real quote from a published page
+        - No model in the matching path

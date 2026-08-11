@@ -12,7 +12,7 @@ Paste a job description; get a brief where every aligned claim cites a page you
 actually published, quoted from it. Nothing is asserted that isn't already
 on the site.
 
-Apache-2.0 · self-hosted React + WebGL graph, no CDN · strict CSP · every route
+MIT · self-hosted React + WebGL graph, no CDN · strict CSP · every route
 prerendered · no LLM anywhere in the matching path.
 
 ---
@@ -229,6 +229,10 @@ data, never code),
 
 ## License
 
-Apache-2.0 — see [LICENSE](./LICENSE). Contributing:
-[CONTRIBUTING.md](./CONTRIBUTING.md) · [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
-· [SECURITY.md](./SECURITY.md).
+MIT — see [LICENSE](./LICENSE). Fork it, sell it, host it; keep the notice.
+The third-party code shipped in this tree — vendored React, and the graph
+engine bundled from graphology and sigma — is MIT too, and attributed in
+[THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md).
+
+Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md) ·
+[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) · [SECURITY.md](./SECURITY.md).

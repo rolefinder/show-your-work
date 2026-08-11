@@ -25,7 +25,9 @@ npm test         # every gate — run this before you push
 
 ## Ground rules
 
-1. **Apache-2.0.** Contributions are under the same license.
+1. **MIT.** Contributions are under the same license. If a change vendors or
+   bundles third-party code into the tree, add it to
+   [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md) in the same PR.
 2. **The demo persona must be self-evidently fake.** `corpus:check` requires
    `fake` in the persona name and in every demo slug, and rejects real-person
    and employer fingerprints. This is not fussiness: every route ships

@@ -110,6 +110,10 @@ from one fact acquiring two readers that then drifted — the full table is in
   [CONTRIBUTING.md](./CONTRIBUTING.md#things-that-are-generated).
 - Put a raw color in `styles.css`. Add a token in `tokens/`.
 - Widen the CSP, or load React, the graph engine, or a model host from a CDN.
+- Vendor or bundle third-party code without adding it to
+  [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md). Self-hosting is how this
+  repo satisfies the CSP, and self-hosting is redistribution. Build tooling is
+  exempt — it never reaches `dist/`.
 - Rewrite an ADR to match a later decision. Add a new one.
 - Adjust `parity:check` to make it pass. Fix the divergence it found.
 - Update `docs/history/`. It is a dated record; that is the point.

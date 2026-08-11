@@ -5,7 +5,7 @@
 **Owner:** Harrison Halperin  
 **Site:** harrisonhalperin.com (static SPA, Cloudflare Pages, strict CSP)
 
-**Umbrella product:** [`recruit-me-prd.md`](./recruit-me-prd.md) (Apache-2.0
+**Umbrella product:** [`recruit-me-prd.md`](./recruit-me-prd.md) (MIT
 open-source site template + toolkit; repo `<owner>/recruit-me`). Fit is a
 **module** inside recruit-me. Dogfood on **private** harrison-site; public
 recruit-me ships demo corpus only. Security:
@@ -178,8 +178,10 @@ No training on JD text for third parties.
 4. Should a public structured resume file be authored to reduce `missing` rows?
 5. Turnstile on submit in v1, or only after abuse appears?
 6. Exact Request-more grant size (e.g. +2 queries) and cooldown (e.g. 7 days)?
-7. License for recruit-me: **Apache-2.0** (locked) — Fit inherits umbrella
-   license when packaged. See [`recruit-me-prd.md`](./recruit-me-prd.md) §9.
+7. License for recruit-me: **MIT** (Apache-2.0 until 2026-08-11) — Fit inherits
+   the umbrella license when packaged. See
+   [`recruit-me-prd.md`](./recruit-me-prd.md) §9 and
+   [ADR 022](../architecture/adr/022-mit-license-and-third-party-notices.md).
 8. Single-shot Fit panel only, or a thin multi-turn shell that still returns
    the §10 contract each turn? (**Still open** per Harrison.)
 
