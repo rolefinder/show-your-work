@@ -21,6 +21,7 @@
     "guard:suggest": "node scripts/suggest-guard-terms.mjs",
     "content:check": "python scripts/check-content.py",
     "additive:check": "node scripts/check-additive.mjs",
+    "layout:check": "node scripts/check-layout.mjs",
     "parity:check": "node scripts/check-parity.mjs",
     "secrets:check": "python scripts/check-secrets.py",
     "style:check": "node scripts/check-style-tokens.mjs",
@@ -45,7 +46,7 @@
     "ux:check": "node scripts/check-ux.mjs",
     "docs:check": "node scripts/check-doc-drift.mjs",
     "docs:links": "node scripts/check-doc-links.mjs",
-    "test": "npm run additive:check && npm run parity:check && npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run publication:check && npm run pages:check && npm run fit:smoke && npm run mcp:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
+    "test": "npm run layout:check && npm run additive:check && npm run parity:check && npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run publication:check && npm run pages:check && npm run fit:smoke && npm run mcp:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",

@@ -162,6 +162,17 @@ show-your-work/
 │   ├── manifest.json              PWA manifest; name/short_name injected too
 │   └── _headers · _redirects      CSP and SPA fallback
 │
+├── assets/                      ▓ SELF-HOSTED STATIC — no CDN, ever (ADR 013)
+│   ├── graph-engine.js            ▒ GENERATED from graph/ by build-graph-vendor
+│   ├── graph-engine.version       the date that bundle was last built
+│   ├── vendor/react*.min.js       React + ReactDOM, vendored so the CSP holds
+│   └── icon.svg                   the favicon/manifest source
+│
+├── .github/                     ▓ CI AND COMMUNITY
+│   ├── workflows/                 ci.yml (gates) · deploy-github-pages.yml
+│   ├── ISSUE_TEMPLATE/            bug · feature · security routing
+│   └── dependabot.yml             npm + Actions
+│
 ├── .claude/                     ▓ AGENT SURFACE — live in a fork, no install
 │   ├── skills/build-show-your-work/   /build-show-your-work — config → deployable site
 │   ├── skills/deploy-pages/       /deploy-pages — fork → live on Cloudflare

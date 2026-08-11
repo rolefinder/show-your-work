@@ -134,6 +134,7 @@ something real:
 |------|-----------------|
 | `parity:check` | The two content resolvers drifting apart — the failure mode that produced four separate bugs before it was gated |
 | `publication:check` | Your own content or `dist/` publishing a term you declared must never ship - a codename, a client, an internal hostname. See `/sanitize` |
+| `layout:check` | A top-level directory that exists in the repo but not in the documented tree — the drift that makes an agent guess whether a folder is intentional |
 | `additive:check` | A template file committed where an adopter is supposed to add one — the thing that makes a fork un-updatable |
 | `corpus:check` | Real-person fingerprints in `content/demo/` — and a demo persona that isn't obviously fake |
 | `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |
