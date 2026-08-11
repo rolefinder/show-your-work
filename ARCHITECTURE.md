@@ -81,13 +81,15 @@ show-your-work/
 │   ├── about/profile.yaml         ← you add: name · tagline · email · skills · links{}
 │   ├── work/<slug>.yaml           ← you add: one project each (slug MUST equal filename)
 │   ├── blog/<slug>.yaml           ← you add: one post each
+│   ├── experience/<slug>.yaml     ← you add: one role each (Fit evidence)
+│   ├── education/<slug>.yaml      ← you add: one credential each
 │   ├── config/
 │   │   ├── site.yaml              ← you add: origin · title_suffix · deploy · theme
 │   │   ├── skills.yaml            ← you add: category order/map + descriptions
 │   │   ├── fit.yaml               ← you add: extra_stops · synonyms · weights · show_gaps
 │   │   └── sources.yaml           ← you add: GitHub user / resume for drafting
 │   └── demo/                    ▒ SHIPPED — never edited, never deleted
-│       └── {about,work,blog,config}/  used for anything you have not added
+│       └── {about,work,blog,experience,education,config}/  used for what you have not added
 │
 ├── src/                         ▓ CODE — contains no identity
 │   ├── app.tsx                    view union, router, page bodies, chrome
@@ -138,9 +140,9 @@ show-your-work/
 │   ├── preview.mjs                static server; --spa mode for the prerenderer
 │   ├── init-site.mjs              `npm run init`
 │   ├── banner.mjs                 the wordmark
-│   ├── check-{ready,adopter-config,style-tokens}.mjs
+│   ├── check-{ready,adopter-config,style-tokens,layout,copy}.mjs
 │   ├── check-{fictional-corpus,secrets}.py
-│   └── {fit,graph,seo}-smoke.*    behavioural tests
+│   └── {fit,mcp,graph,seo}-smoke.*  behavioural tests
 │
 ├── packages/
 │   ├── content/emit_site.py       the YAML → TypeScript emitter
@@ -155,7 +157,8 @@ show-your-work/
 │
 ├── functions/                   ▓ Cloudflare Pages Functions
 │   ├── _middleware.js             404 status + which document to serve
-│   └── api/fit.ts                 optional POST /api/fit
+│   ├── api/fit.ts                 optional POST /api/fit
+│   └── api/mcp.ts                 read-only MCP endpoint for agents (ADR 023)
 │
 ├── public/                      ▓ WEB ROOT — copied to dist/, never edited
 │   ├── index.html · 404.html      templates; identity injected at build

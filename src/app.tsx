@@ -1,6 +1,6 @@
 import type { WorkItem } from "./types";
 import { linkLabel } from "./profile-links";
-import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { BLOG, EDUCATION, EXPERIENCE, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
@@ -23,6 +23,7 @@ type View =
   | { name: "workDetail"; slug: string }
   | { name: "blog" }
   | { name: "blogDetail"; slug: string }
+  | { name: "experience" }
   | { name: "fit" }
   | { name: "graph" }
   | { name: "notfound"; path: string };
@@ -31,6 +32,7 @@ function viewFor(path: string): View {
   const seg = path.split("/").filter(Boolean);
   if (!seg.length) return { name: "home" };
   if (seg[0] === "about") return { name: "about" };
+  if (seg[0] === "experience") return { name: "experience" };
   if (seg[0] === "fit") return { name: "fit" };
   if (seg[0] === "graph") return { name: "graph" };
   if (seg[0] === "work" && seg[1]) return { name: "workDetail", slug: seg[1] };
@@ -42,6 +44,7 @@ function viewFor(path: string): View {
 
 function routeFor(view: View): string {
   if (view.name === "about") return "/about";
+  if (view.name === "experience") return "/experience";
   if (view.name === "fit") return "/fit";
   if (view.name === "graph") return "/graph";
   if (view.name === "work") return "/work";
@@ -60,6 +63,7 @@ export function withSuffix(pageName: string): string {
 
 function titleFor(view: View): string {
   if (view.name === "about") return withSuffix("About");
+  if (view.name === "experience") return withSuffix("Experience");
   if (view.name === "work") return withSuffix("Work");
   if (view.name === "workDetail") {
     const w = WORK.find((x) => x.slug === view.slug);
@@ -207,6 +211,7 @@ function ContactRow() {
 /** Top-level nav, shared by the header bar and the mobile drawer. */
 const NAV_ITEMS: [label: string, view: View][] = [
   ["About", { name: "about" }],
+  ["Experience", { name: "experience" }],
   ["Work", { name: "work" }],
   ["Blog", { name: "blog" }],
   ["Graph", { name: "graph" }],
@@ -231,7 +236,7 @@ function App() {
   const visibleWork = WORK.filter((w) => w.visible !== false);
   const visibleBlog = BLOG.filter((b) => b.visible !== false);
   const docs = React.useMemo(
-    () => buildEvidencePack(SITE_PROFILE, WORK, BLOG),
+    () => buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE),
     [],
   );
   const kg = React.useMemo(
@@ -439,6 +444,116 @@ function App() {
           ),
         ),
       ),
+    );
+  } else if (view.name === "experience") {
+    const roles = EXPERIENCE.filter((e) => e.visible !== false);
+    const credentials = EDUCATION.filter((e) => e.visible !== false);
+    body = React.createElement(
+      "section",
+      { className: "page" },
+      React.createElement("p", { className: "eyebrow" }, "Career"),
+      React.createElement("h1", null, "Experience"),
+      roles.length
+        ? React.createElement(
+            "ol",
+            { className: "card-list" },
+            roles.map((e) =>
+              React.createElement(
+                "li",
+                { key: e.slug, className: "card" },
+                React.createElement("h2", null, e.role),
+                React.createElement(
+                  "p",
+                  { className: "muted" },
+                  // "Present" is derived from an absent end date rather than
+                  // authored, so a role cannot be left saying it ended when it
+                  // did not, or vice versa.
+                  [e.organization, `${e.start} – ${e.end || "Present"}`, e.location]
+                    .filter(Boolean)
+                    .join(" · "),
+                ),
+                React.createElement("p", { className: "prose" }, richText(e.summary, navigate)),
+                e.highlights.length
+                  ? React.createElement(
+                      "ul",
+                      { className: "prose" },
+                      e.highlights.map((h, i) =>
+                        React.createElement("li", { key: i }, richText(h, navigate)),
+                      ),
+                    )
+                  : null,
+                // Curated, not date-inferred (ADR 026). Only links to work that
+                // is actually published, so an unpublished draft cannot leak a
+                // dangling link onto the career page.
+                (() => {
+                  const linked = e.projects
+                    .map((slug) => WORK.find((w) => w.slug === slug && w.visible !== false))
+                    .filter(Boolean) as WorkItem[];
+                  return linked.length
+                    ? React.createElement(
+                        "p",
+                        { className: "muted" },
+                        "Built here: ",
+                        linked.map((w, i) =>
+                          React.createElement(
+                            React.Fragment,
+                            { key: w.slug },
+                            i ? ", " : null,
+                            React.createElement(Link, { href: "/work/" + w.slug }, w.title),
+                          ),
+                        ),
+                      )
+                    : null;
+                })(),
+                e.skills.length
+                  ? React.createElement(
+                      "ul",
+                      { className: "tags" },
+                      e.skills.map((s) =>
+                        React.createElement(
+                          "li",
+                          { key: s },
+                          React.createElement("span", { className: "tag" }, s),
+                        ),
+                      ),
+                    )
+                  : null,
+              ),
+            ),
+          )
+        : React.createElement("p", { className: "muted" }, "No roles published yet."),
+      credentials.length
+        ? React.createElement(
+            React.Fragment,
+            null,
+            React.createElement("h2", null, "Education"),
+            React.createElement(
+              "ul",
+              { className: "card-list" },
+              credentials.map((e) =>
+                React.createElement(
+                  "li",
+                  { key: e.slug, className: "card" },
+                  React.createElement("h3", null, e.credential),
+                  React.createElement(
+                    "p",
+                    { className: "muted" },
+                    [e.institution, e.date, e.honors].filter(Boolean).join(" · "),
+                  ),
+                  e.achievements.length
+                    ? React.createElement(
+                        "ul",
+                        { className: "prose" },
+                        e.achievements.map((a, i) =>
+                          React.createElement("li", { key: i }, richText(a, navigate)),
+                        ),
+                      )
+                    : null,
+                ),
+              ),
+            ),
+          )
+        : null,
     );
   } else if (view.name === "work") {
     body = React.createElement(

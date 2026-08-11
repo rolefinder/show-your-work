@@ -30,7 +30,7 @@ const CORS: Record<string, string> = {
    is data and `config:check` fails the build if it appears in code (ADR 016). */
 const SERVER_NAME = "show-your-work-portfolio";
 
-const EVIDENCE_KINDS = ["about", "work", "blog"] as const;
+const EVIDENCE_KINDS = ["about", "work", "blog", "experience"] as const;
 
 type EvidenceDoc = {
   id: string;

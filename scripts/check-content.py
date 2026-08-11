@@ -46,6 +46,8 @@ from packages.content.paths import corpus_dir, corpus_files, rel, resolve  # noq
 REQUIRED = {
     "work": ["slug", "title", "summary", "body", "skills"],
     "blog": ["slug", "title", "summary", "body", "skills"],
+    "experience": ["slug", "organization", "role", "start", "summary", "highlights"],
+    "education": ["slug", "institution", "credential", "date"],
 }
 PROFILE_REQUIRED = ["name", "tagline", "location", "email", "summary", "skills"]
 
@@ -92,8 +94,10 @@ def collect(kind: str) -> dict[str, dict]:
                 f"{rel}: slug is {data.get('slug')!r} but the filename says {path.stem!r} - "
                 "they must match, or cross-links break"
             )
+        # Education dates are free text ("2022"), and experience carries
+        # start/end instead — only work and blog promise a sortable date.
         date = data.get("date")
-        if date is not None and not DATE.match(str(date)):
+        if kind in ("work", "blog") and date is not None and not DATE.match(str(date)):
             errors.append(f"{rel}: date {date!r} is not YYYY-MM or YYYY-MM-DD")
         out[str(data.get("slug") or path.stem)] = data
     return out
@@ -101,6 +105,21 @@ def collect(kind: str) -> dict[str, dict]:
 
 work = collect("work")
 blog = collect("blog")
+experience = collect("experience")
+education = collect("education")
+
+# ---------- experience -> work references resolve ----------
+# Same failure as a dangling cross-link, by a different route: `projects:` is a
+# curated list of slugs, so a renamed or unpublished project leaves the career
+# page advertising work that is not there.
+for slug, data in experience.items():
+    for target in data.get("projects") or []:
+        if str(target) not in work:
+            errors.append(
+                f"content/experience/{slug}.yaml: projects lists {str(target)!r} but no "
+                f"{target}.yaml exists in {corpus_dir('work').relative_to(ROOT).as_posix()}/ "
+                "- the role would link to a page that 404s"
+            )
 
 # ---------- cross-links resolve ----------
 known = {"work": set(work), "blog": set(blog)}
@@ -127,7 +146,7 @@ if profile is not None:
             errors.append(f"{rel(profile_path)}: missing required field `{field}`")
 
 used: dict[str, list[str]] = {}
-for kind, items in (("work", work), ("blog", blog)):
+for kind, items in (("work", work), ("blog", blog), ("experience", experience)):
     for slug, data in items.items():
         for s in data.get("skills") or []:
             used.setdefault(str(s), []).append(
@@ -176,7 +195,8 @@ if errors:
     raise SystemExit(1)
 
 print(
-    f"check-content: ok ({len(work)} work, {len(blog)} blog, {len(used)} skills"
+    f"check-content: ok ({len(work)} work, {len(blog)} blog, {len(experience)} experience, "
+    f"{len(education)} education, {len(used)} skills"
     + (f", {len(warnings)} warning(s)" if warnings else "")
     + ")"
 )

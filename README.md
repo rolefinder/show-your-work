@@ -102,6 +102,7 @@ Preflights the config, optionally drafts project YAML from sources you name in
 | Route | What it is |
 |-------|-----------|
 | `/` `/about` | Who you are, with a contact strip built from `links` |
+| `/experience` | Roles and education, with each role linking the projects built during it |
 | `/work/<slug>` | A project page with a fixed editorial brief: problem, outcome, evidence, decisions |
 | `/blog/<slug>` | Writing, cross-linked with `{{work:slug\|Label}}` tokens |
 | `/graph` | A WebGL knowledge graph of projects, posts and skills — embedded as a lens on `/work` too |
@@ -178,6 +179,7 @@ file you add takes over from its counterpart in `content/demo/` ([ADR 021](./doc
 | Path | Role |
 |------|------|
 | `content/work\|blog/` | One YAML file per project or post. The bulk of your site |
+| `content/experience\|education/` | One YAML file per role or credential. Roles become Fit evidence |
 | `content/about/profile.yaml` | Name, tagline, email, skills, and `links` keyed by platform |
 | `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
 | `content/config/skills.yaml` | Skill-bank grouping + descriptions |

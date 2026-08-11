@@ -1,0 +1,9 @@
+slug: fake-degree
+institution: Fake State University
+credential: BS, Fictional Information Systems
+date: "2022"
+honors: Cum Laude
+achievements:
+  - Capstone built a fictional content pipeline that a department actually used.
+  - Tutored introductory programming for four semesters.
+visible: true
