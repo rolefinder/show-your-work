@@ -1,4 +1,4 @@
-# Bot protection & cost control — harrisonhalperin.com
+# Bot protection and cost control
 
 Assessment and right-sized mitigation plan for a static Cloudflare Pages personal site.
 Companion Terraform: `infra/cloudflare/terraform/security.tf`. Human-only steps: see

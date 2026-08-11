@@ -29,7 +29,7 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [015](architecture/adr/015-design-token-system.md) | **Design token system** — the four adopter variables |
 | [016](architecture/adr/016-adopter-config-boundary.md) | **Adopter-config boundary** — why identity is data, never code |
 | [017](architecture/adr/017-prerender-and-editorial-contract.md) | **Prerendering, the editorial contract, one-command setup** |
-| [018](architecture/adr/018-build-command-and-source-drafting.md) | `/build-recruit-me` and source drafting |
+| [018](architecture/adr/018-build-command-and-source-drafting.md) | `/build-show-your-work` and source drafting |
 | [019](architecture/adr/019-fit-highlight-mode.md) | Fit is a highlight, not an audit |
 | [020](architecture/adr/020-github-pages-target-and-agent-autonomy.md) | **GitHub Pages as the default target**, and what an agent may do alone |
 | [021](architecture/adr/021-additive-only-adoption.md) | **Adoption is additive** — you add files, you never edit or delete them |
@@ -46,17 +46,19 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 - [Bot and cost protection](ops/bot-and-cost-protection.md)
 - [SEO visibility checklist](ops/seo-visibility-checklist.md)
 - [Security policy](../SECURITY.md), and the fuller
-  [security posture](strategy/recruit-me-security.md)
+  [security posture](strategy/show-your-work-security.md)
 
 ## I want to know why this exists
 
-- [recruit-me PRD](strategy/recruit-me-prd.md) — the product
+- [show-your-work PRD](strategy/show-your-work-prd.md) — the product
 - [Recruiter Fit PRD](strategy/recruiter-fit-prd.md) — the module
 - [Platform review, 2026-07](strategy/platform-review-2026-07.md) —
   standardization and adopter-UX findings, each with a repro
 
-## Project history
+## There is no project-history section
 
-[`history/`](./history/README.md) holds unmaintained records of how the project
-got here — the extraction analysis, the scaffold status, the original packaging
-plan. Kept for the reasoning, not for the instructions.
+Deliberately. Planning docs, handoffs and status snapshots describe how *this*
+project got built, which is of no use to someone building *their* site — and
+they rot into contradictions of the current tree. Every decision worth keeping
+is an ADR above, where the reasoning is dated and the rejected options are
+recorded alongside it.

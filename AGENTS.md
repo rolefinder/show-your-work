@@ -29,7 +29,7 @@ Available in any fork with no install step, because they live in
 | Command | Does |
 |---|---|
 | `/launch` | **The whole path** — identity, build, one authorization, live on GitHub Pages |
-| `/build-recruit-me` | Preflight config, optionally draft content from named sources, build with prerendering, verify |
+| `/build-show-your-work` | Preflight config, optionally draft content from named sources, build with prerendering, verify |
 | `/deploy-pages` | Cloudflare Pages, for real response headers and `/api/fit` |
 | `/ui-review` | The design judgement `ux:check` cannot make |
 | `/sanitize` | Find employer-internal detail before it publishes, and guard against its return. Employers are discovered from the adopter's own resume and GitHub, never hardcoded |
@@ -56,7 +56,7 @@ parsing prose. `check-ready --json` and `pages:setup --json` both do this. Use
 
 > Note for anyone porting this layout: plugin repos put `skills/` at the root
 > with a `.claude-plugin/` manifest, because they are *installed* into another
-> project. recruit-me is *forked*, so its skills must be live in the fork
+> project. show-your-work is *forked*, so its skills must be live in the fork
 > itself — which is what `.claude/skills/` gives.
 
 ## Never invent content
@@ -116,7 +116,6 @@ from one fact acquiring two readers that then drifted — the full table is in
   exempt — it never reaches `dist/`.
 - Rewrite an ADR to match a later decision. Add a new one.
 - Adjust `parity:check` to make it pass. Fix the divergence it found.
-- Update `docs/history/`. It is a dated record; that is the point.
 - Change a token to make `ux:check` pass. The check composites alpha against
   the real background — if it fails, it is right. State the proposed value and
   why.

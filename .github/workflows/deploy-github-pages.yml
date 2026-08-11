@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   # The template repository must not deploy itself. It has Pages disabled, is
-  # named recruit-me rather than <owner>.github.io, and correctly carries
+  # named show-your-work rather than <owner>.github.io, and correctly carries
   # origin: https://example.com — so a deploy here would fail at the last step
   # and leave a permanently red workflow on main. "Has anyone added
   # content/about/profile.yaml?" is exactly the "this is still the template"

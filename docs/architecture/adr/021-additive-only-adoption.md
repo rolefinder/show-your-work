@@ -77,7 +77,7 @@ guard the moment someone flips a boolean.
 
 `site.yaml` gets a `theme:` block. The build writes `dist/tokens/adopter.css`
 from it, and `tokens/tokens.css` imports that file **last**, so the four
-`--rm-*` variables win without `tokens/colors.css` being touched.
+`--syw-*` variables win without `tokens/colors.css` being touched.
 `check-additive` asserts the import is last — anything after it would silently
 override the adopter's palette.
 

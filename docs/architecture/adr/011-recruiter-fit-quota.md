@@ -7,7 +7,7 @@
 
 Fit calls burn Workers AI (and optionally Vectorize) quota. The site is a
 public personal portfolio; unauthenticated visitors can paste JDs or script
-the API. Harrison asked for a cheap product with a limit of **“10 queries
+the API. The owner asked for a cheap product with a limit of **“10 queries
 per week or 2 per day”** plus a **Request more** button that uses a larger
 model to decide whether granting extra quota is likely to help the
 requester toward a job offer, with a cooldown.
@@ -86,7 +86,7 @@ required to ship; if free-tier AI limits are hit, fail with a clear
   Turnstile / tighter WAF as the escalation path
   (`docs/ops/bot-and-cost-protection.md`).
 - Request-more is a judgment call by a model; false grants waste quota,
-  false denies annoy real recruiters. Log and tune; Harrison can add a
+  false denies annoy real recruiters. Log and tune; the owner can add a
   manual allowlist later if needed.
 
 ## Alternatives considered

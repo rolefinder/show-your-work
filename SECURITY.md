@@ -49,7 +49,6 @@ Still needed (human / org):
 - [ ] Confirm LICENSE + SECURITY contacts are correct for public disclosure
 - [ ] **Do not** auto-flip visibility from an agent PR — owner action only
 
-See the [security posture](docs/strategy/recruit-me-security.md) and
+See the [security posture](docs/strategy/show-your-work-security.md) and
 [ADR 012](docs/architecture/adr/012-recruiter-fit-security-data.md) for the
-fuller surface map. The original gap list is kept, unmaintained, in
-[docs/history](docs/history/SITE_OSS_GAP_LIST.md).
+fuller surface map.

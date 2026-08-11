@@ -4,7 +4,7 @@
 
 ## Context
 
-Standing up a recruit-me site required a Cloudflare account, a dashboard visit,
+Standing up a show-your-work site required a Cloudflare account, a dashboard visit,
 and a human clicking through project creation. Everything before that step was
 already automatable — `init --config`, `check-ready`, `npm test` — so the
 manual tail was the whole cost of adoption.
@@ -62,7 +62,7 @@ actually be served — that mismatch silently points every canonical URL, the
 sitemap and every OG image at the wrong host.
 
 It skips while `demo: true`: the template repo is not a deployment, is
-correctly named `recruit-me`, and correctly has `origin: https://example.com`.
+correctly named `show-your-work`, and correctly has `origin: https://example.com`.
 
 ### 4. One authorization gate, and no credential handling ever
 

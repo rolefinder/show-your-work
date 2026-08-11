@@ -17,7 +17,7 @@ if (!existsSync(bundle)) {
 }
 
 const src = readFileSync(bundle, "utf8");
-for (const needle of ["RMPortfolioGraph", "create"]) {
+for (const needle of ["SYWPortfolioGraph", "create"]) {
   if (!src.includes(needle)) {
     console.error(`FAIL: bundle missing ${needle}`);
     process.exit(1);

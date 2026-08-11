@@ -7,7 +7,7 @@
 
 Fit accepts arbitrary recruiter text and files. That input is untrusted:
 prompt injection, oversized payloads, malicious PDFs, and pasted secrets
-are in scope. Harrison also wants inputs and responses stored so briefs
+are in scope. The owner also wants inputs and responses stored so briefs
 can be reviewed and abuse investigated. The site’s baseline is a strict
 CSP, publication-safety scanning (ADR 002), and no third-party analytics
 scripts. Introducing a Function changes the threat model in
@@ -67,12 +67,12 @@ Store enough to debug product quality and abuse:
 - Request-more verdict + reason
 - Optional: embedding/retrieval debug ids (not required in v1)
 
-**Retention:** default **90 days**, then delete or anonymize. Harrison may
+**Retention:** default **90 days**, then delete or anonymize. The owner may
 shorten via config. No sale of JD data. No sending JD corpora to
 third-party training APIs beyond the inference provider needed to serve
 the request.
 
-Access: Harrison (and automated ops he enables) only. No public list of
+Access: the owner (and automated ops they enable) only. No public list of
 past briefs.
 
 ### 5. Abuse controls (stack)
@@ -107,7 +107,7 @@ retention store above.
 ## Alternatives considered
 
 - **Store nothing.** Rejected. Blocks quality review and forensics
-  Harrison asked for.
+  the owner asked for.
 - **Store forever.** Rejected. Unnecessary retention risk.
 - **Client-only PDF parse.** Rejected as sole path. Inconsistent across
   browsers; still must re-validate on server.

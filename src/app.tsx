@@ -401,7 +401,7 @@ function App() {
       "section",
       { className: "page" },
       SITE_CONFIG.demo
-        ? React.createElement("p", { className: "eyebrow" }, "recruit-me demo")
+        ? React.createElement("p", { className: "eyebrow" }, "show-your-work demo")
         : null,
       React.createElement("h1", null, SITE_PROFILE.name),
       React.createElement("p", { className: "lede" }, SITE_PROFILE.tagline),

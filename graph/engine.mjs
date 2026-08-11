@@ -1,6 +1,6 @@
 /**
  * Sigma.js orchestration — create / update / destroy.
- * Public API: window.RMPortfolioGraph.create(host, opts)
+ * Public API: window.SYWPortfolioGraph.create(host, opts)
  */
 import Sigma from "sigma";
 import { NodeCircleProgram, EdgeLineProgram } from "sigma/rendering";
@@ -52,7 +52,7 @@ function fitCamera(sigma, graph, compact) {
  *   nodes, edges, compact?, contextId?, layers?, forces?, onNavigate?, preview?
  */
 export function createPortfolioGraph(container, opts) {
-  if (!container) throw new Error("RMPortfolioGraph.create: container required");
+  if (!container) throw new Error("SYWPortfolioGraph.create: container required");
 
   const state = {
     compact: !!opts.compact,
@@ -171,7 +171,7 @@ export function createPortfolioGraph(container, opts) {
     try {
       fn(ev);
     } catch (err) {
-      console.warn("[RMPortfolioGraph]", name, err);
+      console.warn("[SYWPortfolioGraph]", name, err);
     }
   };
 

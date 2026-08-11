@@ -35,7 +35,7 @@ def main() -> int:
         f"{urllib.parse.quote(args.username, safe='')}"
         f"/repos?sort=updated&per_page={limit}"
     )
-    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "recruit-me-ingest"})
+    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "show-your-work-ingest"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         repos = json.load(resp)
 

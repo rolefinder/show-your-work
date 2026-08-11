@@ -12,7 +12,7 @@ export const SITE_ORIGIN = "https://example.com";
 export const SITE_CONFIG: SiteConfig = {
   origin: "https://example.com",
   titleSuffix: "Fake Name",
-  description: "Demo portfolio for the recruit-me open-source template. Fake Name is a placeholder, not a real person.",
+  description: "Demo portfolio for the show-your-work open-source template. Fake Name is a placeholder, not a real person.",
   shortName: "Fake Name",
   themeColor: "#f7f4ef",
   themeColorDark: "#131211",
@@ -27,7 +27,7 @@ export const SITE_PROFILE: SiteProfile = {
   tagline: "Platform engineer who ships evidence-backed portfolios",
   location: "Fake City, XX",
   email: "fake.name@example.com",
-  summary: "Fake Name is a placeholder persona for the recruit-me template — not a real person. The naming is deliberately obvious so a demo deploy can never be mistaken for someone's actual portfolio. Replace this file with your own.",
+  summary: "Fake Name is a placeholder persona for the show-your-work template — not a real person. The naming is deliberately obvious so a demo deploy can never be mistaken for someone's actual portfolio. Replace this file with your own.",
   skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "YAML content pipelines"],
   links: { "github": "https://example.com/fake-github-profile", "linkedin": "https://example.com/fake-linkedin-profile", "youtube": "https://example.com/fake-youtube-channel" },
 };

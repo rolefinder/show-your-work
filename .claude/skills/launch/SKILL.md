@@ -1,11 +1,11 @@
 ---
 name: launch
-description: Take someone from a fresh recruit-me fork to a live site end to end — gather their identity in one pass, scaffold the config, draft and build the site, and publish it to GitHub Pages. Runs autonomously between a single up-front authorization and the final URL. Use when the user runs /launch, or asks to "set up my site", "get me a portfolio", "put my site online", or "do the whole thing for me".
+description: Take someone from a fresh show-your-work fork to a live site end to end — gather their identity in one pass, scaffold the config, draft and build the site, and publish it to GitHub Pages. Runs autonomously between a single up-front authorization and the final URL. Use when the user runs /launch, or asks to "set up my site", "get me a portfolio", "put my site online", or "do the whole thing for me".
 ---
 
 # /launch
 
-Fork to live site, in one run. `/build-recruit-me` produces `dist/`;
+Fork to live site, in one run. `/build-show-your-work` produces `dist/`;
 `/deploy-pages` covers Cloudflare. This is the whole path, and it is the one
 to use when the user wants the work done rather than explained.
 
@@ -41,7 +41,7 @@ Optional: GitHub, LinkedIn, YouTube, personal site, accent color.
 Two questions decide the deploy shape, so ask them here rather than at the end:
 
 - **Where should this live?** A `<username>.github.io` repository, or a custom
-  domain they already own. recruit-me serves at the **root only** — asset paths
+  domain they already own. show-your-work serves at the **root only** — asset paths
   are absolute — so a project site at `username.github.io/some-repo/` would
   load blank. `check-pages-target` enforces this; do not try to work around it.
 - **Does the repository exist yet?** If not, you will create it in step 3.
@@ -75,7 +75,7 @@ dependency is missing (`missingDependencies`).
 If there are blockers, they are all things only the user can answer. Do not
 guess past them.
 
-For content: follow `/build-recruit-me` steps 2–4 — draft from
+For content: follow `/build-show-your-work` steps 2–4 — draft from
 `content/config/sources.yaml` if the user asked for it, then `npm test`, then
 verify the artifact rather than trusting the exit code.
 

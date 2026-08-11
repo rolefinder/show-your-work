@@ -1,6 +1,6 @@
 ---
 name: deploy-pages
-description: Take a filled-in recruit-me fork from local build to a live site on Cloudflare Pages — what to edit, how to build with prerendering, how to create the Pages project, and how to verify the deploy is really yours. Use when the user runs /deploy-pages, or asks to "deploy my site", "put this on Cloudflare", or "how do I go live".
+description: Take a filled-in show-your-work fork from local build to a live site on Cloudflare Pages — what to edit, how to build with prerendering, how to create the Pages project, and how to verify the deploy is really yours. Use when the user runs /deploy-pages, or asks to "deploy my site", "put this on Cloudflare", or "how do I go live".
 ---
 
 # /deploy-pages
@@ -18,12 +18,12 @@ exists to fail the build when identity leaks into code.
 |------|-------|
 | `content/config/site.yaml` | Origin, title suffix, description, theme colors, `demo:` flag |
 | `content/about/profile.yaml` | Name, tagline, location, email, skills, `links` map |
-| `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
+| `content/config/sources.yaml` | Optional: repos / resume for `/build-show-your-work` to draft from |
 | `content/work/*.yaml` | One file per project |
 | `content/blog/*.yaml` | One file per post |
 | `content/config/skills.yaml` | Skill-bank category grouping |
 | `content/config/fit.yaml` | Fit tuning: stop words, synonyms, weights, extra caveats |
-| `tokens/colors.css` (4 `--rm-*` vars) | Palette, if you want a different one |
+| `tokens/colors.css` (4 `--syw-*` vars) | Palette, if you want a different one |
 | `assets/icon.svg` | Favicon / manifest icon |
 
 ## Steps

@@ -6,23 +6,23 @@
 ## Context
 
 The template's visual layer was a placeholder: `tokens/tokens.css` defined
-three variables (`--rm-brand`, `--rm-bg`, `--rm-fg`) that nothing used, and
+three variables (`--syw-brand`, `--syw-bg`, `--syw-fg`) that nothing used, and
 `styles.css` hardcoded every real value — nine literal hex colors, ad-hoc
 rem paddings, a serif/sans font pair picked per rule, one radius. Consequences
 that mattered for a template specifically:
 
 - **Re-theming a fork meant editing component rules.** The advertised
-  "override in adopter forks" contract was not real: `--rm-brand` was
+  "override in adopter forks" contract was not real: `--syw-brand` was
   referenced nowhere, so changing it changed nothing.
 - **No dark mode at all.** A cream page on a dark-mode OS is the single most
-  visible quality gap against the sibling project (harrison-site).
+  visible quality gap against a sibling private project.
 - **Silent stale-color risk.** `tokens/graph.css` read `var(--radius, 10px)`
   and `var(--line, #ddd5c8)`; neither token existed, so the fallbacks were
   always what painted. Nothing flagged it.
 - **Contrast was unmeasured.** Several small-text pairings landed under
   WCAG AA once measured (see Decision 3).
 
-The sibling project (harrison-site, same author) already runs a layered token
+That sibling project, by the same author, already runs a layered token
 system that solves this. This is an adaptation of that structure — the layer
 split, the scale shape, the naming — re-expressed for this repo's own
 ink-on-cream/teal palette and its own component set. It is not a CSS copy,
@@ -38,7 +38,7 @@ and no third-party stylesheet was used as a source (HANDOFF §8.6).
 
 2. **Semantic aliases, not raw palette, in components.** Raw values live in
    `tokens/`; `styles.css` reads `--surface` / `--fg-muted` / `--space-4` /
-   `--radius-2xl` and never a literal. The four `--rm-*` adopter variables
+   `--radius-2xl` and never a literal. The four `--syw-*` adopter variables
    at the top of `colors.css` are now genuinely load-bearing: every other
    color derives from them or from an alpha ramp over them.
 

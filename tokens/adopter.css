@@ -6,7 +6,7 @@
    dist/ with those values.
 
    It is imported LAST so its :root wins over colors.css, and it
-   sets only the four --rm-* adopter variables that everything
+   sets only the four --syw-* adopter variables that everything
    else derives from. Theming is therefore a content edit, not a
    change to a file the template ships — which is what lets you
    pull template updates without a merge conflict in your palette.

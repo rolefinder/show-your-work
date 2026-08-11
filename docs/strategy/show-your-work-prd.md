@@ -1,19 +1,17 @@
-# PRD: recruit-me
+# PRD: show-your-work
 
 **Status:** Draft (decisions locked 2026-07-09)  
 **Date:** 2026-07-09  
-**Owner:** Harrison Halperin  
-**Public name / repo:** `<owner>/recruit-me` (private until hardened, then public)
+**Public name / repo:** `<owner>/show-your-work` (private until hardened, then public)
 
 Related: Fit module [`recruiter-fit-prd.md`](./recruiter-fit-prd.md) + ADR 010–013;
-packaging [`recruiter-fit-oss-plan.md`](../history/recruiter-fit-oss-plan.md);
-security [`recruit-me-security.md`](./recruit-me-security.md).
+security [`show-your-work-security.md`](./show-your-work-security.md).
 
 ---
 
 ## 1. One-liner
 
-**recruit-me** is an **open-source** (OSI) personal site template plus agent
+**show-your-work** is an **open-source** (OSI) personal site template plus agent
 toolkit: drop in your own `about` / `work` / `blog` (and later `research`)
 data, stand up free-tier hosting, ingest from resume and profiles where
 legally possible, and ship a recruiter **Fit** surface that maps a job
@@ -24,17 +22,17 @@ description to cited evidence on *your* site.
 | Topic | Decision |
 |-------|----------|
 | Template routes | **`/work`** and **`/blog`** (not `/projects` / `/writing`) |
-| Repo | **`<owner>/recruit-me`** — **private now, public later** |
-| Architecture vs harrison-site | **Copy** template/Fit onto the recruit-me harness. **harrison-site stays a separate private repo** and dogfoods Fit against real content. Not “make harrison-site the public template.” |
-| License | **Fully open source:** [MIT](https://opensource.org/license/mit) (OSI) — relicensed from Apache-2.0 on 2026-08-11. Commercial use, forks, and paid hosting by others are **allowed**. See §9. Trademark on the name `recruit-me` is separate from the code license. |
+| Repo | **`<owner>/show-your-work`** — **private now, public later** |
+| Architecture vs the dogfood site | **Copy** template/Fit onto the show-your-work harness. **the dogfood site stays a separate private repo** and dogfoods Fit against real content. Not “make the dogfood site the public template.” |
+| License | **Fully open source:** [MIT](https://opensource.org/license/mit) (OSI) — relicensed from Apache-2.0 on 2026-08-11. Commercial use, forks, and paid hosting by others are **allowed**. See §9. Trademark on the name `show-your-work` is separate from the code license. |
 | LinkedIn | Goal is **automatic pull** of profile/career data. Supported path is **official data-export ZIP → parser → content YAML** (semi-automatic). Full silent API sync of experience/education is **not** available on self-serve LinkedIn APIs today. Scrapers are **out of supported scope**. See §8. |
 | Fit UX | **Open** — single-shot vs multi-turn shell undecided. |
 
 ## 3. Why it exists
 
-Harrison’s live site is a private dogfood instance (strict CSP, modular
-content, planned Fit). Other people want the same *shape* without his
-biography. recruit-me is the reusable harness; harrison-site remains private
+The maintainer’s live site is a private dogfood instance (strict CSP, modular
+content, planned Fit). Other people want the same *shape* without their
+biography. show-your-work is the reusable harness; the dogfood site remains private
 and copies or vendors modules as needed.
 
 ## 4. Users
@@ -44,7 +42,7 @@ and copies or vendors modules as needed.
 | Job seeker / builder | Publish a portfolio from their data; enable Fit |
 | Their coding agent | Ingest, theme, deploy free-tier infra |
 | Recruiter | Paste/drop a JD; get a cite-or-missing brief |
-| Harrison | Private dogfood on harrison-site; Work card once recruit-me is public |
+| The maintainer | Private dogfood on the dogfood site; Work card once show-your-work is public |
 
 ## 5. Surfaces (modules)
 
@@ -56,7 +54,7 @@ and copies or vendors modules as needed.
 | **Ingest plugin** | Workflows + skills + sub-agents per source | Resume + GitHub + **LinkedIn export** in early wave; others gated |
 | **Design templates + style skill** | 2–3 themes; skill to author/adapt (copyright-aware) | Themes v1; skill v1.1 |
 | **Infra skill** | Cloudflare Pages free-tier standup | **Yes** |
-| **Security baseline** | See [`recruit-me-security.md`](./recruit-me-security.md) | **Before public** |
+| **Security baseline** | See [`show-your-work-security.md`](./show-your-work-security.md) | **Before public** |
 
 Non-goals: multi-tenant SaaS, training-first Fit, **login scraping** of
 LinkedIn or any site as a supported feature.
@@ -72,8 +70,8 @@ content/
 design/themes/<name>/
 ```
 
-Demo corpus only in the public repo. Harrison’s real YAML stays in private
-harrison-site.
+Demo corpus only in the public repo. the maintainer’s real YAML stays in private
+The maintainer's private site.
 
 ## 7. Ingest plugin
 
@@ -87,7 +85,7 @@ export ZIP**, §8).
 
 ### What “automatic pull” can mean
 
-| Approach | Gets experience/education? | ToS / access | Verdict for recruit-me |
+| Approach | Gets experience/education? | ToS / access | Verdict for show-your-work |
 |----------|----------------------------|--------------|-------------------------|
 | **Sign In with LinkedIn (OIDC)** | Lite profile only (name, photo, email) — [Microsoft Learn](https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin-v2) | Self-serve | Useful for identity, **not** a portfolio dump |
 | **Community Management / Marketing APIs** | Org/page and partner analytics use cases; partner-gated; not a personal “sync my résumé” product — [Community Management API](https://developer.linkedin.com/product-catalog/marketing/community-management-api) | Org/commercial partner review | **Not** the personal ingest path |
@@ -114,7 +112,7 @@ LinkedIn ever ships a self-serve member career-data API.
 
 ## 9. License — fully open source (MIT)
 
-**Decision (Harrison, 2026-07-09):** ship recruit-me as **true open source**,
+**Decision (the maintainer, 2026-07-09):** ship show-your-work as **true open source**,
 not source-available / Commons Clause / PolyForm. Prior anti-profit
 experiment is **withdrawn**. That part still holds.
 
@@ -143,13 +141,13 @@ Recorded in [ADR 022](../architecture/adr/022-mit-license-and-third-party-notice
 > statement that the license conveys no trademark rights. MIT is silent on
 > both. For a static site generator with no patented technique in it, that is
 > a small exposure — but it is a real one, and it is the reason to revisit this
-> if recruit-me ever grows a novel algorithm worth patenting.
+> if show-your-work ever grows a novel algorithm worth patenting.
 
-**Honest consequence:** anyone may use, modify, sell, or host recruit-me
-(including paid products) without paying Harrison. Protection of the *brand*
-is via **trademark** on `recruit-me` / marketing, not via the code license.
-Protection of *your* live site remains the private harrison-site + security
-baseline ([`recruit-me-security.md`](./recruit-me-security.md)).
+**Honest consequence:** anyone may use, modify, sell, or host show-your-work
+(including paid products) without paying the maintainer. Protection of the *brand*
+is via **trademark** on `show-your-work` / marketing, not via the code license.
+Protection of *your* live site remains the the private dogfood site + security
+baseline ([`show-your-work-security.md`](./show-your-work-security.md)).
 
 Third-party attribution lives in
 [`THIRD-PARTY-NOTICES.md`](../../THIRD-PARTY-NOTICES.md), which covers only what
@@ -160,50 +158,50 @@ This section is product guidance, not legal advice.
 
 ## 10. What else to factor in (incl. security)
 
-Full threat model and tooling: [`recruit-me-security.md`](./recruit-me-security.md).
+Full threat model and tooling: [`show-your-work-security.md`](./show-your-work-security.md).
 
 Short list: LinkedIn ToS, copyright, PII redaction, Publish Guardian before
 public, Fit quota/CSP, content-drift gates, template semver, agent ingest
-cost, maintainer burden, trademark `recruit-me`, a11y/SEO, migration = copy
-out of harrison-site (not in-place public conversion).
+cost, maintainer burden, trademark `show-your-work`, a11y/SEO, migration = copy
+out of the dogfood site (not in-place public conversion).
 
 ## 11. Free-tier infra
 
 Cloudflare Pages + optional Functions for Fit. Infra skill uses **generic**
-account setup docs — no harrison-site Terraform, account IDs, or production
+account setup docs — no the dogfood site Terraform, account IDs, or production
 hostnames in the public tree.
 
-## 12. Work project on harrisonhalperin.com
+## 12. Listing the template as a work project
 
-After public launch: `content/projects/recruit-me.yaml` with `note.href` to
-`https://github.com/<owner>/recruit-me`. Until then `visible: false` or
+After public launch: `content/projects/show-your-work.yaml` with `note.href` to
+`https://github.com/<owner>/show-your-work`. Until then `visible: false` or
 omit the file.
 
 ## 13. Sequencing
 
-1. Private `<owner>/recruit-me` scaffold + demo corpus + theme + CSP.  
+1. Private `<owner>/show-your-work` scaffold + demo corpus + theme + CSP.  
 2. Security baseline (Dependabot, secret scanning, gitleaks, Scorecard-ready
    defaults) **before** public.  
 3. Infra skill → throwaway Pages demo.  
-4. Fit package; dogfood on **private** harrison-site.  
+4. Fit package; dogfood on **private** the dogfood site.  
 5. LinkedIn **export** ingest + resume + GitHub.  
 6. Publish Guardian + public flip.  
-7. Work card on harrison-site.  
+7. Work card on the dogfood site.  
 8. Extra themes / style skill / other ingest sources.
 
 ## 14. Success metrics
 
 - Stranger (or their agent) deploys demo corpus to Pages free tier via infra skill.  
 - Fit fixtures: zero unevidenced `aligned` on demo corpus.  
-- harrison-site runs Fit against real content without publishing that content
-  in recruit-me.  
+- The maintainer's private site runs Fit against real content without publishing that content
+  in show-your-work.  
 - LinkedIn export → reviewable YAML diff in one workflow run.
 
 ## 15. Remaining open questions
 
 1. Fit UX: single-shot vs multi-turn (still open / depends)?  
 2. Which 2–3 starter themes?  
-3. Trademark filing for `recruit-me` (optional but recommended)?  
+3. Trademark filing for `show-your-work` (optional but recommended)?  
 4. How much Publish Guardian to vendor vs checklist-only?  
-5. How much of Publish Guardian to vendor into recruit-me vs document as
+5. How much of Publish Guardian to vendor into show-your-work vs document as
    external gate?

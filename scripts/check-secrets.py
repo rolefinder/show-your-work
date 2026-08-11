@@ -83,7 +83,7 @@ PATTERNS: list[tuple[str, re.Pattern[str]]] = [
 ALLOW_PATH_SNIPPETS = (
     # Example / docs placeholders are fine
     "wrangler.example.toml",
-    "docs/strategy/recruit-me-security.md",
+    "docs/strategy/show-your-work-security.md",
     "scripts/check-secrets.py",  # this file contains pattern strings
 )
 

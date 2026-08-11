@@ -1,5 +1,5 @@
 /**
- * Readiness preflight for /build-recruit-me.
+ * Readiness preflight for /build-show-your-work.
  *
  * Answers one question deterministically, so the skill doesn't have to
  * eyeball it: is this config actually filled in, or is it still the template?

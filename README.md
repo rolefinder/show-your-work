@@ -89,7 +89,7 @@ the corpus for starter files, `--config me.json` runs it unattended.
 Then, in Claude Code:
 
 ```
-/build-recruit-me
+/build-show-your-work
 ```
 
 Preflights the config, optionally drafts project YAML from sources you name in
@@ -151,10 +151,10 @@ Four variables at the top of [`tokens/colors.css`](./tokens/colors.css) drive
 every color on the site:
 
 ```css
---rm-brand: #0f5c4c;      /* accent — links, focus ring, active state */
---rm-brand-deep: #083d33;
---rm-bg: #f7f4ef;         /* page background (light) */
---rm-fg: #1c1a17;         /* primary ink (light) */
+--syw-brand: #0f5c4c;      /* accent — links, focus ring, active state */
+--syw-brand-deep: #083d33;
+--syw-bg: #f7f4ef;         /* page background (light) */
+--syw-fg: #1c1a17;         /* primary ink (light) */
 ```
 
 Component rules never name a color. Dark mode follows `prefers-color-scheme`.
@@ -179,7 +179,7 @@ file you add takes over from its counterpart in `content/demo/` ([ADR 021](./doc
 | `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
 | `content/config/skills.yaml` | Skill-bank grouping + descriptions |
 | `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
-| `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
+| `content/config/sources.yaml` | Optional: repos / resume for `/build-show-your-work` to draft from |
 | `content/config/site.yaml` → `theme:` | Accent and palette, without editing `tokens/` |
 
 ### The engine
@@ -194,7 +194,7 @@ file you add takes over from its counterpart in `content/demo/` ([ADR 021](./doc
 | `public/` | Web-root boilerplate — HTML templates, manifest, `_headers`, `_redirects`. Identity is injected into the copies in `dist/`, so **you never edit these** |
 | `functions/` | Pages middleware (404 status + route docs) and optional `/api/fit` |
 | `packages/` | The YAML→TypeScript emitter, and resume/GitHub ingest |
-| `.claude/skills/` | `/build-recruit-me`, `/deploy-pages`, `/ui-review` — live in a fork with no install step |
+| `.claude/skills/` | `/build-show-your-work`, `/deploy-pages`, `/ui-review` — live in a fork with no install step |
 | `docs/` | ADRs — the reasoning, including what was deliberately *not* built |
 
 ## Demo persona

@@ -1,6 +1,6 @@
 # Third-party notices
 
-recruit-me itself is MIT-licensed — see [LICENSE](./LICENSE). This file covers
+show-your-work itself is MIT-licensed — see [LICENSE](./LICENSE). This file covers
 the third-party code that is **committed into this repository and shipped to
 the browser**, because that is redistribution and MIT requires the copyright
 notice to travel with it.

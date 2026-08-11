@@ -75,12 +75,12 @@ def deploy_target(cfg: dict[str, Any]) -> str:
     return value
 
 
-# site.yaml `theme:` key -> the --rm-* variable it overrides in tokens/colors.css.
+# site.yaml `theme:` key -> the --syw-* variable it overrides in tokens/colors.css.
 THEME_VARS = {
-    "accent": "--rm-brand",
-    "accent_deep": "--rm-brand-deep",
-    "bg": "--rm-bg",
-    "fg": "--rm-fg",
+    "accent": "--syw-brand",
+    "accent_deep": "--syw-brand-deep",
+    "bg": "--syw-bg",
+    "fg": "--syw-fg",
 }
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 

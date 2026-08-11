@@ -117,7 +117,7 @@ description: ${yamlString(a.summary.replace(/\s+/g, " ").trim().slice(0, 200))}
 
 short_name: ${yamlString(a.name)}
 
-# Keep in sync with --rm-bg in tokens/colors.css and the dark --bg.
+# Keep in sync with --syw-bg in tokens/colors.css and the dark --bg.
 theme_color: "#f7f4ef"
 theme_color_dark: "#131211"
 
@@ -136,7 +136,7 @@ ${themeBlock(a)}`;
 /**
  * Accent lives here, not in tokens/colors.css.
  *
- * init used to rewrite the --rm-brand declaration in that file, which made
+ * init used to rewrite the --syw-brand declaration in that file, which made
  * theming an edit to a tracked template file — exactly what this repo now
  * refuses to require. The build turns these into tokens/adopter.css instead.
  * Omitted entirely when you did not pick one, so the shipped palette applies.
