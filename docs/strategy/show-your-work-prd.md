@@ -2,7 +2,7 @@
 
 **Status:** Draft (decisions locked 2026-07-09)  
 **Date:** 2026-07-09  
-**Public name / repo:** `<owner>/show-your-work` (private until hardened, then public)
+**Public name / repo:** `<owner>/show-your-work`
 
 Related: Fit module [`recruiter-fit-prd.md`](./recruiter-fit-prd.md) + ADR 010–013;
 security [`show-your-work-security.md`](./show-your-work-security.md).
@@ -22,7 +22,7 @@ description to cited evidence on *your* site.
 | Topic | Decision |
 |-------|----------|
 | Template routes | **`/work`** and **`/blog`** (not `/projects` / `/writing`) |
-| Repo | **`<owner>/show-your-work`** — **private now, public later** |
+| Repo | **`<owner>/show-your-work`** — public, MIT |
 | Architecture vs the dogfood site | **Copy** template/Fit onto the show-your-work harness. **the dogfood site stays a separate private repo** and dogfoods Fit against real content. Not “make the dogfood site the public template.” |
 | License | **Fully open source:** [MIT](https://opensource.org/license/mit) (OSI) — relicensed from Apache-2.0 on 2026-08-11. Commercial use, forks, and paid hosting by others are **allowed**. See §9. Trademark on the name `show-your-work` is separate from the code license. |
 | LinkedIn | Goal is **automatic pull** of profile/career data. Supported path is **official data-export ZIP → parser → content YAML** (semi-automatic). Full silent API sync of experience/education is **not** available on self-serve LinkedIn APIs today. Scrapers are **out of supported scope**. See §8. |

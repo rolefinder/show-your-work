@@ -6,9 +6,11 @@ Security fixes target the latest `main` of this template.
 
 ## Reporting a vulnerability
 
-Email **harrison@quant-h2.com** with a description and reproduction steps.
-Do not open a public issue for sensitive reports while the repo is private;
-after a public flip, prefer coordinated disclosure.
+Email **harrison@quant-h2.com** with a description and reproduction steps, or
+open a private advisory through GitHub's **Report a vulnerability** button.
+Please do not open a public issue for a sensitive report — coordinated
+disclosure gives adopters a chance to pull the fix before the detail is
+public.
 
 ## Baseline expectations
 
@@ -30,24 +32,24 @@ after a public flip, prefer coordinated disclosure.
 - No production Cloudflare account IDs in-tree (`wrangler.example.toml` only)
 - Graph vendor is self-hosted (`assets/graph-engine.js`); no CDN Sigma/Graphology
 
-## Before flipping the repo public
+## Release hardening
 
-Done in-tree:
+Enforced in-tree, on every PR:
 
 - [x] Dependabot (npm + Actions)
 - [x] CI `npm run test` (corpus + secrets + build + fit/graph smoke)
 - [x] Strict CSP `_headers`
 - [x] Fictional corpus gate
 - [x] Local secret pattern scan (`scripts/check-secrets.py`)
+- [x] Publication-safety gate (`publication:check`) over content *and* `dist/`
 
-Still needed (human / org):
+Repository settings, which no gate in here can assert:
 
-- [ ] Enable **GitHub secret scanning** + push protection on the repo
-- [ ] Optional: add [gitleaks](https://github.com/gitleaks/gitleaks) or
-      TruffleHog as a dedicated workflow (local script is the baseline)
-- [ ] Owner review that no real Cloudflare account IDs / tokens remain
-- [ ] Confirm LICENSE + SECURITY contacts are correct for public disclosure
-- [ ] **Do not** auto-flip visibility from an agent PR — owner action only
+- [ ] **GitHub secret scanning + push protection** enabled
+- [ ] Optional: [gitleaks](https://github.com/gitleaks/gitleaks) or TruffleHog
+      as a dedicated workflow — the local script is the baseline, not the ceiling
+- [ ] Visibility changes are an owner action. **Never** flip a repo public from
+      an agent PR
 
 See the [security posture](docs/strategy/show-your-work-security.md) and
 [ADR 012](docs/architecture/adr/012-recruiter-fit-security-data.md) for the

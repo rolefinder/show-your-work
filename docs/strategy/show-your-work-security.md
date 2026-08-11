@@ -60,11 +60,10 @@ stay out.
 
 ---
 
-## 3. Controls before flipping show-your-work public
+## 3. Repository controls
 
 ### Repository
 
-- Private until the checklist below is green, then public.
 - Branch protection on `main`: required reviews, no force-push, status checks.
 - CODEOWNERS for sensitive paths (`packages/fit`, workflows, `wrangler*`).
 - Signed commits preferred for maintainers.
