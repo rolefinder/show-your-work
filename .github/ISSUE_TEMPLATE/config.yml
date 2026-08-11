@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/rolefinder/recruit-me/blob/main/SECURITY.md
+    about: Do not open a public issue. Email the address in SECURITY.md.
+  - name: I am trying to build my own site
+    url: https://github.com/rolefinder/recruit-me/blob/main/docs/guide/README.md
+    about: Setup, authoring, theming and deploying — most questions are answered here.
+  - name: A gate is blocking me and I do not know why
+    url: https://github.com/rolefinder/recruit-me/blob/main/docs/guide/README.md#when-something-fails
+    about: Each gate names what it found. This table maps the message to the fix.
