@@ -61,9 +61,42 @@ function llmsTxt(): string {
   lines.push(
     `- [Fit](${SITE}/fit): paste a job description, get a brief where every aligned claim cites a page above.`,
     `- [Graph](${SITE}/graph): how the work connects.`,
-    "",
   );
+  if (HAS_FUNCTIONS) {
+    lines.push(
+      `- [MCP](${SITE}/api/mcp): read-only Model Context Protocol endpoint — list_pages, get_page, fit_brief.`,
+    );
+  }
+  lines.push("");
   return lines.join("\n");
+}
+
+/*
+ * Pages Functions exist on Cloudflare Pages and nowhere else. On the
+ * GitHub Pages target /api/* is simply absent, so advertising an MCP endpoint
+ * there would publish a discovery document pointing at a 404 — worse than
+ * publishing nothing, because an agent would treat it as broken rather than
+ * missing.
+ */
+const HAS_FUNCTIONS = SITE_CONFIG.deployTarget !== "github-pages";
+
+/**
+ * .well-known/mcp.json — registry-style discovery for the MCP endpoint, so an
+ * agent that knows the domain can find the server without being told the path.
+ */
+function mcpManifest(): string {
+  return (
+    JSON.stringify(
+      {
+        name: `${SITE_PROFILE.name} — portfolio`,
+        description:
+          "Read-only portfolio corpus: enumerate published pages, read one, or score a job description against published evidence.",
+        remotes: [{ type: "streamable-http", url: `${SITE}/api/mcp` }],
+      },
+      null,
+      2,
+    ) + "\n"
+  );
 }
 
 export function emitSeoArtifacts(): void {
@@ -99,9 +132,14 @@ export function emitSeoArtifacts(): void {
   writeFileSync(join(dist, "llms.txt"), llmsTxt(), "utf8");
   writeFileSync(join(dist, "known-paths.json"), JSON.stringify(paths), "utf8");
 
+  if (HAS_FUNCTIONS) {
+    mkdirSync(join(dist, ".well-known"), { recursive: true });
+    writeFileSync(join(dist, ".well-known", "mcp.json"), mcpManifest(), "utf8");
+  }
+
   console.log(
     `emit-seo-artifacts: ok - ${paths.length} sitemap URLs, ${paths.length} known paths, ` +
-      `llms.txt (origin=${SITE})`,
+      `llms.txt (origin=${SITE})${HAS_FUNCTIONS ? ", .well-known/mcp.json" : " (no Functions target: MCP discovery skipped)"}`,
   );
 }
 

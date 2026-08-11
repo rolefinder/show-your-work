@@ -27,6 +27,7 @@ asks once before anything goes public, and hands back a URL.
 | HSTS, COOP, CORP | **unavailable** — headers only | set by `public/_headers` |
 | Cache-Control on assets | Pages' defaults | immutable, one year |
 | `POST /api/fit` | unavailable | optional Function |
+| `POST /api/mcp` (agents) | **unavailable** — Functions only | read-only MCP server, plus `.well-known/mcp.json` |
 | Browser Fit | works | works |
 | Prerendering, SEO, sitemap, OG cards | identical | identical |
 

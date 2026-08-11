@@ -138,6 +138,7 @@ something real:
 | `corpus:check` | Real-person fingerprints in `content/demo/` — and a demo persona that isn't obviously fake |
 | `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |
 | `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
+| `mcp:smoke` | The MCP endpoint drifting from the protocol or from Fit — an `aligned` row without a citation reaching an agent |
 | `fit:smoke` | An `aligned` requirement without a citation; a dequalifying verdict leaking into highlight mode; the browser and Worker evidence packs disagreeing |
 | `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
 | `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids — this caught the skill-bank dots being silently stripped |

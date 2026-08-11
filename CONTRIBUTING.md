@@ -97,7 +97,7 @@ Do not hand-edit these; edit their source and rebuild.
 ```
 additive:check -> parity:check -> corpus:check -> publication:check -> content:check -> secrets:check -> style:check
   -> build
-  -> config:check -> pages:check -> fit:smoke -> graph:smoke -> seo:smoke
+  -> config:check -> pages:check -> fit:smoke -> mcp:smoke -> graph:smoke -> seo:smoke
   -> csp:smoke -> ux:check
 ```
 
