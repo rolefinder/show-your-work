@@ -59,6 +59,11 @@ Letting the API return a 403 would have been less code. It would also have told
 the adopter *what* failed and not *why*, and the why is the entire point: the
 choice between a public repo and a bill is theirs to make deliberately.
 
+**It fails closed.** The first version only refused when `gh api` succeeded, so
+an API error, an expired token, or a rename mid-run skipped the check and let
+Pages be enabled anyway — the guard going quiet at precisely the moment nobody
+knew whether it was needed. Unknown visibility is now treated as private.
+
 ### `free:check` asserts the boundary rather than trusting it
 
 Wired in early in `npm test`, it fails on:

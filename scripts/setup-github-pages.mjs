@@ -150,19 +150,29 @@ record("root-path", target.stdout.trim().split("\n").pop().replace(/^check-pages
    On a public repo both are free and unmetered, which is why the default path
    is public. Refusing here rather than letting the API 403 means the adopter
    learns WHY, and learns it before anything is charged rather than after. */
+/* Fails CLOSED. A guard that skips itself when it cannot check is not a guard:
+   the one moment it goes quiet — an API error, a token that lost `repo`, a
+   rename mid-run — is exactly the moment nobody knows whether enabling Pages
+   starts a bill. Unknown is treated as private. */
 const visibility = run("gh", ["api", `repos/${slug}`, "-q", ".private"]);
-if (visibility.status === 0) {
-  const isPrivate = visibility.stdout.trim() === "true";
-  if (isPrivate) {
-    needsHuman(
-      `${slug} is private — GitHub Pages needs a paid plan there, and Actions minutes become billable, ` +
-        "so this would put your site behind a bill rather than on the free tier",
-      `gh repo edit ${slug} --visibility public --accept-visibility-change-consequences\n` +
-        "    (or keep it private and deploy somewhere you already pay for — see docs/guide/deploy.md)",
-    );
-  }
-  record("visibility", "public — Pages and Actions are both free here");
+const isPrivate = visibility.stdout.trim();
+if (visibility.status !== 0 || (isPrivate !== "true" && isPrivate !== "false")) {
+  needsHuman(
+    `could not read whether ${slug} is public, so this stopped rather than risk enabling Pages on a private repo — ` +
+      "which needs a paid GitHub plan and makes Actions minutes billable",
+    `gh api repos/${slug} -q .private     # expect: false\n` +
+      `    (if that errors, check: gh auth status)`,
+  );
 }
+if (isPrivate === "true") {
+  needsHuman(
+    `${slug} is private — GitHub Pages needs a paid plan there, and Actions minutes become billable, ` +
+      "so this would put your site behind a bill rather than on the free tier",
+    `gh repo edit ${slug} --visibility public --accept-visibility-change-consequences\n` +
+      "    (or keep it private and deploy somewhere you already pay for — see docs/guide/deploy.md)",
+  );
+}
+record("visibility", "public — Pages and Actions are both free here");
 
 if (dryRun) {
   record("dry-run", "stopping before any change was made");
