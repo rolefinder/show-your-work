@@ -277,9 +277,28 @@ function App() {
     const onPop = () => {
       setPath(window.location.pathname || "/");
       setSearch(window.location.search || "");
+      // The fragment matters on the way back too. Without this, going back to
+      // a Fit citation restores /experience#<slug> in the address bar and
+      // leaves the reader at the top of the page — the same miss navigate()
+      // fixes on the way forward.
+      scrollToHash(window.location.hash || "");
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  /*
+   * Third path to the same target, and the one an outside agent uses: a cold
+   * load of /experience#<slug>, which is what /api/mcp hands back as a
+   * citation URL. The browser does scroll to the prerendered anchor while
+   * parsing — and then ReactDOM.render replaces #root, rebuilding that element
+   * and losing the position. Re-aims once after the first render.
+   *
+   * Only when a fragment is present: with no hash this must not run, or it
+   * would fight the browser's own scroll restoration on a refresh.
+   */
+  React.useEffect(() => {
+    if (window.location.hash) scrollToHash(window.location.hash);
   }, []);
 
   // Below --bp-md the nav collapses behind a menu button; widening the
