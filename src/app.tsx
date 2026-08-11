@@ -277,11 +277,15 @@ function App() {
     const onPop = () => {
       setPath(window.location.pathname || "/");
       setSearch(window.location.search || "");
-      // The fragment matters on the way back too. Without this, going back to
+      // The fragment matters on the way back too: without this, going back to
       // a Fit citation restores /experience#<slug> in the address bar and
-      // leaves the reader at the top of the page — the same miss navigate()
-      // fixes on the way forward.
-      scrollToHash(window.location.hash || "");
+      // leaves the reader at the top of the page.
+      //
+      // Only when there IS one. scrollToHash sends an empty hash to the top,
+      // and back/forward to an ordinary page must leave scroll alone so the
+      // browser can restore where the reader was — which is what it did before
+      // this handler learned about fragments at all.
+      if (window.location.hash) scrollToHash(window.location.hash);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);

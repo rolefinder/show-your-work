@@ -38,6 +38,7 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [024](architecture/adr/024-directory-skeleton-gate.md) | The directory tree is machine-checked against the one documented |
 | [025](architecture/adr/025-copy-quality-gate.md) | Rendered copy is linted, because no other gate reads the words |
 | [026](architecture/adr/026-experience-and-education-content.md) | **Experience and education** as content types — roles become Fit evidence |
+| [027](architecture/adr/027-free-to-serve.md) | **Free to serve** — the template hosts your Pages site and provisions nothing else |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The

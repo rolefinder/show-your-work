@@ -12,8 +12,9 @@ Paste a job description; get a brief where every aligned claim cites a page you
 actually published, quoted from it. Nothing is asserted that isn't already
 on the site.
 
-MIT · self-hosted React + WebGL graph, no CDN · strict CSP · every route
-prerendered · no LLM anywhere in the matching path.
+MIT · free to run, and gated so it stays that way · self-hosted React + WebGL
+graph, no CDN · strict CSP · every route prerendered · no LLM anywhere in the
+matching path.
 
 **Live:** [harrisonhalperin.com](https://harrisonhalperin.com) — the maintainer's
 own site, built from this template. The demo corpus below is what you get before
@@ -139,6 +140,7 @@ something real:
 |------|-----------------|
 | `parity:check` | The two content resolvers drifting apart — the failure mode that produced four separate bugs before it was gated |
 | `publication:check` | Your own content or `dist/` publishing a term you declared must never ship - a codename, a client, an internal hostname. See `/sanitize` |
+| `free:check` | A metered binding or a third-party fetch reaching a Pages Function — the way a template starts billing people who forked it |
 | `layout:check` | A top-level directory that exists in the repo but not in the documented tree — the drift that makes an agent guess whether a folder is intentional |
 | `additive:check` | A template file committed where an adopter is supposed to add one — the thing that makes a fork un-updatable |
 | `corpus:check` | Real-person fingerprints in `content/demo/` — and a demo persona that isn't obviously fake |

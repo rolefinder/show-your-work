@@ -96,11 +96,18 @@ get one explicit yes. Name the repository, its visibility, and each action:
 > The repo will be public — that is required for Pages on a free account.
 > Shall I go ahead?
 
-Two things this must get right:
+Three things this must get right:
 
 - **Public is a real decision.** GitHub Pages requires a public repository on
   free accounts. The user's YAML becomes world-readable. Say it in those words;
   do not bury it.
+- **This path is free, and you must keep it that way.** Public Pages and public
+  Actions minutes cost nothing. Do not offer to set up Cloudflare, register a
+  domain, or enable a paid plan to get past a problem — none of that is yours to
+  arrange, and a bill that arrives because an agent was being helpful is worse
+  than a site that is not up yet. Name the option, stop, let them decide
+  ([ADR 027](../../../docs/architecture/adr/027-free-to-serve.md)).
+  `pages:setup` refuses a private repo for the same reason and says why.
 - **After the yes, do not ask again.** Steps 4–6 run without further prompts.
   Come back only for a blocker you genuinely cannot resolve.
 

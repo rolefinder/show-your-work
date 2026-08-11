@@ -44,6 +44,14 @@ prompts. Then take a single explicit authorization before anything leaves the
 machine — naming the repository, its visibility, and each action — and do not
 interrupt again until you have a URL or a real blocker.
 
+**Never provision anything metered.** You may enable GitHub Pages on a repo the
+human already owns, and emit a CNAME for a domain they already own. You may not
+create a Cloudflare account, project or binding, register a domain, enable a
+paid plan, or make a private repo public. The person paying is not the person
+prompting, and a bill that arrives because an agent was being helpful is worse
+than a site that is not up yet. Explain the option, and let them take it (ADR
+027).
+
 **Never handle a credential.** Not a password, not a token, not a 2FA code; not
 into a browser, a prompt, or a file. Authentication is the human's, in their own
 terminal. `pages:setup` has no prompt path at all: it asks `gh` whether they
@@ -110,6 +118,9 @@ from one fact acquiring two readers that then drifted — the full table is in
   [CONTRIBUTING.md](./CONTRIBUTING.md#things-that-are-generated).
 - Put a raw color in `styles.css`. Add a token in `tokens/`.
 - Widen the CSP, or load React, the graph engine, or a model host from a CDN.
+- Add a metered binding to `functions/`, or fetch a third-party host from one.
+  `free:check` fails the build, and the reason is ADR 027: an adopter who
+  forked a portfolio template must not be able to receive an invoice for it.
 - Vendor or bundle third-party code without adding it to
   [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md). Self-hosting is how this
   repo satisfies the CSP, and self-hosting is redistribution. Build tooling is
