@@ -26,7 +26,7 @@ description to cited evidence on *your* site.
 | Template routes | **`/work`** and **`/blog`** (not `/projects` / `/writing`) |
 | Repo | **`<owner>/recruit-me`** — **private now, public later** |
 | Architecture vs harrison-site | **Copy** template/Fit onto the recruit-me harness. **harrison-site stays a separate private repo** and dogfoods Fit against real content. Not “make harrison-site the public template.” |
-| License | **Fully open source:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) (OSI). Commercial use, forks, and paid hosting by others are **allowed**. See §9. Trademark on the name `recruit-me` is separate from the code license. |
+| License | **Fully open source:** [MIT](https://opensource.org/license/mit) (OSI) — relicensed from Apache-2.0 on 2026-08-11. Commercial use, forks, and paid hosting by others are **allowed**. See §9. Trademark on the name `recruit-me` is separate from the code license. |
 | LinkedIn | Goal is **automatic pull** of profile/career data. Supported path is **official data-export ZIP → parser → content YAML** (semi-automatic). Full silent API sync of experience/education is **not** available on self-serve LinkedIn APIs today. Scrapers are **out of supported scope**. See §8. |
 | Fit UX | **Open** — single-shot vs multi-turn shell undecided. |
 
@@ -112,19 +112,38 @@ This is **automatic after the official export**, not silent background
 scraping. Document that limitation honestly in the README. Revisit if
 LinkedIn ever ships a self-serve member career-data API.
 
-## 9. License — fully open source (locked)
+## 9. License — fully open source (MIT)
 
 **Decision (Harrison, 2026-07-09):** ship recruit-me as **true open source**,
 not source-available / Commons Clause / PolyForm. Prior anti-profit
-experiment is **withdrawn**.
+experiment is **withdrawn**. That part still holds.
 
-**Chosen license: [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).**
+**Current license: [MIT](https://opensource.org/license/mit).**
+Recorded in [ADR 022](../architecture/adr/022-mit-license-and-third-party-notices.md).
 
-| Why Apache-2.0 over MIT | Why not AGPL / Commons Clause |
-|-------------------------|-------------------------------|
-| Explicit patent grant + clearer trademark non-grant | AGPL is still commercial-OK; Commons Clause is **not** OSI open source |
-| Common for infra / agent tooling adopters | Matches “fully open source” literally |
-| Compatible with most dependency graphs | Maximizes forks, stars, and corporate tryouts |
+> **Superseded 2026-08-11.** This section originally locked
+> [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0). The reasoning
+> below is kept because the alternatives it rules out are still ruled out —
+> only the choice between the two permissive licenses changed.
+>
+> | Why Apache-2.0 over MIT | Why not AGPL / Commons Clause |
+> |-------------------------|-------------------------------|
+> | Explicit patent grant + clearer trademark non-grant | AGPL is still commercial-OK; Commons Clause is **not** OSI open source |
+> | Common for infra / agent tooling adopters | Matches "fully open source" literally |
+> | Compatible with most dependency graphs | Maximizes forks, stars, and corporate tryouts |
+>
+> **What changed:** for a fork-and-own site template, the license is read by an
+> individual deciding whether they may keep the fork, not by a legal team
+> clearing a dependency. MIT is the one permissive license that audience reads
+> without help, and every third-party line in the tree is already MIT
+> ([`THIRD-PARTY-NOTICES.md`](../../THIRD-PARTY-NOTICES.md)), so the project
+> now matches what it ships.
+>
+> **What was given up:** Apache-2.0's express patent grant and its explicit
+> statement that the license conveys no trademark rights. MIT is silent on
+> both. For a static site generator with no patented technique in it, that is
+> a small exposure — but it is a real one, and it is the reason to revisit this
+> if recruit-me ever grows a novel algorithm worth patenting.
 
 **Honest consequence:** anyone may use, modify, sell, or host recruit-me
 (including paid products) without paying Harrison. Protection of the *brand*
@@ -132,9 +151,10 @@ is via **trademark** on `recruit-me` / marketing, not via the code license.
 Protection of *your* live site remains the private harrison-site + security
 baseline ([`recruit-me-security.md`](./recruit-me-security.md)).
 
-**While the repo is private:** add `LICENSE` (Apache-2.0) as soon as the
-scaffold exists so the public flip is a visibility change, not a relicensing
-event. Optional `NOTICE` file if third-party attributions accumulate.
+Third-party attribution lives in
+[`THIRD-PARTY-NOTICES.md`](../../THIRD-PARTY-NOTICES.md), which covers only what
+is redistributed in-tree — vendored React, and the graph engine bundled from
+graphology and sigma. Build tooling never reaches `dist/`, so it is not listed.
 
 This section is product guidance, not legal advice.
 

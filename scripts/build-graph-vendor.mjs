@@ -20,7 +20,12 @@ await build({
   platform: "browser",
   target: ["es2020"],
   minify: true,
-  legalComments: "none",
+  // This file is a committed redistribution of Graphology, ForceAtlas2 and
+  // Sigma, all MIT. Their published dists carry no license banners today, so
+  // attribution lives in THIRD-PARTY-NOTICES.md — but "none" would silently
+  // drop a banner the day one of them starts shipping it. "eof" keeps any such
+  // notice in the artifact, at the end, out of the hot path.
+  legalComments: "eof",
   logLevel: "info",
 });
 
