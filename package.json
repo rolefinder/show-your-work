@@ -55,6 +55,6 @@
     "playwright": "^1.62.0",
     "sigma": "^3.0.3",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^7.0.2"
   }
 }
