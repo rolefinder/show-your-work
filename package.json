@@ -47,7 +47,7 @@
     "test": "npm run additive:check && npm run parity:check && npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run publication:check && npm run pages:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
   },
   "devDependencies": {
-    "@types/react": "^18.3.18",
+    "@types/react": "^19.2.18",
     "@types/react-dom": "^18.3.5",
     "esbuild": "^0.25.0",
     "graphology": "^0.26.0",
