@@ -36,7 +36,7 @@ jobs:
 
       # The built site, downloadable from the PR - lets you eyeball a visual
       # change without building locally.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dist
