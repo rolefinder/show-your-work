@@ -87,7 +87,7 @@ jobs:
       - name: Confirm the site will serve at the root
         run: node scripts/check-pages-target.mjs
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
 
