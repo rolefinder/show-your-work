@@ -37,8 +37,33 @@ function checkOgImage(doc, label) {
   }
 }
 
-for (const name of ["sitemap.xml", "robots.txt", "known-paths.json", "manifest.json", "404.html"]) {
+for (const name of ["sitemap.xml", "robots.txt", "known-paths.json", "manifest.json", "404.html", "llms.txt", "llms-full.txt"]) {
   if (!existsSync(join(dist, name))) fail(`dist/${name} missing`);
+}
+
+/* ---------------------------------------------------------------- AEO ------
+   The agent-facing surface rots silently: nothing renders it, so a regression
+   here is invisible until a site stops being cited and nobody knows why. */
+
+const robotsTxt = readFileSync(join(dist, "robots.txt"), "utf8");
+/* A blanket `User-agent: *` cannot express intent across crawlers that train,
+   crawlers that index for citation, and crawlers fetching one page because a
+   user just asked. The search group is the one that matters for a portfolio. */
+for (const agent of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"]) {
+  if (!new RegExp(`^User-agent: ${agent}$`, "m").test(robotsTxt)) {
+    fail(`robots.txt does not name ${agent} — AI answer engines are the distribution channel for this site`);
+  }
+}
+
+const llmsFull = readFileSync(join(dist, "llms-full.txt"), "utf8");
+const llmsIndex = readFileSync(join(dist, "llms.txt"), "utf8");
+/* Cross-link tokens are renderer markup. Left in these files, an answer engine
+   quotes "{{work:slug|Label}}" back at a reader verbatim. */
+for (const [name, text] of [["llms.txt", llmsIndex], ["llms-full.txt", llmsFull]]) {
+  if (text.includes("{{")) fail(`${name} contains raw {{…}} cross-link tokens — strip them before publishing`);
+}
+if (llmsFull.length <= llmsIndex.length) {
+  fail("llms-full.txt is not longer than llms.txt — it should carry full page text, not just the index");
 }
 
 const sitemap = readFileSync(join(dist, "sitemap.xml"), "utf8");

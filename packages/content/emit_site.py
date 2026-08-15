@@ -139,6 +139,32 @@ def emit_theme(cfg: dict[str, Any]) -> str:
     return "{ " + ", ".join(out) + " }" if out else "{}"
 
 
+def ai_crawlers(cfg: dict[str, Any]) -> str:
+    """Which classes of AI crawler robots.txt invites.
+
+    Both default to true, which is the right default for a portfolio: the
+    search crawlers are how an assistant asked about you cites a real page
+    instead of guessing, and a site whose whole purpose is being found has
+    little to gain from opting out of the training corpora that answer
+    questions about it. An adopter who disagrees flips a boolean.
+    """
+    raw = cfg.get("ai_crawlers") or {}
+    if not isinstance(raw, dict):
+        raise SystemExit(f"{rel(SITE_CFG)}: ai_crawlers must be a mapping of booleans")
+    unknown = sorted(set(raw) - {"search", "training"})
+    if unknown:
+        raise SystemExit(
+            f"{rel(SITE_CFG)}: ai_crawlers does not take {unknown} (it takes: search, training)"
+        )
+    parts = []
+    for key in ("search", "training"):
+        value = raw.get(key, True)
+        if not isinstance(value, bool):
+            raise SystemExit(f"{rel(SITE_CFG)}: ai_crawlers.{key} must be true or false, got {value!r}")
+        parts.append(f"{key}: {'true' if value else 'false'}")
+    return "{ " + ", ".join(parts) + " }"
+
+
 def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
     """Everything that identifies this deployment, for src/ and emit-html."""
     return "\n".join(
@@ -156,6 +182,7 @@ def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
             # exactly while content/about/profile.yaml has not been added.
             f"  demo: {'true' if is_demo() else 'false'},",
             f"  deployTarget: {ts_string(deploy_target(cfg))},",
+            f"  aiCrawlers: {ai_crawlers(cfg)},",
             f"  customDomain: {ts_string(str((cfg.get('deploy') or {}).get('custom_domain') or '').strip())},",
             f"  theme: {emit_theme(cfg)},",
             "};",

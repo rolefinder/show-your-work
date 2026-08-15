@@ -10,6 +10,39 @@ dashboard/account actions on services this template doesn't control.
       re-run `npm run build`, and confirm `dist/sitemap.xml`/`dist/robots.txt`
       no longer say `example.com`.
 
+## Unblock AI crawlers at the edge (Cloudflare only — do this first)
+
+**This is the one that silently costs you everything.** Every Cloudflare zone
+created since 2025-07-01 blocks GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot
+and Google-Extended by default, before `robots.txt` is read. Your `llms.txt`,
+your structured data and your MCP endpoint are all invisible until you change
+it, and nothing in this repo can.
+
+- [ ] Cloudflare dashboard → **AI Crawl Control** (formerly AI Audit).
+- [ ] Allow the search crawlers at minimum: `OAI-SearchBot`,
+      `Claude-SearchBot`, `PerplexityBot` — these are how you get cited.
+- [ ] Allow the user-initiated fetchers: `ChatGPT-User`, `Claude-User`,
+      `Perplexity-User` — someone asking an assistant about you right now.
+- [ ] Decide separately on training crawlers (`GPTBot`, `ClaudeBot`,
+      `Google-Extended`, `CCBot`). Blocking these does **not** remove you from
+      AI search, and `Google-Extended` has no effect on Google Search ranking.
+- [ ] After a few days, check the Crawlers tab: it lists which AI services
+      actually fetched your content in the last 24 hours. That is the only real
+      confirmation the change worked.
+- [ ] Keep `ai_crawlers:` in `content/config/site.yaml` in agreement with what
+      you set here, so `robots.txt` and the edge tell the same story.
+
+## Verify the agent-facing surface
+
+- [ ] `curl https://<your-domain>/llms.txt` — the index.
+- [ ] `curl https://<your-domain>/llms-full.txt` — every page in full.
+- [ ] `curl https://<your-domain>/evidence.json` — the corpus as JSON.
+- [ ] Cloudflare only: `curl -X POST https://<your-domain>/api/mcp -H 'Content-Type: application/json' -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: server/discover' -d '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{}}'`
+      should return your supported protocol versions.
+- [ ] Ask ChatGPT, Claude and Perplexity a question only your site answers
+      ("what has &lt;your name&gt; built with &lt;a skill on your site&gt;?") and see
+      whether they cite your pages. This is the actual scoreboard.
+
 ## Google Search Console
 
 - [ ] Add your domain as a property.

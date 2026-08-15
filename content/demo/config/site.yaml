@@ -26,6 +26,27 @@ short_name: "Fake Name"
 theme_color: "#f7f4ef"
 theme_color_dark: "#131211"
 
+# Which AI crawlers robots.txt invites. Both default to true, and for a site
+# whose purpose is being found by a recruiter's assistant that is almost
+# certainly what you want.
+#
+#   search    The answer engines — OAI-SearchBot, Claude-SearchBot,
+#             PerplexityBot, and the user-initiated fetchers. This is your
+#             distribution: block it and ChatGPT Search, Claude and Perplexity
+#             stop citing you. Turning this off is opting out of AI search.
+#   training  Model training corpora — GPTBot, ClaudeBot, Google-Extended,
+#             CCBot and friends. The real judgement call: no per-visit
+#             referral, but it is what lets a model say anything about you
+#             without a live fetch. Google-Extended governs Gemini only and
+#             has no effect on Google Search ranking.
+#
+# NOTE: robots.txt is only half of it. Cloudflare blocks these crawlers at the
+# edge by DEFAULT on every zone created since 2025-07-01, regardless of what
+# this file says — see docs/guide/deploy.md § Agents and answer engines.
+ai_crawlers:
+  search: true
+  training: true
+
 # Demo mode. TRUE ships the "this corpus is fictional" chrome (home eyebrow,
 # footer line). Set to false — and clear extraCaveats in config/fit.yaml — the
 # moment content/ holds your real work.

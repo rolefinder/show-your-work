@@ -43,7 +43,30 @@ clickjacking protection, which has no meta equivalent.
 For a portfolio, that is usually an acceptable trade, and it is stated here
 rather than glossed so it can be an actual decision.
 
-## Agents
+## Agents and answer engines
+
+> **If you deploy to Cloudflare, read this before anything else.**
+>
+> Since **1 July 2025**, every newly created Cloudflare zone blocks AI crawlers
+> **by default** with a managed WAF rule — GPTBot, ClaudeBot, PerplexityBot,
+> OAI-SearchBot, Google-Extended and others. The rule does not distinguish
+> training crawlers from the search crawlers that cite you.
+>
+> This happens **at the edge, before your `robots.txt` is ever read.** You can
+> ship a perfect `robots.txt`, a complete `llms.txt` and a live MCP endpoint,
+> and ChatGPT Search, Claude and Perplexity will still be unable to see any of
+> it. For a site whose entire purpose is being found by a recruiter's
+> assistant, this is the single most expensive default in the stack.
+>
+> **Fix it in the dashboard** — the repo cannot: open **AI Crawl Control** (the
+> tool formerly called AI Audit) and allow at least the search and
+> user-initiated crawlers. The Crawlers tab shows which AI services actually
+> requested your content in the last 24 hours, so you can confirm the change
+> took effect rather than assume it.
+>
+> GitHub Pages has no such default. This is a Cloudflare-only trap.
+
+
 
 Cloudflare deploys get `POST /api/mcp`, a read-only [MCP](https://modelcontextprotocol.io)
 endpoint (ADR 024) so an assistant can enumerate your pages, read them, and

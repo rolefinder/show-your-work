@@ -18,6 +18,7 @@ export const SITE_CONFIG: SiteConfig = {
   themeColorDark: "#131211",
   demo: true,
   deployTarget: "github-pages",
+  aiCrawlers: { search: true, training: true },
   customDomain: "",
   theme: {},
 };

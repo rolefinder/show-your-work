@@ -33,6 +33,11 @@ export type SiteConfig = {
      shipped palette". Written into dist/tokens/adopter.css at build time so
      theming never means editing a file under tokens/. */
   theme: Partial<Record<"accent" | "accentDeep" | "bg" | "fg", string>>;
+  /* Which classes of AI crawler robots.txt invites. A single `User-agent: *`
+     cannot express this: the bots do three different jobs, and for a portfolio
+     the search-index ones are the whole point — they are how an assistant asked
+     about you cites a real page instead of guessing. See ADR 025. */
+  aiCrawlers: { search: boolean; training: boolean };
 };
 
 /**
