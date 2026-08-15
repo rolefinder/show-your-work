@@ -35,8 +35,18 @@ impossible to reintroduce.
 **D4 is fixed** in ADR 023: a body is now a list of blocks (headings, lists,
 quotes, code, callouts), a plain string still means one paragraph, and code
 blocks are deliberately excluded from the Fit corpus so a citation can never be
-a fragment of shell. `image` and `figure` are designed for and wait on D6 and
-D5. Everything else below is open.
+a fragment of shell. `image` and `figure` are designed for and wait on D6 and D5.
+
+**D2 and D7 are fixed.** The social card now renders against the real
+`dist/tokens/*.css` with `adopter.css` last, so it inherits the adopter's
+palette instead of scraping a shipped default; its CSS moved to
+`scripts/lib/og-card.css` and joined the token gate, and `seo:smoke` now asserts
+every emitted `og:image` resolves to a file. The home page leads with Fit and a
+line saying what it does, shows selected work, and gives its `h1` the display
+step — which is what finally consumes `--text-display`.
+
+Step 0 and step 1 are therefore complete. Steps 2–5 below are open; the figure
+kit's scope is settled (measurement-free flow + stack, not a port — see D5).
 
 ---
 
@@ -75,7 +85,7 @@ for, and add the reverse pass (D3) so this class of regression cannot return.
 
 ---
 
-### D2. The social card ignores the adopter's accent, and is exempt from the token gate
+### D2. The social card ignores the adopter's accent, and is exempt from the token gate — FIXED
 
 **Severity: high** (the most-viewed rendering of the site, and it is off-brand)
 
@@ -289,7 +299,7 @@ before the feature does — `check-ux.mjs:184` fails on an `img` without `alt`.
 
 ---
 
-### D7. The home page has no composition, and buries the product
+### D7. The home page has no composition, and buries the product — FIXED
 
 **Severity: high** (positioning, not just aesthetics)
 
@@ -470,9 +480,9 @@ Ordered so each step is independently shippable and ends green on `npm test`.
 
 | Step | Findings | Why here |
 |---|---|---|
-| 0 | ~~D1~~, D2, ~~D3~~ | Small and mechanical; D3's gate is what stops D1 recurring. D1 and D3 are done — D2 is the remainder |
-| 1 | D4 | Unblocks everything editorial |
-| 2 | D5 | Depends on D4's `{figure}` entry |
-| 3 | D6, D7, D8 | The front door, once there is imagery to put in it |
+| 0 | ~~D1, D2, D3~~ | **Done.** Small and mechanical; D3's gate is what stops D1 recurring |
+| 1 | ~~D4~~ | **Done.** Unblocks everything editorial |
+| 2 | D5 | Depends on D4's `{figure}` entry. Scope settled: a measurement-free flow + stack kit, **not** a port — see D5 |
+| 3 | D6, ~~D7~~, D8 | Imagery, and the rest of the front door. D7 landed early: it needed composition and copy, not an asset pipeline |
 | 4 | D9–D13 | Breadth: graph, print, wide screens, feedback |
 | 5 | D14, D16, Part 5 | Governance, and the reverse port |

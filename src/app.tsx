@@ -396,11 +396,16 @@ function App() {
           activeSkills.every((s) => (w.skills || []).includes(s)),
         );
 
+  /* The home page shows proof, not just a description of it. Authoring order
+     decides what leads — the same order /work uses — so it is an editorial
+     choice made in content/, not a ranking invented here. */
+  const featuredWork = visibleWork.slice(0, 3);
+
   let body: React.ReactNode = null;
   if (view.name === "home") {
     body = React.createElement(
       "section",
-      { className: "page" },
+      { className: "page page--home" },
       SITE_CONFIG.demo
         ? React.createElement("p", { className: "eyebrow" }, "recruit-me demo")
         : null,
@@ -408,13 +413,51 @@ function App() {
       React.createElement("p", { className: "lede" }, SITE_PROFILE.tagline),
       React.createElement("p", { className: "prose" }, SITE_PROFILE.summary),
       React.createElement(ContactRow, null),
+      /* Fit leads. It is the one thing here that is not another portfolio, and
+         it shipped as the third of three buttons in the de-emphasized variant,
+         with nothing saying what it does. */
       React.createElement(
         "div",
         { className: "cta-row" },
-        React.createElement(Link, { href: "/work", className: "btn" }, "Work"),
+        React.createElement(Link, { href: "/fit", className: "btn" }, "Try Fit"),
+        React.createElement(Link, { href: "/work", className: "btn secondary" }, "Work"),
         React.createElement(Link, { href: "/graph", className: "btn secondary" }, "Graph"),
-        React.createElement(Link, { href: "/fit", className: "btn secondary" }, "Try Fit"),
       ),
+      React.createElement(
+        "p",
+        { className: "cta-note" },
+        "Paste a job description — every aligned claim cites a page on this site, quoted from it.",
+      ),
+      featuredWork.length
+        ? React.createElement(
+            "section",
+            { className: "featured" },
+            React.createElement("p", { className: "eyebrow" }, "Selected work"),
+            React.createElement(
+              "ul",
+              { className: "card-list card-list--split" },
+              featuredWork.map((w) =>
+                React.createElement(
+                  "li",
+                  { key: w.slug },
+                  React.createElement(
+                    Link,
+                    { href: "/work/" + w.slug, className: "card-link u-card-link" },
+                    React.createElement("span", { className: "card-link__title" }, w.title),
+                    React.createElement("span", { className: "card-link__summary" }, w.summary),
+                  ),
+                ),
+              ),
+            ),
+            visibleWork.length > featuredWork.length
+              ? React.createElement(
+                  Link,
+                  { href: "/work", className: "featured__more" },
+                  `All ${visibleWork.length} projects →`,
+                )
+              : null,
+          )
+        : null,
       React.createElement(SkillBank, {
         groups: homeSkillGroups,
         intro: "Every skill across work and blog, grouped by tenant config. Click one to open Work filtered to that skill.",

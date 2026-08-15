@@ -1,0 +1,97 @@
+/* ============================================================
+   Social card (1200×630) — the component layer for og:image.
+
+   A real stylesheet rather than a template literal inside
+   prerender-routes.ts for one reason: check-style-tokens.mjs can scan a .css
+   file, and this is the most-viewed rendering of the whole site. It had drifted
+   before anything was watching — its own font stack, its own ink ramp, and an
+   eyebrow tracked at 0.14em against the 0.12em that tokens/typography.css calls
+   "THE eyebrow signature".
+
+   The prerenderer inlines the REAL dist/tokens/*.css here, adopter.css last, so
+   every value below resolves through the same four --rm-* variables the site
+   does. An adopter who sets theme.accent gets their colour on the card and on
+   the page from one edit. Never restate a value a token already holds; that is
+   how the drift happened.
+
+   The card is the site's inverse surface — --surface-inverse over
+   --fg-on-inverse — rather than a separately-configured dark. That is what
+   makes it follow the adopter's palette instead of tracking it by hand.
+
+   Sizes are fixed pixels because the canvas is always exactly 1200×630. The
+   fluid type scale has nothing to be fluid against here, so a clamp() would be
+   theatre.
+   ============================================================ */
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 1200px;
+  height: 630px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 72px 80px;
+  background: var(--surface-inverse);
+  color: var(--fg-on-inverse);
+  font-family: var(--font-sans);
+}
+
+.eyebrow {
+  font-size: 26px;
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--fg-on-inverse-muted);
+}
+
+/* The accent stripe. --brand resolves through --rm-brand. */
+.accent {
+  width: 120px;
+  height: 6px;
+  margin-bottom: 28px;
+  border-radius: 3px;
+  background: var(--brand);
+}
+
+h1 {
+  font-size: 76px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.06;
+  letter-spacing: var(--tracking-display);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* A long title needs the smaller step or it clips at three lines. Set as a
+   class on <body> rather than an interpolated font-size, so the value stays in
+   this file where the gate can see it. */
+body.long-title h1 {
+  font-size: 60px;
+}
+
+.desc {
+  margin-top: 24px;
+  max-width: 20em;
+  font-size: 30px;
+  line-height: var(--line-body);
+  color: var(--fg-on-inverse-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 28px;
+  font-weight: var(--weight-medium);
+  color: var(--fg-on-inverse-muted);
+}

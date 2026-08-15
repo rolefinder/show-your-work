@@ -37,6 +37,13 @@ override you.
 Dark mode follows `prefers-color-scheme` and is derived, not hand-painted —
 there is no second palette to keep in sync.
 
+**Your social cards follow too.** The 1200×630 `og:image` rendered for every
+route is built against these same tokens (`scripts/lib/og-card.css`, with
+`dist/tokens/*.css` inlined and `adopter.css` last), so the accent stripe on the
+card a recruiter sees in Slack is the accent you set here. It used to be read
+from the shipped defaults, which meant every fork's cards went out in the
+template's teal no matter what the site looked like.
+
 ## How it is layered
 
 ```

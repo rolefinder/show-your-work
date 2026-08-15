@@ -16,6 +16,27 @@ function fail(msg) {
   process.exit(1);
 }
 
+let ogChecked = 0;
+
+/** og:image and twitter:image must both point at a file that exists in dist/. */
+function checkOgImage(doc, label) {
+  for (const [attr, re] of [
+    ["og:image", /<meta property="og:image" content="([^"]*)"/],
+    ["twitter:image", /<meta name="twitter:image" content="([^"]*)"/],
+  ]) {
+    const url = (doc.match(re) || [])[1];
+    if (!url) fail(`${label} has no ${attr}`);
+    // Same-origin absolute URL -> a path under dist/.
+    const path = url.replace(/^https?:\/\/[^/]+/, "");
+    if (!path.startsWith("/")) fail(`${label} ${attr} is not an absolute URL: ${url}`);
+    const file = join(dist, ...path.split("/").filter(Boolean));
+    if (!existsSync(file)) {
+      fail(`${label} ${attr} points at ${path}, but dist${path} does not exist`);
+    }
+    ogChecked++;
+  }
+}
+
 for (const name of ["sitemap.xml", "robots.txt", "known-paths.json", "manifest.json", "404.html"]) {
   if (!existsSync(join(dist, name))) fail(`dist/${name} missing`);
 }
@@ -68,8 +89,15 @@ if (prerendered) {
     if (!/<script type="application\/ld\+json">\s*\{"@context"/.test(doc)) {
       fail(`dist${p}.html missing JSON-LD`);
     }
+    /* The tag and the artifact have to agree. Every route emits an og:image
+       URL, and nothing checked that a file existed at the other end — a card
+       that failed to render, or a route key that stopped matching its filename,
+       would ship a broken preview to every recruiter the link reaches while
+       every gate stayed green. */
+    checkOgImage(doc, `dist${p}.html`);
     checkedRoutes++;
   }
+  checkOgImage(readFileSync(join(dist, "index.html"), "utf8"), "dist/index.html");
 }
 
 console.log("seo-smoke ok", {
@@ -77,4 +105,5 @@ console.log("seo-smoke ok", {
   knownPaths: knownPaths.length,
   prerendered,
   checkedRoutes,
+  ogImagesResolved: ogChecked,
 });

@@ -154,6 +154,44 @@
   letter-spacing: var(--tracking-display);
 }
 
+/* The home page is the one place the type scale reaches its top step. Until
+   something used --text-display, the largest type anywhere was a 28→40px h1,
+   which is the mechanical reason the page read flat. */
+.page--home h1 {
+  font-size: var(--text-display);
+}
+
+/* One line under the CTA row saying what Fit is. Sits with the buttons rather
+   than starting a new block, so it reads as their caption.
+
+   text-wrap: pretty because a two-word orphan on the second line is exactly
+   what this sentence produced at desktop width. Ignored by browsers that do
+   not support it, which is the correct degradation for a wrapping hint. */
+.cta-note {
+  margin-top: var(--space-3);
+  max-width: var(--measure-reading);
+  font-size: var(--text-body);
+  color: var(--fg-muted);
+  text-wrap: pretty;
+}
+
+.featured {
+  margin-top: var(--section-gap);
+}
+
+.featured__more {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-4);
+  font-size: var(--text-body);
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+
+.featured__more:hover {
+  color: var(--fg);
+}
+
 .page h2 {
   margin-top: var(--space-10);
 }
@@ -176,6 +214,7 @@
   font-size: var(--text-lead);
   line-height: var(--line-body);
   color: var(--fg-muted);
+  text-wrap: pretty;
 }
 
 .prose {

@@ -78,6 +78,13 @@
   /* Decorative only (dots, separators) — fails AA for text. */
   --fg-faint: var(--ink-40);
   --fg-on-inverse: var(--cream);
+  /* Secondary and tertiary ink for an inverse surface — the social card sets
+     an eyebrow, a description and a footer on --surface-inverse. Written as
+     explicit channels rather than an alpha of --cream because a var() cannot be
+     given an alpha without color-mix, and the component layer may not call it.
+     Both clear AA against --surface-inverse at the 26-30px the card uses. */
+  --fg-on-inverse-muted: rgb(255 253 249 / 0.72);
+  --fg-on-inverse-dim: rgb(255 253 249 / 0.66);
   /* No --fg-on-brand: nothing in the system sets text on a solid accent fill.
      The primary button is ink-on-cream (--surface-inverse/--fg-on-inverse) and
      pressed states use the --brand-soft tint, which keeps --fg. Add it back

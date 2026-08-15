@@ -38,8 +38,15 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const tokensDir = join(root, "tokens");
 
-/** Files whose values must be tokens, not literals. */
-const COMPONENT_LAYER = ["styles.css"];
+/** Files whose values must be tokens, not literals.
+ *
+ * og-card.css is here because the social card is the most-viewed rendering of
+ * the site and was, until it became a real stylesheet, exempt from every rule
+ * in this file — it had drifted to its own font stack, its own ink ramp, and an
+ * eyebrow tracked at 0.14em against the token's 0.12em. A card that renders in
+ * the template's colours on someone else's site is a branding bug, so it is
+ * held to the same standard as the page. */
+const COMPONENT_LAYER = ["styles.css", "scripts/lib/og-card.css"];
 
 const COLOR_LITERAL =
   /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|color-mix)\s*\(/gi;
