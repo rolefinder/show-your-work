@@ -57,10 +57,18 @@ for (const agent of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"]) {
 
 const llmsFull = readFileSync(join(dist, "llms-full.txt"), "utf8");
 const llmsIndex = readFileSync(join(dist, "llms.txt"), "utf8");
-/* Cross-link tokens are renderer markup. Left in these files, an answer engine
-   quotes "{{work:slug|Label}}" back at a reader verbatim. */
-for (const [name, text] of [["llms.txt", llmsIndex], ["llms-full.txt", llmsFull]]) {
-  if (text.includes("{{")) fail(`${name} contains raw {{…}} cross-link tokens — strip them before publishing`);
+/* Cross-link tokens are renderer markup. Left in, an answer engine quotes
+   "{{work:slug|Label}}" back at a reader verbatim.
+
+   Checked strictly on llms.txt only, which is prose end to end. llms-full.txt
+   reproduces code blocks verbatim, and code legitimately contains brace syntax
+   — a GitHub Actions sample is full of `${{ … }}`, and a page documenting this
+   project's own cross-link syntax has the real thing inside a fence. Failing
+   the build on either would be the gate breaking valid content. The guarantee
+   there comes from bodyFullText stripping per block instead, leaving code
+   alone. */
+if (llmsIndex.includes("{{")) {
+  fail("llms.txt contains raw {{…}} cross-link tokens — strip them before publishing");
 }
 if (llmsFull.length <= llmsIndex.length) {
   fail("llms-full.txt is not longer than llms.txt — it should carry full page text, not just the index");

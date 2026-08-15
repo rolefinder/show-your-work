@@ -29,16 +29,27 @@ import type { BodyBlock } from "../types";
  * is about what may be *quoted as a claim*; this is about representing the
  * page, where a code sample is legitimate content a reader can see.
  */
-export function bodyFullText(blocks: BodyBlock[] | undefined): string {
+export function bodyFullText(
+  blocks: BodyBlock[] | undefined,
+  stripProseTokens: (s: string) => string = (s) => s,
+): string {
+  /* Token stripping happens per block, not over the joined result, because
+     code is not prose. A shell or GitHub Actions sample legitimately contains
+     `${{ … }}`, and a page documenting this project's own cross-link syntax
+     legitimately contains `{{work:slug|Label}}` inside a fence. Rewriting
+     either would make the "full text" disagree with the page it claims to
+     reproduce — and a blanket check for `{{` would fail the build on a
+     perfectly valid Actions snippet. */
   const parts: string[] = [];
+  const prose = (s: string) => stripProseTokens(s);
   for (const block of blocks || []) {
-    if (typeof block === "string") parts.push(block);
-    else if ("list" in block) parts.push(...block.list.map((i) => `- ${i}`));
-    else if ("h2" in block) parts.push(block.h2);
-    else if ("h3" in block) parts.push(block.h3);
-    else if ("quote" in block) parts.push(block.quote, ...(block.cite ? [`— ${block.cite}`] : []));
-    else if ("note" in block) parts.push(block.note);
-    else if ("code" in block) parts.push(block.code);
+    if (typeof block === "string") parts.push(prose(block));
+    else if ("list" in block) parts.push(...block.list.map((i) => `- ${prose(i)}`));
+    else if ("h2" in block) parts.push(prose(block.h2));
+    else if ("h3" in block) parts.push(prose(block.h3));
+    else if ("quote" in block) parts.push(prose(block.quote), ...(block.cite ? [`— ${prose(block.cite)}`] : []));
+    else if ("note" in block) parts.push(prose(block.note));
+    else if ("code" in block) parts.push(block.code); // verbatim, always
   }
   return parts.join("\n\n").trim();
 }

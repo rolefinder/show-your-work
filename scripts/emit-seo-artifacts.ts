@@ -142,7 +142,7 @@ function llmsFullTxt(): string {
         lines.push("");
       }
 
-      const body = stripTokens(bodyFullText(item.body));
+      const body = bodyFullText(item.body, stripTokens);
       if (body) lines.push(body, "");
     }
   }
