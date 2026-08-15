@@ -95,6 +95,9 @@ recruit-me/
 │   ├── profile-links.ts           platform key → display label (shared w/ build)
 │   ├── globals.d.ts               vendored React/ReactDOM as globals
 │   ├── generated/content.ts       ▒ GENERATED from content/
+│   ├── content/
+│   │   ├── bodyText.ts            body blocks → flat prose (Fit/search; no code)
+│   │   └── Body.tsx               body blocks → elements
 │   ├── fit/
 │   │   ├── config.ts              tunables, defaults, caveat resolution
 │   │   ├── extract.ts             JD → requirement lines; tokenize; synonym expand

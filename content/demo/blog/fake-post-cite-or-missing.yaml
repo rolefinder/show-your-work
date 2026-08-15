@@ -2,12 +2,55 @@ slug: fake-post-cite-or-missing
 title: "Fake Post: cite or missing"
 summary: >
   Why a JD fit brief should refuse aligned claims without citations.
-body: >
-  Recruiters need requirement-to-evidence mapping, not a chatty bio bot.
-  The cite-or-missing contract marks gaps honestly and links only to published
-  /work and /blog pages — for example {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and
-  {{work:fake-project-content-emit|Fake Project: Content Emit}}. Deterministic matchers are a safe v1; RAG can
-  swap in later behind the same JSON shape.
+
+# `body:` may be a single string (one paragraph) or a list of blocks, as here.
+# The grammar is documented in packages/content/body.py. This post uses every
+# block type on purpose: it is the template's worked example, and it is the
+# page ux:check sweeps to prove each one renders in both schemes.
+#
+# Note the `>` on prose entries. A plain YAML scalar ends at ": ", so a
+# cross-link label containing a colon — {{work:slug|Fake Project: Merge Gate}} —
+# is a parse error without it. Folded scalars are what the rest of the corpus
+# uses for the same reason.
+body:
+  - >
+    Recruiters need requirement-to-evidence mapping, not a chatty bio bot.
+    The cite-or-missing contract marks gaps honestly and links only to published
+    /work and /blog pages — for example {{work:fake-project-merge-gate|Fake Project: Merge Gate}}
+    and {{work:fake-project-content-emit|Fake Project: Content Emit}}.
+
+  - h2: What the contract actually says
+
+  - >
+    The rule is narrow enough to enforce mechanically, which is the only kind of
+    rule that survives contact with a deadline.
+
+  - list:
+      - An aligned verdict requires at least one citation.
+      - A citation quotes text that already exists on a published page.
+      - A requirement with no match is reported as a gap, not softened.
+
+  - quote: >
+      A brief that cannot cite is a brief that is guessing.
+    cite: The cite-or-missing rule, in one line
+
+  - h3: Why deterministic retrieval
+
+  - >
+    A model would write a smoother brief and would occasionally invent an
+    employer. Keyword retrieval cannot, because it can only surface sentences
+    that are already in the corpus. Smoothness is not worth a fabricated date.
+
+  - code: |
+      npm run fit:smoke
+      # asserts: aligned => at least one citation, on every fixture
+    lang: bash
+
+  - note: >
+      Deterministic matchers are a safe v1; RAG can swap in later behind the same
+      JSON shape, because the contract is about citations rather than about how a
+      candidate sentence was found.
+
 skills:
   - Fit
   - evidence

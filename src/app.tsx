@@ -1,6 +1,7 @@
 import type { WorkItem } from "./types";
 import { linkLabel } from "./profile-links";
 import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { Body } from "./content/Body";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
@@ -506,7 +507,7 @@ function App() {
           React.createElement("h1", null, w.title),
           React.createElement("p", { className: "lede" }, w.summary),
           React.createElement(ProjectBrief, { item: w }),
-          React.createElement("p", { className: "prose" }, richText(w.body, navigate)),
+          React.createElement(Body, { blocks: w.body, navigate }),
           React.createElement(SkillTags, { item: w, Link }),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
@@ -542,7 +543,7 @@ function App() {
           React.createElement(Link, { href: "/blog", className: "page-back" }, "← Blog"),
           React.createElement("h1", null, b.title),
           React.createElement("p", { className: "lede" }, b.summary),
-          React.createElement("p", { className: "prose" }, richText(b.body, navigate)),
+          React.createElement(Body, { blocks: b.body, navigate }),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
   } else if (view.name === "fit") {

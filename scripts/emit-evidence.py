@@ -23,6 +23,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+from packages.content.body import body_text  # noqa: E402
 from packages.content.paths import corpus_files, is_demo, resolve  # noqa: E402
 OUT = ROOT / "dist" / "evidence.json"
 
@@ -72,7 +73,7 @@ def main() -> int:
                     for part in [
                         str(w.get("title") or ""),
                         str(w.get("summary") or "").strip(),
-                        str(w.get("body") or "").strip(),
+                        body_text(w.get("body")),
                         str(w.get("problem") or "").strip(),
                         *claims,
                         *[str(d).strip() for d in (w.get("decisions") or [])],
@@ -104,7 +105,7 @@ def main() -> int:
                     [
                         str(b.get("title") or ""),
                         str(b.get("summary") or "").strip(),
-                        str(b.get("body") or "").strip(),
+                        body_text(b.get("body")),
                         " ".join(b.get("skills") or []),
                     ]
                 ),

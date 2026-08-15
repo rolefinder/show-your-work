@@ -53,7 +53,7 @@ build fails otherwise, because the slug is the URL.
 | `slug` | string | Lowercase, hyphens. Must match the filename |
 | `title` | string | Quote it if it contains a colon |
 | `summary` | string | One sentence a recruiter can read in three seconds. This is the card |
-| `body` | string | The prose. Supports [cross-links](#cross-links) |
+| `body` | string or list | The prose. One paragraph as a string, or a list of [blocks](#long-form-bodies). Supports [cross-links](#cross-links) |
 | `skills` | list | Skill labels. These drive the skill bank, the graph, and Fit's heaviest signal — see [spelling](#skills-are-a-taxonomy-not-tags) |
 
 ### Optional
@@ -99,6 +99,68 @@ surrounding paragraph. That is the whole trick.
 
 `npm run ready` warns — it does not block — on a project with no `outcome` or
 `evidence`, and tells you Fit will quote fragments there.
+
+## Long-form bodies
+
+A `body` can stay a single string — that is one paragraph, and it is still the
+right shape for most project pages:
+
+```yaml
+body: >
+  One paragraph, folded across as many source lines as you like.
+```
+
+When a page needs more than a paragraph, write a list instead. A bare entry is
+a paragraph; the rest are single-key blocks:
+
+```yaml
+body:
+  - >
+    A paragraph. Cross-links work here and in every block below.
+
+  - h2: A section heading
+  - h3: A sub-heading
+
+  - list:
+      - A bullet
+      - Another bullet
+  - list:
+      - A numbered step
+    ordered: true
+
+  - quote: >
+      Someone else's sentence.
+    cite: Who said it
+
+  - code: |
+      npm run build
+    lang: bash
+
+  - note: >
+      An aside the reader can skip.
+```
+
+`content/demo/blog/fake-post-cite-or-missing.yaml` uses every block, and is the
+page to copy from.
+
+**Write prose entries as `>` block scalars.** A plain YAML scalar ends at the
+first `": "`, so a cross-link label containing a colon —
+`{{work:slug|Fake Project: Merge Gate}}` — is a parse error without one. The
+same applies to any sentence with a colon in it.
+
+Two rules the build enforces, both because the alternative is silent:
+
+- **A misspelled block key fails the build.** `h1:` or `attribution:` names the
+  file and the block index rather than being skipped, because a section that
+  quietly disappears looks exactly like one you never wrote.
+- **Code blocks are not part of the Fit corpus.** Fit cites by quoting text from
+  your pages, and half a line of shell is not a claim about your work. Code is
+  rendered, indexed by nothing, and never quoted back to a recruiter. Every
+  other block is prose you wrote and is fair to cite.
+
+`image` and `figure` blocks are not implemented yet — each needs a subsystem
+this template does not have (an asset pipeline, a diagram kit). The grammar is
+designed to take them without changing what you have already authored.
 
 ## Cross-links
 

@@ -41,6 +41,8 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+from packages.content.body import BodyError, body_text  # noqa: E402
+from packages.content.body import normalize as normalize_body  # noqa: E402
 from packages.content.paths import corpus_dir, corpus_files, rel, resolve  # noqa: E402
 
 REQUIRED = {
@@ -95,6 +97,14 @@ def collect(kind: str) -> dict[str, dict]:
         date = data.get("date")
         if date is not None and not DATE.match(str(date)):
             errors.append(f"{rel}: date {date!r} is not YYYY-MM or YYYY-MM-DD")
+        # Body blocks, reported here with a filename rather than as a traceback
+        # out of the emitter. A mistyped block key is the dangerous case: the
+        # section would otherwise have to either vanish from the page or crash
+        # the build, and vanishing looks exactly like never having written it.
+        try:
+            normalize_body(data.get("body"))
+        except BodyError as exc:
+            errors.append(f"{rel}: {exc}")
         out[str(data.get("slug") or path.stem)] = data
     return out
 
@@ -102,12 +112,37 @@ def collect(kind: str) -> dict[str, dict]:
 work = collect("work")
 blog = collect("blog")
 
+def link_scan_text(data: dict, field: str) -> str:
+    """The text a link check should scan, for one field.
+
+    `body` is a block list, so this flattens it — using the same body_text the
+    renderer's link rendering follows, which is what keeps validation and
+    rendering from drifting apart. A body whose blocks do not parse returns
+    empty rather than raising: collect() has already reported that file's shape
+    error, and letting this raise would replace a named, actionable error with
+    a traceback (platform-review-2026-07 P2(c)).
+    """
+    if field != "body":
+        return str(data.get(field) or "")
+    try:
+        return body_text(data.get("body"))
+    except BodyError:
+        return ""
+
+
 # ---------- cross-links resolve ----------
 known = {"work": set(work), "blog": set(blog)}
 for kind, items in (("work", work), ("blog", blog)):
     for slug, data in items.items():
         for field in ("summary", "body"):
-            for m in TOKEN.finditer(str(data.get(field) or "")):
+            # `body` is a block list. Scanning str(list) would still find the
+            # tokens by accident, but only because repr happens to include
+            # them — body_text is the same text the renderer turns into links,
+            # so validation and rendering cannot drift apart. Code blocks are
+            # excluded from both: they render literally, so a {{…}} inside one
+            # is never a link and must not be reported as a broken one.
+            raw = link_scan_text(data, field)
+            for m in TOKEN.finditer(raw):
                 target_kind = "blog" if m.group(1) in ("blog", "post") else "work"
                 target = m.group(2)
                 if target not in known[target_kind]:

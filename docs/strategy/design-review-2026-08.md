@@ -30,7 +30,13 @@ system fonts (no shipped webfont) and dark mode via `prefers-color-scheme` only.
 **Status.** D1 and D3 were fixed in the change that added this document —
 `--brand-deep` now has consumers, the four dead semantic tokens are gone, and
 `check-style-tokens.mjs` grew the reverse pass that makes both regressions
-impossible to reintroduce. Everything else below is open.
+impossible to reintroduce.
+
+**D4 is fixed** in ADR 023: a body is now a list of blocks (headings, lists,
+quotes, code, callouts), a plain string still means one paragraph, and code
+blocks are deliberately excluded from the Fit corpus so a citation can never be
+a fragment of shell. `image` and `figure` are designed for and wait on D6 and
+D5. Everything else below is open.
 
 ---
 
@@ -201,7 +207,7 @@ now stripped the same way the literal scan already was.
 
 ## Part 2 — The expression ceiling
 
-### D4. A body is one string, rendered as one `<p>`
+### D4. A body is one string, rendered as one `<p>` — FIXED
 
 **Severity: high** (this is the product ceiling)
 
