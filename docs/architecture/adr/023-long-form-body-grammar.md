@@ -61,6 +61,14 @@ Fit contract — which is where the interesting constraint lives.
    and the emitter report it; neither raises a traceback
    (platform-review-2026-07 P2(c)).
 
+   This includes the *shape* of a `list`, not only the block key. A bare string
+   is iterable one character at a time, and `list: A bullet` is the same
+   `key: text` shape `h2`, `h3` and `note` take — so the natural mistake would
+   otherwise publish one bullet per letter. A mapping item (`- Label: text`,
+   which is how an unquoted bullet containing `": "` parses) would publish a
+   Python repr to the page. Both are rejected. This is worse than the silent
+   disappearance the rule above is about: it silently publishes garbage.
+
 6. **`image` and `figure` are designed for and deliberately absent.** Each needs
    a subsystem that does not exist yet — an asset pipeline (design review D6)
    and a diagram kit (D5). Adding a variant to the union is additive, so they

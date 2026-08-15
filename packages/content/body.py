@@ -105,7 +105,27 @@ def _normalize_entry(entry: Any, i: int) -> list[Any]:
         raise BodyError(f"{where}: {key} block does not take {unknown} (it takes: {extra})")
 
     if key == "list":
-        items = [str(x).strip() for x in (entry.get("list") or []) if str(x or "").strip()]
+        raw_items = entry.get("list")
+        # A bare string is iterable one character at a time, and `list: text` is
+        # the same `key: text` shape that h2, h3 and note take — so the natural
+        # mistake publishes a bullet per letter rather than failing.
+        if raw_items is not None and not isinstance(raw_items, (list, tuple)):
+            raise BodyError(
+                f"{where}: list takes a sequence of bullets, got "
+                f"{type(raw_items).__name__} — write each bullet as its own `- ` item"
+            )
+        items: list[str] = []
+        for j, item in enumerate(raw_items or []):
+            # `- Label: text` parses as a mapping, and str() on it would publish
+            # a Python repr to the page.
+            if isinstance(item, (dict, list, tuple)):
+                raise BodyError(
+                    f"{where}: list[{j}] must be text, got {type(item).__name__} — "
+                    "a bullet is one line of text; quote it if it contains ': '"
+                )
+            text = " ".join(str(item or "").split())
+            if text:
+                items.append(text)
         if not items:
             return []
         block: dict[str, Any] = {"list": items}

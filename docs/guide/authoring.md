@@ -150,9 +150,12 @@ same applies to any sentence with a colon in it.
 
 Two rules the build enforces, both because the alternative is silent:
 
-- **A misspelled block key fails the build.** `h1:` or `attribution:` names the
-  file and the block index rather than being skipped, because a section that
-  quietly disappears looks exactly like one you never wrote.
+- **A misspelled or misshapen block fails the build.** `h1:` or `attribution:`
+  names the file and the block index rather than being skipped, because a
+  section that quietly disappears looks exactly like one you never wrote. So
+  does `list: one bullet` — a `list` needs `- ` items, and a bare string there
+  would publish one bullet per letter. A bullet containing `": "` must be
+  quoted, or YAML reads it as a mapping.
 - **Code blocks are not part of the Fit corpus.** Fit cites by quoting text from
   your pages, and half a line of shell is not a claim about your work. Code is
   rendered, indexed by nothing, and never quoted back to a recruiter. Every
