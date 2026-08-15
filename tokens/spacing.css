@@ -22,8 +22,10 @@
 
   /* ---------- Layout containers ---------- */
   --container-max: 960px; /* primary content column */
-  --container-narrow: 720px; /* long-form reading measure */
-  --container-wide: 1280px; /* full-bleed inner bound (graph) */
+  /* No --container-narrow: the reading measure is --measure-reading (66ch),
+     which tracks the type scale instead of fixing a pixel width. No
+     --container-wide either, until something is actually laid out wide —
+     check-style-tokens fails on a semantic token nothing consumes. */
 
   /* Page gutter scales from phone → desktop */
   --gutter: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);

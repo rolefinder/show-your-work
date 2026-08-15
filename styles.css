@@ -293,6 +293,10 @@ button.linkish {
   cursor: pointer;
 }
 
+button.linkish:active {
+  color: var(--brand-deep);
+}
+
 .prose-link {
   color: var(--fg);
   font-weight: var(--weight-medium);
@@ -522,9 +526,11 @@ a.tag:hover {
   border-color: var(--border);
 }
 
+/* The one genuinely stateful chip in the system: --brand-deep is specified as
+   the pressed accent, and this is what "pressed" means here. */
 .skill-chip.pressed {
   background: var(--brand-soft);
-  border-color: var(--accent);
+  border-color: var(--brand-deep);
   color: var(--fg);
 }
 

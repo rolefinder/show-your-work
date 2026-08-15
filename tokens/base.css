@@ -94,6 +94,12 @@ a:hover {
   text-decoration-color: var(--accent);
 }
 
+/* Pressed goes one step past hover. --brand-deep is darker than the accent in
+   light and lighter in dark, so "heavier" reads the same way in both schemes. */
+a:active {
+  text-decoration-color: var(--brand-deep);
+}
+
 img,
 svg,
 video {
@@ -149,14 +155,12 @@ input[type="range"] {
   font-weight: var(--weight-medium);
 }
 
-/* Card — the dominant container. */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-5);
-}
+/* No .card here. The card treatment (surface + border-soft + radius-2xl +
+   shadow-card) is declared by the three components that actually use it —
+   .card-link, .project-brief and .fit-req in styles.css. A base .card that
+   nothing applied shipped for long enough to be worth naming: it read as the
+   system's dominant container while every real card redeclared the same five
+   properties beside it. */
 
 /* Centered content column with responsive gutter. */
 .container {

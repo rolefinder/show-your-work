@@ -54,6 +54,8 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 - [Recruiter Fit PRD](strategy/recruiter-fit-prd.md) — the module
 - [Platform review, 2026-07](strategy/platform-review-2026-07.md) —
   standardization and adopter-UX findings, each with a repro
+- [Design review, 2026-08](strategy/design-review-2026-08.md) — where the visual
+  and editorial layer falls short of the dogfood site, each with a repro
 
 ## Project history
 
