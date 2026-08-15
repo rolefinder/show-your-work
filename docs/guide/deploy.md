@@ -53,6 +53,11 @@ deterministic matcher the site uses. No model runs on the server, so nothing it
 returns is generated: every aligned claim cites one of your pages and quotes
 text already on it.
 
+The endpoint speaks both protocol eras on one URL: the current stateless
+revision (`2026-07-28`, per-request metadata and validated headers) and the
+older `initialize` handshake used by revisions through `2025-11-25`. Clients
+built against either one work without configuration.
+
 `.well-known/mcp.json` and the `llms.txt` entry are written **only** on the
 Cloudflare target, because advertising an endpoint that 404s is worse than
 advertising none.

@@ -69,8 +69,9 @@ function llmsTxt(): string {
      on both targets. */
   if (MCP_AVAILABLE) {
     lines.push(
-      `- [MCP](${SITE}/api/mcp): Model Context Protocol endpoint (streamable-http, read-only) — ` +
-        "tools: list_pages, get_page, fit_brief. No model runs server-side.",
+      `- [MCP](${SITE}/api/mcp): Model Context Protocol endpoint (streamable-http, read-only, ` +
+        "protocol 2026-07-28 with legacy fallback) — tools: list_pages, get_page, fit_brief. " +
+        "No model runs server-side.",
     );
   }
   lines.push("");
