@@ -35,6 +35,7 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [021](architecture/adr/021-additive-only-adoption.md) | **Adoption is additive** — you add files, you never edit or delete them |
 | [022](architecture/adr/022-mit-license-and-third-party-notices.md) | MIT, and attribution for what is actually redistributed |
 | [023](architecture/adr/023-long-form-body-grammar.md) | **Long-form body grammar** — blocks, and why code is not citable |
+| [024](architecture/adr/024-read-only-mcp-endpoint.md) | **Read-only MCP endpoint** — agents query the corpus; no model runs server-side |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The

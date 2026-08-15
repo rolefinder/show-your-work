@@ -157,8 +157,9 @@ recruit-me/
 │   └── theme.mjs                  reads pg-* CSS vars via canvas readback
 │
 ├── functions/                   ▓ Cloudflare Pages Functions
-│   ├── _middleware.js             404 status + which document to serve
-│   └── api/fit.ts                 optional POST /api/fit
+│   ├── _middleware.js             404 status + which document to serve; /api/* → next()
+│   ├── api/fit.ts                 optional POST /api/fit
+│   └── api/mcp.ts                 read-only MCP endpoint for agents (ADR 024)
 │
 ├── public/                      ▓ WEB ROOT — copied to dist/, never edited
 │   ├── index.html · 404.html      templates; identity injected at build

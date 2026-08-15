@@ -61,9 +61,41 @@ function llmsTxt(): string {
   lines.push(
     `- [Fit](${SITE}/fit): paste a job description, get a brief where every aligned claim cites a page above.`,
     `- [Graph](${SITE}/graph): how the work connects.`,
-    "",
+    `- [Evidence pack](${SITE}/evidence.json): every page above as JSON — id, title, canonical URL, full text, skills.`,
   );
+  /* Only advertise the MCP endpoint where it can actually run. GitHub Pages
+     serves no Functions, so listing it there would send every agent that reads
+     this file to a 404. evidence.json above is the static equivalent and works
+     on both targets. */
+  if (MCP_AVAILABLE) {
+    lines.push(
+      `- [MCP](${SITE}/api/mcp): Model Context Protocol endpoint (streamable-http, read-only) — ` +
+        "tools: list_pages, get_page, fit_brief. No model runs server-side.",
+    );
+  }
+  lines.push("");
   return lines.join("\n");
+}
+
+/** Pages Functions exist only on Cloudflare; GitHub Pages cannot run them. */
+const MCP_AVAILABLE = SITE_CONFIG.deployTarget === "cloudflare-pages";
+
+/**
+ * .well-known/mcp.json — registry-style discovery, so an agent handed only the
+ * domain can find the endpoint rather than being told about it out of band.
+ */
+function mcpManifest(): string {
+  return (
+    JSON.stringify(
+      {
+        name: SITE_PROFILE.name,
+        description: `Read-only portfolio corpus for ${SITE_PROFILE.name}. Enumerate pages, read their text, and score a job description against published evidence.`,
+        remotes: [{ type: "streamable-http", url: `${SITE}/api/mcp` }],
+      },
+      null,
+      2,
+    ) + "\n"
+  );
 }
 
 export function emitSeoArtifacts(): void {
@@ -99,9 +131,15 @@ export function emitSeoArtifacts(): void {
   writeFileSync(join(dist, "llms.txt"), llmsTxt(), "utf8");
   writeFileSync(join(dist, "known-paths.json"), JSON.stringify(paths), "utf8");
 
+  if (MCP_AVAILABLE) {
+    mkdirSync(join(dist, ".well-known"), { recursive: true });
+    writeFileSync(join(dist, ".well-known", "mcp.json"), mcpManifest(), "utf8");
+  }
+
   console.log(
     `emit-seo-artifacts: ok - ${paths.length} sitemap URLs, ${paths.length} known paths, ` +
-      `llms.txt (origin=${SITE})`,
+      `llms.txt (origin=${SITE})` +
+      (MCP_AVAILABLE ? ", .well-known/mcp.json" : " - no MCP manifest (deploy target has no Functions)"),
   );
 }
 

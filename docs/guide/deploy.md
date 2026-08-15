@@ -27,7 +27,9 @@ asks once before anything goes public, and hands back a URL.
 | HSTS, COOP, CORP | **unavailable** — headers only | set by `public/_headers` |
 | Cache-Control on assets | Pages' defaults | immutable, one year |
 | `POST /api/fit` | unavailable | optional Function |
+| **`POST /api/mcp`** (agents) | **unavailable** — no Functions | read-only MCP endpoint |
 | Browser Fit | works | works |
+| `llms.txt`, `evidence.json` | identical | identical |
 | Prerendering, SEO, sitemap, OG cards | identical | identical |
 
 The reason for the whole middle block is one fact: **GitHub Pages cannot set
@@ -40,6 +42,26 @@ clickjacking protection, which has no meta equivalent.
 
 For a portfolio, that is usually an acceptable trade, and it is stated here
 rather than glossed so it can be an actual decision.
+
+## Agents
+
+Cloudflare deploys get `POST /api/mcp`, a read-only [MCP](https://modelcontextprotocol.io)
+endpoint (ADR 024) so an assistant can enumerate your pages, read them, and
+score a job description against them without scraping. It exposes three tools —
+`list_pages`, `get_page`, `fit_brief` — over the same corpus and the same
+deterministic matcher the site uses. No model runs on the server, so nothing it
+returns is generated: every aligned claim cites one of your pages and quotes
+text already on it.
+
+`.well-known/mcp.json` and the `llms.txt` entry are written **only** on the
+Cloudflare target, because advertising an endpoint that 404s is worse than
+advertising none.
+
+On GitHub Pages the agent-facing surface is still real, just static:
+`llms.txt` indexes the site and `evidence.json` is the whole corpus as JSON —
+id, title, canonical URL, full text and skills per page. Both ship identically
+on either target, so an agent can always read your work; only the live scoring
+call needs Functions.
 
 ## GitHub Pages
 
