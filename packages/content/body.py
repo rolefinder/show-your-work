@@ -31,7 +31,7 @@ lives in its own module rather than inside emit_site:
                claim about someone's work. Everything else is prose the author
                wrote about their own work and is fair to quote.
 
-src/content/body.ts is the second implementation of exactly this, for the
+src/content/bodyText.ts is the second implementation of exactly this, for the
 browser. The two must agree: the browser builds its Fit pack from the generated
 TS module while /api/fit reads dist/evidence.json emitted from here, so a
 divergence makes the same JD answer differently depending on the path.
