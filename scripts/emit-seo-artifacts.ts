@@ -16,7 +16,7 @@ import { SITE_CONFIG, SITE_PROFILE } from "../src/generated/content";
 import { linkLabel } from "../src/profile-links";
 import { buildRoutes, knownPaths, visibleBlog, visibleWork } from "./lib/routes";
 import { SITE } from "./lib/site-meta";
-import { bodyText } from "../src/content/bodyText";
+import { bodyFullText, bodyText } from "../src/content/bodyText";
 /* Cross-link tokens are markup for the renderer, not prose. Left in, an
    answer engine quotes "{{work:slug|Label}}" back at a reader verbatim. */
 import { stripTokens } from "../src/search/richText";
@@ -122,7 +122,27 @@ function llmsFullTxt(): string {
       if (item.date) lines.push(`Date: ${item.date}`);
       if (item.skills?.length) lines.push(`Skills: ${item.skills.join(", ")}`);
       lines.push("", stripTokens(item.summary).replace(/\s+/g, " ").trim(), "");
-      const body = stripTokens(bodyText(item.body));
+
+      /* The editorial contract, which the page renders above the body and Fit
+         *prefers* to quote — outcome and evidence are whole authored claims.
+         Omitting them made a file advertised as "the page in full" miss the
+         most citable copy on it. */
+      const contract: [string, string | string[] | undefined][] = [
+        ["Problem", (item as { problem?: string }).problem],
+        ["Outcome", (item as { outcome?: string }).outcome],
+        ["Evidence", (item as { evidence?: string[] }).evidence],
+        ["Key decisions", (item as { decisions?: string[] }).decisions],
+      ];
+      for (const [label, value] of contract) {
+        if (!value || (Array.isArray(value) && !value.length)) continue;
+        lines.push(`${label}:`);
+        for (const entry of Array.isArray(value) ? value : [value]) {
+          lines.push(`- ${stripTokens(String(entry)).replace(/\s+/g, " ").trim()}`);
+        }
+        lines.push("");
+      }
+
+      const body = stripTokens(bodyFullText(item.body));
       if (body) lines.push(body, "");
     }
   }

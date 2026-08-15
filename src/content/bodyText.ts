@@ -19,6 +19,30 @@ import type { BodyBlock } from "../types";
  * a line of shell is not a claim about anyone's work. Every other block is
  * prose the author wrote about their own work and is fair to quote.
  */
+/**
+ * Every block as text, code included — for llms-full.txt, which advertises
+ * itself as the page in full.
+ *
+ * Deliberately a separate function rather than a flag on `bodyText`: that one
+ * has a byte-for-byte parity contract with packages/content/body.py, and an
+ * option only one side implements is how those two drift. The exclusion there
+ * is about what may be *quoted as a claim*; this is about representing the
+ * page, where a code sample is legitimate content a reader can see.
+ */
+export function bodyFullText(blocks: BodyBlock[] | undefined): string {
+  const parts: string[] = [];
+  for (const block of blocks || []) {
+    if (typeof block === "string") parts.push(block);
+    else if ("list" in block) parts.push(...block.list.map((i) => `- ${i}`));
+    else if ("h2" in block) parts.push(block.h2);
+    else if ("h3" in block) parts.push(block.h3);
+    else if ("quote" in block) parts.push(block.quote, ...(block.cite ? [`— ${block.cite}`] : []));
+    else if ("note" in block) parts.push(block.note);
+    else if ("code" in block) parts.push(block.code);
+  }
+  return parts.join("\n\n").trim();
+}
+
 export function bodyText(blocks: BodyBlock[] | undefined): string {
   const parts: string[] = [];
   for (const block of blocks || []) {

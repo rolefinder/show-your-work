@@ -65,6 +65,19 @@ for (const [name, text] of [["llms.txt", llmsIndex], ["llms-full.txt", llmsFull]
 if (llmsFull.length <= llmsIndex.length) {
   fail("llms-full.txt is not longer than llms.txt — it should carry full page text, not just the index");
 }
+/* "Full" has to mean full. The editorial contract is the most citable copy on
+   a work page — Fit prefers `outcome` and `evidence` as quotes precisely
+   because they are whole authored claims — and the first version of this file
+   rendered only summary + body, silently dropping all of it. */
+const evidencePack = JSON.parse(readFileSync(join(dist, "evidence.json"), "utf8"));
+for (const doc of evidencePack.docs.filter((d) => d.kind === "work")) {
+  for (const claim of doc.claims || []) {
+    const needle = claim.slice(0, 60);
+    if (!llmsFull.replace(/\s+/g, " ").includes(needle.replace(/\s+/g, " "))) {
+      fail(`llms-full.txt omits a claim Fit would cite, from ${doc.url}: "${needle}…"`);
+    }
+  }
+}
 
 const sitemap = readFileSync(join(dist, "sitemap.xml"), "utf8");
 if (!sitemap.startsWith("<?xml")) fail("sitemap.xml is not XML");
