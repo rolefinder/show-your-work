@@ -131,6 +131,16 @@ export function FitPage({ docs, onNavigate }: Props) {
         React.createElement("span", { className: "muted" }, `${jd.length} / ${MAX_CHARS}`),
       ),
     ),
+    // ADR 012 asks that recruiters be told what happens to a pasted JD. The
+    // answer is "nothing leaves the tab": run() calls matchFit locally, and the
+    // only network traffic is the GET for the static evidence pack. Said at the
+    // point of entry rather than buried in a policy page, since a JD can carry
+    // an unposted role or a candidate's details. Reuses .muted — no new CSS.
+    React.createElement(
+      "p",
+      { className: "muted" },
+      "Your job description is matched inside this browser tab. It is not uploaded, logged, or stored — closing the tab is all it takes to discard it.",
+    ),
     error ? React.createElement("p", { className: "error", role: "alert" }, error) : null,
     brief ? React.createElement(FitBriefView, { brief, onNavigate }) : null,
   );
