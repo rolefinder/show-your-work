@@ -14,7 +14,14 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE_CONFIG, SITE_PROFILE } from "../src/generated/content";
 import { linkLabel } from "../src/profile-links";
-import { buildRoutes, knownPaths, visibleBlog, visibleExperience, visibleWork } from "./lib/routes";
+import {
+  buildRoutes,
+  knownPaths,
+  visibleBlog,
+  visibleEducation,
+  visibleExperience,
+  visibleWork,
+} from "./lib/routes";
 import { SITE } from "./lib/site-meta";
 import { bodyFullText, bodyText } from "../src/content/bodyText";
 /* Cross-link tokens are markup for the renderer, not prose. Left in, an
@@ -167,6 +174,30 @@ function llmsFullTxt(): string {
         lines.push("Highlights:");
         for (const h of e.highlights) {
           lines.push(`- ${stripTokens(String(h)).replace(/\s+/g, " ").trim()}`);
+        }
+        lines.push("");
+      }
+    }
+  }
+
+  /* Education renders on the same /experience page, so leaving it out would
+     make the file incomplete for the very route the block above exists to
+     cover — half the career content, not a separate page nobody asked for. */
+  if (visibleEducation.length) {
+    lines.push("## Education", "");
+    for (const e of visibleEducation) {
+      lines.push(
+        `### ${e.credential} — ${e.institution}`,
+        "",
+        `URL: ${SITE}/experience#${e.slug}`,
+        `Date: ${e.date}`,
+      );
+      if (e.honors) lines.push(`Honors: ${stripTokens(e.honors).replace(/\s+/g, " ").trim()}`);
+      lines.push("");
+      if (e.achievements?.length) {
+        lines.push("Achievements:");
+        for (const a of e.achievements) {
+          lines.push(`- ${stripTokens(String(a)).replace(/\s+/g, " ").trim()}`);
         }
         lines.push("");
       }
