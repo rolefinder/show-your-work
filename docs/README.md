@@ -65,6 +65,9 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
   standardization and adopter-UX findings, each with a repro
 - [Design review, 2026-08](strategy/design-review-2026-08.md) — where the visual
   and editorial layer falls short of the dogfood site, each with a repro
+- [Internship-system review, 2026-08](strategy/internship-system-review-2026-08.md) —
+  an outside proposal for the same problem, what transfers, and the defects
+  mapping it onto this tree surfaced
 
 ## There is no project-history section
 
