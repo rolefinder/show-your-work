@@ -14,7 +14,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE_CONFIG, SITE_PROFILE } from "../src/generated/content";
 import { linkLabel } from "../src/profile-links";
-import { buildRoutes, knownPaths, visibleBlog, visibleWork } from "./lib/routes";
+import { buildRoutes, knownPaths, visibleBlog, visibleExperience, visibleWork } from "./lib/routes";
 import { SITE } from "./lib/site-meta";
 import { bodyFullText, bodyText } from "../src/content/bodyText";
 /* Cross-link tokens are markup for the renderer, not prose. Left in, an
@@ -146,6 +146,33 @@ function llmsFullTxt(): string {
       if (body) lines.push(body, "");
     }
   }
+
+  /* Experience is one page with an anchor per role, not a page per item, so it
+     cannot go through the loop above. It is included because the file claims
+     to be every published page in full — and because highlights are whole
+     authored claims, which is exactly the copy Fit prefers to quote. */
+  if (visibleExperience.length) {
+    lines.push("## Experience", "");
+    for (const e of visibleExperience) {
+      lines.push(
+        `### ${e.role} — ${e.organization}`,
+        "",
+        `URL: ${SITE}/experience#${e.slug}`,
+        `Dates: ${e.start} – ${e.end || "Present"}`,
+      );
+      if (e.location) lines.push(`Location: ${e.location}`);
+      if (e.skills?.length) lines.push(`Skills: ${e.skills.join(", ")}`);
+      lines.push("", stripTokens(e.summary).replace(/\s+/g, " ").trim(), "");
+      if (e.highlights?.length) {
+        lines.push("Highlights:");
+        for (const h of e.highlights) {
+          lines.push(`- ${stripTokens(String(h)).replace(/\s+/g, " ").trim()}`);
+        }
+        lines.push("");
+      }
+    }
+  }
+
   return lines.join("\n");
 }
 

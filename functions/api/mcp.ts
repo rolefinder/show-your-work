@@ -103,7 +103,7 @@ type EvidenceDoc = {
 
 type EvidencePack = { version: number; docs: EvidenceDoc[] };
 
-const KINDS = ["work", "blog", "about"] as const;
+const KINDS = ["about", "work", "blog", "experience"] as const;
 
 /* Public read-only data, so wildcard CORS is deliberate: the corpus IS the
    published site. There is no origin-gated state to protect and no session to
@@ -112,8 +112,11 @@ const KINDS = ["work", "blog", "about"] as const;
 const CORS: Record<string, string> = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "POST, OPTIONS",
+  /* The union of both eras: mcp-method / mcp-name are 2026-07-28, and
+     mcp-session-id is the legacy handshake's. A dual-era server that rejects
+     the legacy header at preflight is not dual-era from a browser. */
   "access-control-allow-headers":
-    "content-type, accept, mcp-protocol-version, mcp-method, mcp-name",
+    "content-type, accept, mcp-protocol-version, mcp-method, mcp-name, mcp-session-id",
   "access-control-expose-headers": "mcp-protocol-version",
   "access-control-max-age": "86400",
 };

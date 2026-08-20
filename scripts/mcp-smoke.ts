@@ -194,6 +194,17 @@ ok("list_pages filters by kind", (workOnly.data?.pages || []).every((p: { kind: 
 const badKind = await call("list_pages", { kind: "nope" });
 ok("list_pages rejects an unknown kind", badKind.isError);
 
+/* Every kind the catalogue actually emits must also be an accepted filter.
+   Asserted as a relationship rather than a hardcoded list, because the bug this
+   guards against is the two drifting: `experience` docs reached evidence.json
+   with ADR 027 while the tool's enum still listed only work/blog/about, so an
+   agent could see a role in an unfiltered call and be refused when it asked for
+   roles. Adding a content type must not need an edit here to stay honest. */
+for (const kind of new Set((pages.data?.pages || []).map((p: { kind: string }) => p.kind))) {
+  const filtered = await call("list_pages", { kind });
+  ok(`list_pages accepts kind "${kind}", which its own catalogue emits`, !filtered.isError, String(filtered.data));
+}
+
 const firstId = pages.data?.pages?.[0]?.id;
 const page = await call("get_page", { id: firstId });
 ok("get_page returns full text", typeof page.data?.text === "string" && page.data.text.length > 0);
