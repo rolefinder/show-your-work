@@ -1,5 +1,5 @@
 /* ============================================================
-   recruit-me — Color tokens
+   show-your-work — Color tokens
    Ink-on-cream with a single accent, light + dark, following the
    system preference. Structure: raw palette → alpha ramps →
    semantic aliases. Components only ever read the semantic
@@ -13,16 +13,16 @@
 
   /* ---------- ADOPTER OVERRIDES ----------
      Fork and change these four; everything else derives. */
-  --rm-brand: #0f5c4c; /* accent — links, focus ring, active state */
-  --rm-brand-deep: #083d33; /* pressed / heavier accent */
-  --rm-bg: #f7f4ef; /* page background (light) */
-  --rm-fg: #1c1a17; /* primary ink (light) */
+  --syw-brand: #0f5c4c; /* accent — links, focus ring, active state */
+  --syw-brand-deep: #083d33; /* pressed / heavier accent */
+  --syw-bg: #f7f4ef; /* page background (light) */
+  --syw-fg: #1c1a17; /* primary ink (light) */
 
   /* ---------- Raw palette ---------- */
-  --ink: var(--rm-fg);
+  --ink: var(--syw-fg);
   --ink-800: #26231f; /* dark-mode card surface */
   --ink-900: #131211; /* dark-mode page background */
-  --cream: var(--rm-bg);
+  --cream: var(--syw-bg);
   --white: #fffdf9; /* elevated card surface (light) */
 
   /* Ink alpha ramp — borders, faint fills, secondary/tertiary text.
@@ -36,8 +36,8 @@
   --ink-70: rgb(28 26 23 / 0.7);
 
   /* ---------- Brand ---------- */
-  --brand: var(--rm-brand);
-  --brand-deep: var(--rm-brand-deep);
+  --brand: var(--syw-brand);
+  --brand-deep: var(--syw-brand-deep);
   --brand-soft: #e4efe9; /* tinted fill behind pressed chips / active rows */
 
   /* ---------- Category palette (skill dots, tags — decorative only) ---------- */

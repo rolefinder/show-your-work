@@ -1,8 +1,8 @@
 {
-  "name": "recruit-me",
+  "name": "show-your-work",
   "version": "0.3.0",
   "private": true,
-  "description": "Open-source personal portfolio template + recruiter Fit (JD → cite-or-missing evidence brief).",
+  "description": "Open-source personal portfolio template + recruiter Fit (JD \u2192 cite-or-missing evidence brief).",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -22,6 +22,8 @@
     "guard:suggest": "node scripts/suggest-guard-terms.mjs",
     "content:check": "python scripts/check-content.py",
     "additive:check": "node scripts/check-additive.mjs",
+    "layout:check": "node scripts/check-layout.mjs",
+    "free:check": "node scripts/check-free.mjs",
     "parity:check": "node scripts/check-parity.mjs",
     "secrets:check": "python scripts/check-secrets.py",
     "style:check": "node scripts/check-style-tokens.mjs",
@@ -39,13 +41,15 @@
     "build": "bun run emit && bun run typecheck && bun run build:graph && bun run bundle && bun run emit:artifacts && bun run emit:evidence && bun run emit:fit-config && bun run build:fit-worker && node scripts/run-prerender.mjs",
     "preview": "node scripts/preview.mjs",
     "fit:smoke": "bun scripts/fit-smoke.ts",
+    "mcp:smoke": "bun scripts/mcp-smoke.ts",
     "graph:smoke": "node scripts/graph-smoke.mjs",
     "seo:smoke": "node scripts/seo-smoke.mjs",
     "csp:smoke": "node scripts/csp-smoke.mjs",
     "ux:check": "node scripts/check-ux.mjs",
+    "copy:check": "node scripts/check-copy.mjs",
     "docs:check": "node scripts/check-doc-drift.mjs",
     "docs:links": "node scripts/check-doc-links.mjs",
-    "test": "bun run additive:check && bun run parity:check && bun run corpus:check && bun run content:check && bun run secrets:check && bun run style:check && bun run build && bun run config:check && bun run publication:check && bun run pages:check && bun run fit:smoke && bun run graph:smoke && bun run seo:smoke && bun run csp:smoke && bun run ux:check"
+    "test": "bun run layout:check && bun run free:check && bun run additive:check && bun run parity:check && bun run corpus:check && bun run content:check && bun run secrets:check && bun run style:check && bun run build && bun run config:check && bun run publication:check && bun run pages:check && bun run fit:smoke && bun run mcp:smoke && bun run graph:smoke && bun run seo:smoke && bun run csp:smoke && bun run ux:check && bun run copy:check"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",

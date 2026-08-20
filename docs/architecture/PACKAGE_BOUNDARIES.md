@@ -1,6 +1,6 @@
 # Package boundaries (target cut)
 
-recruit-me ships as a **template monorepo-shaped tree** today (`src/`, `content/`,
+show-your-work ships as a **template monorepo-shaped tree** today (`src/`, `content/`,
 `scripts/`). Full `packages/*` extraction is deferred; this doc locks ownership
 so future splits stay honest.
 
@@ -60,5 +60,5 @@ engine. Highlight / lens glue stays in **starter** (or a thin adapter).
   `content/config/skills.yaml`).
 - Core defaults (`src/fit/config.ts`) are generic English stops + common tech
   synonyms only — **no** real-person stopwords.
-- Graph forces → `opts.forces` on `RMPortfolioGraph.create` / `update` (never
+- Graph forces → `opts.forces` on `SYWPortfolioGraph.create` / `update` (never
   `window.HHPG_*`).

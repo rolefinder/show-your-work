@@ -40,7 +40,7 @@ export type PortfolioGraphApi = {
 
 declare global {
   interface Window {
-    RMPortfolioGraph?: PortfolioGraphApi;
+    SYWPortfolioGraph?: PortfolioGraphApi;
   }
 }
 
@@ -58,7 +58,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
 
   React.useEffect(() => {
     const host = hostRef.current;
-    const api = window.RMPortfolioGraph;
+    const api = window.SYWPortfolioGraph;
     if (!host || !api?.create) return;
 
     engineRef.current?.destroy();
@@ -157,7 +157,7 @@ export function GraphPage(props: GraphPageProps) {
     [gravity],
   );
 
-  const ready = typeof window !== "undefined" && !!window.RMPortfolioGraph?.create;
+  const ready = typeof window !== "undefined" && !!window.SYWPortfolioGraph?.create;
 
   return React.createElement(
     "section",

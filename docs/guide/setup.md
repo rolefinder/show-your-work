@@ -101,7 +101,7 @@ your identity is precisely what this project exists not to do.
 | `1` | Config still has placeholders, an unreviewed draft, or a published `TODO` — each one listed |
 | `2` | A toolchain dependency is missing — a different problem, so a different code |
 
-Then, in Claude Code, `/build-recruit-me` runs the preflight, optionally drafts
+Then, in Claude Code, `/build-show-your-work` runs the preflight, optionally drafts
 project YAML from the sources you name in `content/config/sources.yaml`, builds
 with prerendering, and verifies the artifact.
 

@@ -27,14 +27,14 @@ const PORT = Number(process.env.PRERENDER_PORT || 4178);
 
 /**
  * The card's accent stripe is the BRAND colour, which lives in
- * tokens/colors.css as --rm-brand — not in site.yaml. site.yaml's theme_color
+ * tokens/colors.css as --syw-brand — not in site.yaml. site.yaml's theme_color
  * is the page background, so using it painted a beige bar on a near-black
  * card. Read the token instead of duplicating the value into config, so the
  * card can't drift from the site.
  */
 function brandAccent(): string {
   const css = readFileSync(join(root, "tokens", "colors.css"), "utf8");
-  const m = css.match(/--rm-brand:\s*(#[0-9a-f]{3,8})/i);
+  const m = css.match(/--syw-brand:\s*(#[0-9a-f]{3,8})/i);
   return m ? m[1] : SITE_CONFIG.themeColorDark;
 }
 const ACCENT = brandAccent();

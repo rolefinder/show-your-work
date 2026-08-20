@@ -7,7 +7,7 @@
 
 ADR 016 made adoption a `content/` edit rather than a code change. That closed
 the *configuration* gap but not the *capability* gap: a correctly-configured
-recruit-me site still could not do what a full personal portfolio does.
+show-your-work site still could not do what a full personal portfolio does.
 
 Three things were missing, in descending order of how much they mattered to
 the product's actual claim — "a recruiter finds your evidence":
@@ -85,7 +85,7 @@ the product's actual claim — "a recruiter finds your evidence":
     for starter files. It validates origin/email/accent before writing, has a
     `--dry-run`, and is scriptable via `--config me.json` — a scaffolder you
     cannot script is only half a tool. It writes to `content/` and the four
-    `--rm-*` lines in `tokens/colors.css`; it never touches `src/`.
+    `--syw-*` lines in `tokens/colors.css`; it never touches `src/`.
 
 12. **Tests split into engine invariants and demo expectations.** Running
     `init` surfaced that `fit-smoke` asserted things about the *demo* corpus

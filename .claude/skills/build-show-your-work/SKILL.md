@@ -1,9 +1,9 @@
 ---
-name: build-recruit-me
-description: Take a filled-in recruit-me config and produce the deployable site — preflight the config, optionally draft content from the adopter's own sources via a workflow, build with prerendering, and verify. Use when the user runs /build-recruit-me, or asks to "build my site", "generate my portfolio", or "turn my config into a site".
+name: build-show-your-work
+description: Take a filled-in show-your-work config and produce the deployable site — preflight the config, optionally draft content from the adopter's own sources via a workflow, build with prerendering, and verify. Use when the user runs /build-show-your-work, or asks to "build my site", "generate my portfolio", or "turn my config into a site".
 ---
 
-# /build-recruit-me
+# /build-show-your-work
 
 Turn `content/` into `dist/`. The adopter's job is to fill in config and write
 (or approve) their content; this command does everything after that.

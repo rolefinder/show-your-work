@@ -19,6 +19,8 @@ SKILLS_CFG = resolve("config", "skills.yaml")
 SITE_CFG = resolve("config", "site.yaml")
 WORK_DIR = corpus_dir("work")
 BLOG_DIR = corpus_dir("blog")
+EXPERIENCE_DIR = corpus_dir("experience")
+EDUCATION_DIR = corpus_dir("education")
 OUT = ROOT / "src" / "generated" / "content.ts"
 
 
@@ -75,12 +77,12 @@ def deploy_target(cfg: dict[str, Any]) -> str:
     return value
 
 
-# site.yaml `theme:` key -> the --rm-* variable it overrides in tokens/colors.css.
+# site.yaml `theme:` key -> the --syw-* variable it overrides in tokens/colors.css.
 THEME_VARS = {
-    "accent": "--rm-brand",
-    "accent_deep": "--rm-brand-deep",
-    "bg": "--rm-bg",
-    "fg": "--rm-fg",
+    "accent": "--syw-brand",
+    "accent_deep": "--syw-brand-deep",
+    "bg": "--syw-bg",
+    "fg": "--syw-fg",
 }
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
@@ -205,6 +207,56 @@ def emit_blog(items: list[dict[str, Any]]) -> str:
     return f"export const BLOG: BlogPost[] = [\n{body}\n];"
 
 
+def emit_experience_item(e: dict[str, Any]) -> str:
+    visible = "true" if e.get("visible", True) else "false"
+    # Highlights are whitespace-collapsed here because scripts/emit-evidence.py
+    # collapses the same values for the Worker's pack and fit-smoke compares the
+    # two — a folded YAML scalar must not yield two different strings.
+    highlights = [" ".join(str(h).split()) for h in (e.get("highlights") or []) if str(h).strip()]
+    projects = [str(s).strip() for s in (e.get("projects") or []) if str(s).strip()]
+    return (
+        "  {\n"
+        f"    slug: {ts_string(e['slug'])},\n"
+        f"    organization: {ts_string(str(e.get('organization') or '').strip())},\n"
+        f"    role: {ts_string(str(e.get('role') or '').strip())},\n"
+        f"    start: {ts_string(str(e.get('start') or '').strip())},\n"
+        f"{opt_string('end', e.get('end'))}"
+        f"{opt_string('location', e.get('location'))}"
+        f"    summary: {ts_string(str(e.get('summary') or '').strip())},\n"
+        f"    highlights: {ts_string_array(highlights)},\n"
+        f"    skills: {ts_string_array(list(e.get('skills') or []))},\n"
+        f"    projects: {ts_string_array(projects)},\n"
+        f"    visible: {visible},\n"
+        "  }"
+    )
+
+
+def emit_experience(items: list[dict[str, Any]]) -> str:
+    body = ",\n".join(emit_experience_item(e) for e in items)
+    return f"export const EXPERIENCE: ExperienceItem[] = [\n{body}\n];"
+
+
+def emit_education_item(e: dict[str, Any]) -> str:
+    visible = "true" if e.get("visible", True) else "false"
+    achievements = [" ".join(str(a).split()) for a in (e.get("achievements") or []) if str(a).strip()]
+    return (
+        "  {\n"
+        f"    slug: {ts_string(e['slug'])},\n"
+        f"    institution: {ts_string(str(e.get('institution') or '').strip())},\n"
+        f"    credential: {ts_string(str(e.get('credential') or '').strip())},\n"
+        f"    date: {ts_string(str(e.get('date') or '').strip())},\n"
+        f"{opt_string('honors', e.get('honors'))}"
+        f"    achievements: {ts_string_array(achievements)},\n"
+        f"    visible: {visible},\n"
+        "  }"
+    )
+
+
+def emit_education(items: list[dict[str, Any]]) -> str:
+    body = ",\n".join(emit_education_item(e) for e in items)
+    return f"export const EDUCATION: EducationItem[] = [\n{body}\n];"
+
+
 def emit_skill_categories(data: dict[str, Any]) -> str:
     order = list(data.get("order") or ["Other"])
     fallback = str(data.get("fallback") or "Other")
@@ -243,8 +295,13 @@ def load_yaml_dir(directory: Path) -> list[dict[str, Any]]:
     return items
 
 
-def load_corpus() -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
-    profile = yaml.safe_load(ABOUT.read_text(encoding="utf-8")) or {}
+def load_corpus() -> dict[str, Any]:
+    """Every corpus and config the module is rendered from.
+
+    A dict rather than a tuple: this grew past the point where positional
+    unpacking at two call sites was readable, and a mis-ordered pair of
+    same-typed lists is a silent bug rather than a type error.
+    """
     skills_cfg = (
         yaml.safe_load(SKILLS_CFG.read_text(encoding="utf-8")) or {}
         if SKILLS_CFG.exists()
@@ -255,26 +312,29 @@ def load_corpus() -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, 
         if SITE_CFG.exists()
         else {"origin": "https://example.com"}
     )
-    return profile, load_yaml_dir(WORK_DIR), load_yaml_dir(BLOG_DIR), skills_cfg, site_cfg
+    return {
+        "profile": yaml.safe_load(ABOUT.read_text(encoding="utf-8")) or {},
+        "work": load_yaml_dir(WORK_DIR),
+        "blog": load_yaml_dir(BLOG_DIR),
+        "experience": load_yaml_dir(EXPERIENCE_DIR),
+        "education": load_yaml_dir(EDUCATION_DIR),
+        "skills_cfg": skills_cfg,
+        "site_cfg": site_cfg,
+    }
 
 
-def render_module(
-    profile: dict[str, Any],
-    work: list[dict[str, Any]],
-    blog: list[dict[str, Any]],
-    skills_cfg: dict[str, Any],
-    site_cfg: dict[str, Any],
-) -> str:
+def render_module(corpus: dict[str, Any]) -> str:
     header = (
         "/* AUTO-GENERATED by packages/content — do not edit by hand.\n"
-        "   Source: content/about, content/work, content/blog, content/config/skills.yaml,\n"
-        "   content/config/site.yaml\n"
+        "   Source: content/about, content/work, content/blog, content/experience,\n"
+        "   content/education, content/config/skills.yaml, content/config/site.yaml\n"
         "   Regenerate: bun run emit\n"
         "*/\n"
-        'import type { BlogPost, SiteConfig, SiteProfile, WorkItem } from "../types";\n'
+        'import type { BlogPost, EducationItem, ExperienceItem, SiteConfig, SiteProfile, WorkItem } from "../types";\n'
         'import type { SkillCategoryConfig } from "../skills/SkillBank";\n'
         "\n"
     )
+    site_cfg = corpus["site_cfg"]
     origin = str(site_cfg.get("origin") or "https://example.com").rstrip("/")
     parts = [
         header,
@@ -282,26 +342,31 @@ def render_module(
         "",
         emit_site_config(site_cfg, origin),
         "",
-        emit_profile(profile),
+        emit_profile(corpus["profile"]),
         "",
-        emit_work(work),
+        emit_work(corpus["work"]),
         "",
-        emit_blog(blog),
+        emit_blog(corpus["blog"]),
         "",
-        emit_skill_categories(skills_cfg),
+        emit_experience(corpus["experience"]),
+        "",
+        emit_education(corpus["education"]),
+        "",
+        emit_skill_categories(corpus["skills_cfg"]),
         "",
     ]
     return "\n".join(parts)
 
 
 def emit_generated_module(*, dry_run: bool = False) -> str:
-    profile, work, blog, skills_cfg, site_cfg = load_corpus()
-    text = render_module(profile, work, blog, skills_cfg, site_cfg)
+    corpus = load_corpus()
+    text = render_module(corpus)
     if dry_run:
         return text
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(text, encoding="utf-8", newline="\n")
     return (
-        f"emitted profile + {len(work)} work + {len(blog)} blog "
+        f"emitted profile + {len(corpus['work'])} work + {len(corpus['blog'])} blog "
+        f"+ {len(corpus['experience'])} experience + {len(corpus['education'])} education "
         f"+ skill categories -> {OUT.relative_to(ROOT)}"
     )

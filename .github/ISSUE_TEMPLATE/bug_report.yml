@@ -7,7 +7,7 @@ body:
       value: |
         If a build gate is failing on **your own content**, that is usually the
         gate working — start with the table in
-        [docs/guide](https://github.com/rolefinder/recruit-me/blob/main/docs/guide/README.md#when-something-fails).
+        [docs/guide](https://github.com/rolefinder/show-your-work/blob/main/docs/guide/README.md#when-something-fails).
         File here when the template itself is wrong.
 
   - type: textarea

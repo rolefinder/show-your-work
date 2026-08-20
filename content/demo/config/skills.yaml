@@ -5,6 +5,7 @@ order:
   - Platform & delivery
   - Languages & content
   - Fit & evidence
+  - Interface
   - Other
 map:
   CI/CD: Platform & delivery
@@ -18,6 +19,9 @@ map:
   YAML content pipelines: Languages & content
   Fit: Fit & evidence
   evidence: Fit & evidence
+  CSS: Interface
+  accessibility: Interface
+  design tokens: Interface
 
 # What each skill means, site-wide. Optional — chips render without it. Pairs
 # with a work item's `skill_notes` (how it applied there) to form the two
@@ -33,3 +37,6 @@ descriptions:
   content pipelines: Turning authored content into typed, buildable artifacts.
   Fit: Matching a job description against published evidence.
   evidence: Claims that link back to something published rather than asserted.
+  CSS: Styling built from design tokens rather than literal values.
+  accessibility: Contrast, keyboard reach, and semantics verified in the build.
+  design tokens: A shared token layer several surfaces read from, so a palette change is one edit.

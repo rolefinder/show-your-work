@@ -1,4 +1,4 @@
-# ADR 018: `/build-recruit-me`, source drafting, and the links map
+# ADR 018: `/build-show-your-work`, source drafting, and the links map
 
 **Status:** Accepted
 **Date:** 2026-07-25
@@ -47,9 +47,9 @@ preserved through the Python dict and drives render order.
 JSON-LD still emits `sameAs` — schema.org's actual property for "other URLs
 for this same entity" — now sourced from `Object.values(links)`.
 
-### `/build-recruit-me`
+### `/build-show-your-work`
 
-A skill (`.claude/skills/build-recruit-me/SKILL.md`) that orchestrates:
+A skill (`.claude/skills/build-show-your-work/SKILL.md`) that orchestrates:
 preflight → optional drafting → build → verify the artifact → report.
 
 **`scripts/check-ready.mjs`** does the preflight deterministically rather than

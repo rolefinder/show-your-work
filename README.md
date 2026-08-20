@@ -12,8 +12,13 @@ Paste a job description; get a brief where every aligned claim cites a page you
 actually published, quoted from it. Nothing is asserted that isn't already
 on the site.
 
-MIT · self-hosted React + WebGL graph, no CDN · strict CSP · every route
-prerendered · no LLM anywhere in the matching path.
+MIT · free to run, and gated so it stays that way · self-hosted React + WebGL
+graph, no CDN · strict CSP · every route prerendered · no LLM anywhere in the
+matching path.
+
+**Live:** [harrisonhalperin.com](https://harrisonhalperin.com) — the maintainer's
+own site, built from this template. The demo corpus below is what you get before
+you add anything.
 
 ---
 
@@ -89,7 +94,7 @@ the corpus for starter files, `--config me.json` runs it unattended.
 Then, in Claude Code:
 
 ```
-/build-recruit-me
+/build-show-your-work
 ```
 
 Preflights the config, optionally drafts project YAML from sources you name in
@@ -102,6 +107,7 @@ Preflights the config, optionally drafts project YAML from sources you name in
 | Route | What it is |
 |-------|-----------|
 | `/` `/about` | Who you are, with a contact strip built from `links` |
+| `/experience` | Roles and education, with each role linking the projects built during it |
 | `/work/<slug>` | A project page with a fixed editorial brief: problem, outcome, evidence, decisions |
 | `/blog/<slug>` | Writing, cross-linked with `{{work:slug\|Label}}` tokens |
 | `/graph` | A WebGL knowledge graph of projects, posts and skills — embedded as a lens on `/work` too |
@@ -134,14 +140,18 @@ something real:
 |------|-----------------|
 | `parity:check` | The two content resolvers drifting apart — the failure mode that produced four separate bugs before it was gated |
 | `publication:check` | Your own content or `dist/` publishing a term you declared must never ship - a codename, a client, an internal hostname. See `/sanitize` |
+| `free:check` | A metered binding or a third-party fetch reaching a Pages Function — the way a template starts billing people who forked it |
+| `layout:check` | A top-level directory that exists in the repo but not in the documented tree — the drift that makes an agent guess whether a folder is intentional |
 | `additive:check` | A template file committed where an adopter is supposed to add one — the thing that makes a fork un-updatable |
 | `corpus:check` | Real-person fingerprints in `content/demo/` — and a demo persona that isn't obviously fake |
 | `config:check` | Your name, email or title suffix hardcoded anywhere in `src/` |
 | `style:check` | A raw color in the component layer, or a `var(--x)` that resolves to nothing |
+| `mcp:smoke` | The MCP endpoint drifting from the protocol or from Fit — an `aligned` row without a citation reaching an agent |
 | `fit:smoke` | An `aligned` requirement without a citation; a dequalifying verdict leaking into highlight mode; the browser and Worker evidence packs disagreeing |
 | `seo:smoke` | A prerendered route missing its own canonical or JSON-LD |
 | `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids — this caught the skill-bank dots being silently stripped |
 | `pages:check` | A GitHub Pages deploy that would land on a subpath and load blank |
+| `copy:check` | A cross-link token that reached the page as literal braces, a published `TODO`, or a doubled word — the prose defects every structural gate is blind to |
 | `content:check` | A cross-link that would 404; a missing required field; a skill spelled two ways |
 | `check-ready` | Placeholder identity, an unreviewed draft, or a published `TODO` |
 
@@ -151,10 +161,10 @@ Four variables at the top of [`tokens/colors.css`](./tokens/colors.css) drive
 every color on the site:
 
 ```css
---rm-brand: #0f5c4c;      /* accent — links, focus ring, active state */
---rm-brand-deep: #083d33;
---rm-bg: #f7f4ef;         /* page background (light) */
---rm-fg: #1c1a17;         /* primary ink (light) */
+--syw-brand: #0f5c4c;      /* accent — links, focus ring, active state */
+--syw-brand-deep: #083d33;
+--syw-bg: #f7f4ef;         /* page background (light) */
+--syw-fg: #1c1a17;         /* primary ink (light) */
 ```
 
 Component rules never name a color. Dark mode follows `prefers-color-scheme`.
@@ -175,11 +185,12 @@ file you add takes over from its counterpart in `content/demo/` ([ADR 021](./doc
 | Path | Role |
 |------|------|
 | `content/work\|blog/` | One YAML file per project or post. The bulk of your site |
+| `content/experience\|education/` | One YAML file per role or credential. Roles become Fit evidence |
 | `content/about/profile.yaml` | Name, tagline, email, skills, and `links` keyed by platform |
 | `content/config/site.yaml` | Deployment identity — origin, title suffix, theme colors, `demo:` |
 | `content/config/skills.yaml` | Skill-bank grouping + descriptions |
 | `content/config/fit.yaml` | Fit tuning — stops, synonyms, weights, extra caveats |
-| `content/config/sources.yaml` | Optional: repos / resume for `/build-recruit-me` to draft from |
+| `content/config/sources.yaml` | Optional: repos / resume for `/build-show-your-work` to draft from |
 | `content/config/site.yaml` → `theme:` | Accent and palette, without editing `tokens/` |
 
 ### The engine
@@ -194,7 +205,7 @@ file you add takes over from its counterpart in `content/demo/` ([ADR 021](./doc
 | `public/` | Web-root boilerplate — HTML templates, manifest, `_headers`, `_redirects`. Identity is injected into the copies in `dist/`, so **you never edit these** |
 | `functions/` | Pages middleware (404 status + route docs) and optional `/api/fit` |
 | `packages/` | The YAML→TypeScript emitter, and resume/GitHub ingest |
-| `.claude/skills/` | `/build-recruit-me`, `/deploy-pages`, `/ui-review` — live in a fork with no install step |
+| `.claude/skills/` | `/build-show-your-work`, `/deploy-pages`, `/ui-review` — live in a fork with no install step |
 | `docs/` | ADRs — the reasoning, including what was deliberately *not* built |
 
 ## Demo persona

@@ -1,9 +1,9 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
+  "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "recruit-me",
+      "name": "show-your-work",
       "devDependencies": {
         "@types/react": "^18.3.18",
         "@types/react-dom": "^18.3.5",

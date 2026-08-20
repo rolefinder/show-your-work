@@ -9,13 +9,13 @@ This template shipped with zero SEO tooling: no sitemap.xml, no robots.txt,
 no manifest.json, and no dedicated 404 handling — unmatched paths silently
 render the homepage via `viewFor()`'s fallback, with an unconditional
 `_redirects` SPA catch-all (`/* /index.html 200`) always returning `200`.
-Ported the equivalent infra from a sibling project (harrison-site) that
+Ported the equivalent infra from a sibling private project that
 had just built it out, adapted to this repo's actual shape rather than
 copied — the two repos differ in ways that change the right design.
 
 ## Key structural difference from the sibling project
 
-harrison-site prerenders every route to a real static file at build time
+That project prerenders every route to a real static file at build time
 (Playwright), so removing its `_redirects` catch-all was safe — every
 known route already had a real file Cloudflare would serve directly, and
 only genuinely unknown paths ever reached the catch-all. **This repo has

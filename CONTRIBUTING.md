@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in **recruit-me**.
+Thanks for your interest in **show-your-work**.
 
 If you are here to *use* the template rather than change it, you want
 [docs/guide](./docs/guide/README.md) instead — building your own site should
@@ -93,13 +93,13 @@ Do not hand-edit these; edit their source and rebuild.
 
 ## What CI runs
 
-`bun run test` — fourteen gates around one full build, in this order:
+`bun run test` — eighteen gates around one full build, in this order:
 
 ```
-additive:check -> parity:check -> corpus:check -> content:check -> secrets:check -> style:check
+layout:check -> free:check -> additive:check -> parity:check -> corpus:check -> content:check -> secrets:check -> style:check
   -> build
-  -> config:check -> publication:check -> pages:check -> fit:smoke -> graph:smoke -> seo:smoke
-  -> csp:smoke -> ux:check
+  -> config:check -> publication:check -> pages:check -> fit:smoke -> mcp:smoke -> graph:smoke -> seo:smoke
+  -> csp:smoke -> ux:check -> copy:check
 ```
 
 `publication:check` runs *after* `build` on purpose: it reads `dist/`, so on a
@@ -121,8 +121,9 @@ starting point — see the table in
 
 - **ADRs are records.** Add a new one rather than rewriting an old one to match
   a later decision. `docs/architecture/adr/`.
-- **`docs/history/` is unmaintained** by design. Do not update it to match
-  current reality; that is what makes it history.
+- **Don't add project archaeology.** Planning docs, handoffs and status
+  snapshots age into noise for everyone who arrives later. If a decision is
+  worth keeping, it is worth an ADR.
 - If you change a number the docs quote — a Fit weight, a search score, an
   input cap — `docs:check` will fail until the prose is updated too.
 

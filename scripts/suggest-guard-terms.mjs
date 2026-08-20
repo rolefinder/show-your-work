@@ -5,7 +5,7 @@
  * wrong twice over: it is adopter-specific data in a template, and it would be
  * *someone else's* employer list in your fork. So they are discovered from the
  * same sources the site is built from — content/config/sources.yaml names a
- * resume and a GitHub handle, and `/build-recruit-me` already drafts content
+ * resume and a GitHub handle, and `/build-show-your-work` already drafts content
  * out of them. Anything an employer's name can reach, this can see first.
  *
  * CANDIDATES, NOT DECISIONS. Every line printed is a guess. Half of them will

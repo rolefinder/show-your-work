@@ -1,7 +1,7 @@
 # ADR 022: MIT, and attribution for what we actually redistribute
 
 **Status:** Accepted · 2026-08-11 · supersedes the license choice in
-[recruit-me PRD §9](../../strategy/recruit-me-prd.md#9-license--fully-open-source-mit)
+[show-your-work PRD §9](../../strategy/show-your-work-prd.md#9-license--fully-open-source-mit)
 
 
 ## Context
@@ -14,7 +14,7 @@ grounds that turn out not to describe this project.
 Apache-2.0 was chosen for its express patent grant, its explicit trademark
 non-grant, and because it is "common for infra / agent tooling adopters." Two
 of those three assume a reader who is clearing a dependency for a legal team.
-recruit-me's reader is a person deciding whether they are allowed to keep the
+show-your-work's reader is a person deciding whether they are allowed to keep the
 fork of a portfolio site they just built. For that reader, the 202-line license
 is a cost with no matching benefit.
 
@@ -42,8 +42,8 @@ adopters do a compatibility check that has no interesting answer.
 explicit statement that the license conveys no trademark rights. MIT is silent
 on both. For a static site generator whose one novel mechanism is deterministic
 keyword retrieval, the patent exposure is small — but it is not zero, and it is
-the reason to revisit this if recruit-me ever grows something worth patenting.
-Trademark on the name `recruit-me` was always separate from the code license
+the reason to revisit this if show-your-work ever grows something worth patenting.
+Trademark on the name `show-your-work` was always separate from the code license
 (PRD §9) and is unaffected.
 
 ### `THIRD-PARTY-NOTICES.md`
@@ -79,14 +79,11 @@ non-event, instead of a silent strip that nobody would notice.
 
 ### Documents that still say Apache-2.0
 
-Left alone on purpose, per the repo's own rule that
-[ADRs are records](../../README.md#decision-records) and
-[`docs/history/`](../../history/README.md) is unmaintained by design:
-
-| Where | Why it stays |
-|---|---|
-| [`docs/history/**`](../../history/README.md) | Unmaintained by design. It records what was true then |
-| [ADR 015](./015-design-token-system.md) | Names "an Apache-2.0 repo" in passing. Rewriting an accepted ADR to match a later decision would make it lie about what was true when the decision was taken |
+[ADR 015](./015-design-token-system.md) names "an Apache-2.0 repo" in passing.
+Left alone per the repo's own rule that
+[ADRs are records](../../README.md#decision-records): rewriting an accepted ADR
+to match a later decision would make it lie about what was true when the
+decision was taken.
 
 Live guidance *was* updated: PRD §9 carries a dated supersession note that
 keeps the original rationale table, the Fit PRD's open-questions entry points

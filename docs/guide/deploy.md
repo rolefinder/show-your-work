@@ -15,6 +15,30 @@ deploy:
 Or let an agent do the whole thing: **`/launch`** gathers your details, builds,
 asks once before anything goes public, and hands back a URL.
 
+## What this costs
+
+**Nothing, on the default path.** GitHub Pages on a public repository is free,
+and so are the Actions minutes that build it. There is no metered resource in a
+site built from this template, so there is no usage number to watch — that is
+enforced by `free:check`, not just intended ([ADR 028](../architecture/adr/028-free-to-serve.md)).
+
+Three things cost money, and you have to choose all three deliberately:
+
+| | What it costs | Why you might |
+|---|---|---|
+| A **custom domain** | Whatever your registrar charges | `you.com` instead of `you.github.io` |
+| **Cloudflare Pages** on a paid Workers plan | Their pricing | Real response headers, `/api/fit`, `/api/mcp` |
+| A **private repo** | GitHub Pro, plus billable Actions minutes | You do not want `content/` world-readable |
+
+That last one is the trap, so `pages:setup` refuses it rather than letting the
+API fail with a 403: on a private repo, Pages needs a paid plan **and** every
+push starts billing Actions minutes, because the build installs a browser. If
+you want the repo private, deploy somewhere you already pay for instead.
+
+The template will use infrastructure you own. It will not create any for you —
+no Cloudflare project, no domain registration, no paid plan. Those are one-time
+decisions with recurring costs, and they are yours to make.
+
 ## What differs, honestly
 
 | | GitHub Pages | Cloudflare Pages |
@@ -27,6 +51,7 @@ asks once before anything goes public, and hands back a URL.
 | HSTS, COOP, CORP | **unavailable** — headers only | set by `public/_headers` |
 | Cache-Control on assets | Pages' defaults | immutable, one year |
 | `POST /api/fit` | unavailable | optional Function |
+| `POST /api/mcp` (agents) | **unavailable** — Functions only | read-only MCP server, plus `.well-known/mcp.json` |
 | Browser Fit | works | works |
 | Prerendering, SEO, sitemap, OG cards | identical | identical |
 

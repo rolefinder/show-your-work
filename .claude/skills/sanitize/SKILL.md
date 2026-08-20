@@ -1,6 +1,6 @@
 ---
 name: sanitize
-description: Find employer-internal detail in a recruit-me site before it is published — codenames, client names, internal hostnames, ticket prefixes, team structure — and set up a guard so it cannot reappear. Use when the user runs /sanitize, or asks to "check what I'm about to publish", "did I leak anything", "review this for confidential info", or before making a portfolio public.
+description: Find employer-internal detail in a show-your-work site before it is published — codenames, client names, internal hostnames, ticket prefixes, team structure — and set up a guard so it cannot reappear. Use when the user runs /sanitize, or asks to "check what I'm about to publish", "did I leak anything", "review this for confidential info", or before making a portfolio public.
 ---
 
 # /sanitize

@@ -1,6 +1,6 @@
 # Architecture
 
-How recruit-me is put together, and why the seams are where they are.
+How show-your-work is put together, and why the seams are where they are.
 
 If you read one thing, read [Three kinds of file](#three-kinds-of-file). Every
 other decision follows from it.
@@ -37,7 +37,7 @@ flowchart LR
     subgraph D["DATA — you own this"]
         direction TB
         D1["content/**.yaml"]
-        D2["tokens/colors.css<br/>4 --rm-* vars"]
+        D2["tokens/colors.css<br/>4 --syw-* vars"]
     end
 
     subgraph G["GENERATED — never hand-edit"]
@@ -75,19 +75,21 @@ you rename yourself (ADR 016).
 ## Directory structure
 
 ```
-recruit-me/
+show-your-work/
 │
 ├── content/                     ▓ DATA — you only ever ADD here (ADR 021)
 │   ├── about/profile.yaml         ← you add: name · tagline · email · skills · links{}
 │   ├── work/<slug>.yaml           ← you add: one project each (slug MUST equal filename)
 │   ├── blog/<slug>.yaml           ← you add: one post each
+│   ├── experience/<slug>.yaml     ← you add: one role each (Fit evidence)
+│   ├── education/<slug>.yaml      ← you add: one credential each
 │   ├── config/
 │   │   ├── site.yaml              ← you add: origin · title_suffix · deploy · theme
 │   │   ├── skills.yaml            ← you add: category order/map + descriptions
 │   │   ├── fit.yaml               ← you add: extra_stops · synonyms · weights · show_gaps
 │   │   └── sources.yaml           ← you add: GitHub user / resume for drafting
 │   └── demo/                    ▒ SHIPPED — never edited, never deleted
-│       └── {about,work,blog,config}/  used for anything you have not added
+│       └── {about,work,blog,experience,education,config}/  used for what you have not added
 │
 ├── src/                         ▓ CODE — contains no identity
 │   ├── app.tsx                    view union, router, page bodies, chrome
@@ -138,16 +140,16 @@ recruit-me/
 │   ├── preview.mjs                static server; --spa mode for the prerenderer
 │   ├── init-site.mjs              `bun run init`
 │   ├── banner.mjs                 the wordmark
-│   ├── check-{ready,adopter-config,style-tokens}.mjs
+│   ├── check-{ready,adopter-config,style-tokens,layout,copy}.mjs
 │   ├── check-{fictional-corpus,secrets}.py
-│   └── {fit,graph,seo}-smoke.*    behavioural tests
+│   └── {fit,mcp,graph,seo}-smoke.*  behavioural tests
 │
 ├── packages/
 │   ├── content/emit_site.py       the YAML → TypeScript emitter
 │   └── ingest/                    resume / GitHub → draft YAML for review
 │
 ├── graph/                       ▓ WebGL engine, bundled to a self-hosted file
-│   ├── index.mjs                  attaches window.RMPortfolioGraph
+│   ├── index.mjs                  attaches window.SYWPortfolioGraph
 │   ├── engine.mjs                 Sigma lifecycle, interaction, camera
 │   ├── layout.mjs                 Graphology build, node color/size, view filter
 │   ├── forces.mjs                 ForceAtlas2 presets (default vs compact)
@@ -155,15 +157,27 @@ recruit-me/
 │
 ├── functions/                   ▓ Cloudflare Pages Functions
 │   ├── _middleware.js             404 status + which document to serve
-│   └── api/fit.ts                 optional POST /api/fit
+│   ├── api/fit.ts                 optional POST /api/fit
+│   └── api/mcp.ts                 read-only MCP endpoint for agents (ADR 024)
 │
 ├── public/                      ▓ WEB ROOT — copied to dist/, never edited
 │   ├── index.html · 404.html      templates; identity injected at build
 │   ├── manifest.json              PWA manifest; name/short_name injected too
 │   └── _headers · _redirects      CSP and SPA fallback
 │
+├── assets/                      ▓ SELF-HOSTED STATIC — no CDN, ever (ADR 013)
+│   ├── graph-engine.js            ▒ GENERATED from graph/ by build-graph-vendor
+│   ├── graph-engine.version       the date that bundle was last built
+│   ├── vendor/react*.min.js       React + ReactDOM, vendored so the CSP holds
+│   └── icon.svg                   the favicon/manifest source
+│
+├── .github/                     ▓ CI AND COMMUNITY
+│   ├── workflows/                 ci.yml (gates) · deploy-github-pages.yml
+│   ├── ISSUE_TEMPLATE/            bug · feature · security routing
+│   └── dependabot.yml             npm + Actions
+│
 ├── .claude/                     ▓ AGENT SURFACE — live in a fork, no install
-│   ├── skills/build-recruit-me/   /build-recruit-me — config → deployable site
+│   ├── skills/build-show-your-work/   /build-show-your-work — config → deployable site
 │   ├── skills/deploy-pages/       /deploy-pages — fork → live on Cloudflare
 │   ├── skills/ui-review/          /ui-review — the judgement ux:check can't make
 │   ├── skills/launch/             /launch — fork to live URL, one authorization
@@ -174,8 +188,7 @@ recruit-me/
 │   ├── guide/                     building YOUR site: setup, authoring, theming
 │   ├── architecture/adr/          why — including the options that were rejected
 │   ├── ops/                       running it: bot/cost protection, SEO checklist
-│   ├── strategy/                  PRDs, security posture, platform review
-│   └── history/                   unmaintained record of how this got built
+│   └── strategy/                  PRDs, security posture, platform review
 │
 └── dist/                        build output (gitignored)
 ```
@@ -606,7 +619,7 @@ flowchart LR
     end
 
     subgraph RUN["runtime"]
-        GJ -->|script tag| WIN["window.RMPortfolioGraph<br/>{ create, layers, resolveForces }"]
+        GJ -->|script tag| WIN["window.SYWPortfolioGraph<br/>{ create, layers, resolveForces }"]
         KG["buildKnowledgeGraph.ts<br/>nodes + edges"] --> GP["GraphPage / KnowledgeLens"]
         GP -->|"create(host, opts)"| WIN
         CSS["tokens/graph.css<br/>--pg-* on .pg-page"] -->|"getComputedStyle<br/>+ canvas readback"| WIN
@@ -619,7 +632,7 @@ flowchart LR
 with no `unsafe-eval`; the engine is bundled to one self-hosted IIFE and
 published on `window`, so React never bundles Sigma and the app degrades to a
 quiet empty host if the engine is missing. `build-graph-vendor.mjs` fails the
-build if `RMPortfolioGraph` isn't in the output.
+build if `SYWPortfolioGraph` isn't in the output.
 
 **Three edge layers**, independently toggleable:
 
@@ -645,7 +658,7 @@ containers so the dark canvas never leaks into page chrome.
 
 ```mermaid
 flowchart TD
-    RM["--rm-brand · --rm-brand-deep<br/>--rm-bg · --rm-fg"] --> RAW["raw palette<br/>--ink --cream --white"]
+    RM["--syw-brand · --syw-brand-deep<br/>--syw-bg · --syw-fg"] --> RAW["raw palette<br/>--ink --cream --white"]
     RAW --> RAMP["alpha ramps<br/>--ink-05 … --ink-70"]
     RAMP --> SEM["semantic aliases<br/>--bg --surface --fg --fg-muted<br/>--border --accent --focus-ring"]
     DARK["@media prefers-color-scheme: dark"] -->|overrides| SEM
@@ -710,7 +723,7 @@ flowchart LR
 | `config:check` | Your identity appearing anywhere under `src/`, `functions/`, `graph/`, or `public/` |
 | `pages:check` | A GitHub Pages deploy that would land on a subpath and load blank; an `origin` that disagrees with where the site is actually served. Skipped while `demo: true` |
 | `fit:smoke` | An `aligned` requirement with no citation; the two evidence packs disagreeing; a dequalifying status leaking into highlight mode; the non-exhaustive caveat going missing; audit mode losing the ability to report gaps |
-| `graph:smoke` | A missing bundle; a bundle without `RMPortfolioGraph`/`create`; a regression to the retired `window.HHPG_FORCES` global; `resolveForces` ignoring `opts.forces`, the compact preset, or the defaults |
+| `graph:smoke` | A missing bundle; a bundle without `SYWPortfolioGraph`/`create`; a regression to the retired `window.HHPG_FORCES` global; `resolveForces` ignoring `opts.forces`, the compact preset, or the defaults |
 | `seo:smoke` | Sitemap/known-paths count mismatch; a 404 without `noindex`; an indexable route without its own document, canonical, or JSON-LD |
 | `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids, with the policy enforced; a meta CSP that is missing, wrongly present, or placed after the first stylesheet or script |
 | `ux:check` | Text below WCAG AA against its real composited background; horizontal overflow; an undersized touch target that also fails the 2.5.8 spacing rule; no keyboard focus ring; a route without exactly one `h1`, a `lang`, or a title. 9 routes x light/dark x 375/1280px |
@@ -733,7 +746,7 @@ filename. It appears in the work list, skill bank, search index, knowledge
 graph, sitemap, `llms.txt`, evidence pack, and gets a prerendered page with its
 own OG card. No other file changes.
 
-**Re-theme.** Change the four `--rm-*` vars in `tokens/colors.css`. Dark mode
+**Re-theme.** Change the four `--syw-*` vars in `tokens/colors.css`. Dark mode
 follows automatically.
 
 **Tune Fit.** `content/config/fit.yaml` — stop words, synonyms, per-skill
@@ -779,7 +792,7 @@ considered and rejected.
 | [015](./docs/architecture/adr/015-design-token-system.md) | Design tokens, contrast floors, the drift gate |
 | [016](./docs/architecture/adr/016-adopter-config-boundary.md) | Identity is data, never code |
 | [017](./docs/architecture/adr/017-prerender-and-editorial-contract.md) | Prerendering, the editorial contract, one-command setup |
-| [018](./docs/architecture/adr/018-build-command-and-source-drafting.md) | `/build-recruit-me`, grounded drafting, the links map |
+| [018](./docs/architecture/adr/018-build-command-and-source-drafting.md) | `/build-show-your-work`, grounded drafting, the links map |
 | [019](./docs/architecture/adr/019-fit-highlight-mode.md) | Fit is a highlight, not an audit |
 
 Full index: [`docs/README.md`](./docs/README.md).

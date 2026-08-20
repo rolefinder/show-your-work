@@ -1,7 +1,7 @@
 export const meta = {
   name: 'draft-content',
   description: 'Draft content/work YAML from the adopter\'s own sources, grounded and reviewable',
-  whenToUse: 'Invoked by /build-recruit-me when content/config/sources.yaml names a source and the user opted into drafting.',
+  whenToUse: 'Invoked by /build-show-your-work when content/config/sources.yaml names a source and the user opted into drafting.',
   phases: [
     { title: 'Discover', detail: 'one agent per configured source; return candidate projects' },
     { title: 'Draft', detail: 'one agent per candidate; write a visible:false YAML draft' },

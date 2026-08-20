@@ -118,7 +118,7 @@ steps into a single entry point (~5s off every build).
 
 **Recommendation.** A one-page CLI contract: `--help` on anything an adopter
 runs, `name: ok|WARN|FAILED` prefixes, and the 0/1/2 exit convention applied
-everywhere. Small, mechanical, and it makes `/build-recruit-me` more reliable
+everywhere. Small, mechanical, and it makes `/build-show-your-work` more reliable
 since the skill currently reads prose to decide what happened.
 
 ---
@@ -226,7 +226,7 @@ where it's currently invisible.
 | 1 | **U1 — `npm run dev`** | 23s → ~3s on the loop an author runs hundreds of times |
 | 2 | **P2 — content validation gate** | Stops a broken link reaching a recruiter; kills a whole class of silent errors |
 | 3 | **P1 — config casing** | User-facing inconsistency that fails silently |
-| 4 | **P4 — CLI contract** | Mechanical; makes `/build-recruit-me` more reliable |
+| 4 | **P4 — CLI contract** | Mechanical; makes `/build-show-your-work` more reliable |
 | 5 | **U3 / U4 — first-run polish** | Cheap once P4's conventions exist |
 | 6 | **P3 — merge the tsx steps** | ~5s off every build; do alongside P4 |
 

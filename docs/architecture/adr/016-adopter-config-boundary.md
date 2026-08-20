@@ -25,8 +25,8 @@ deployed:
    persona in `<title>`, `description`, `og:title`, `og:description`,
    `name`, and `short_name` — six edits in two file formats, none mentioned in
    `skills/infra-pages/SKILL.md`.
-4. **`src/app.tsx` hardcoded** a `— recruit-me demo` title suffix, a
-   "recruit-me demo" home eyebrow, and a "Demo corpus · Avery Quill
+4. **`src/app.tsx` hardcoded** a `— show-your-work demo` title suffix, a
+   "show-your-work demo" home eyebrow, and a "Demo corpus · Avery Quill
    (fictional)" footer line.
 5. **No contact affordance.** `profile.yaml` had `email` but nothing rendered
    it, and no field existed for a GitHub/LinkedIn link — a portfolio a
@@ -76,7 +76,7 @@ one config file that *was* data was not wired to anything.
 ## What this does NOT close
 
 Honest scope: this ADR makes adoption a config exercise. It does not reach
-feature parity with the sibling site (harrison-site / harrisonhalperin.com).
+feature parity with a sibling private site by the same author.
 Still open, roughly in value order:
 
 - **Prerendering.** ADR 014 §5 already flagged it. Per-route metadata is

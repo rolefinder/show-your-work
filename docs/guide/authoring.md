@@ -143,7 +143,7 @@ on that project.
 `visible: false` keeps a file out of the built site — no page, no sitemap
 entry, no graph node. Use it for drafts.
 
-`/build-recruit-me` writes drafted content as `visible: false` with `TODO:`
+`/build-show-your-work` writes drafted content as `visible: false` with `TODO:`
 markers wherever the source did not actually say something. Nothing it could
 not trace to a source is ever guessed. You review it, fill the TODOs, and flip
 the flag.

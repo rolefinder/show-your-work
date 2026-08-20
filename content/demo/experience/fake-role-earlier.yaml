@@ -1,0 +1,22 @@
+slug: fake-role-earlier
+organization: Fake Studio
+role: Fake Frontend Developer
+start: "2022-06"
+end: "2024-01"
+location: Remote
+summary: >
+  Built and shipped fictional client sites, and the shared component layer
+  behind them.
+highlights:
+  - >
+    Consolidated eight one-off stylesheets into a single token layer, after
+    which a palette change was one edit rather than eight.
+  - >
+    Introduced contrast checking into the build, which caught pairs that had
+    been shipping below the accessibility threshold.
+skills:
+  - CSS
+  - accessibility
+  - design tokens
+projects: []
+visible: true

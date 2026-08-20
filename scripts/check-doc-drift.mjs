@@ -32,7 +32,9 @@ const docs = flat(read("ARCHITECTURE.md") + "\n" + read("README.md"));
 const cfg = read("src", "fit", "config.ts");
 const search = read("src", "search", "searchGraph.ts");
 const fitPage = read("src", "fit", "FitPage.tsx");
-const api = read("functions", "api", "fit.ts");
+// The daily cap moved out of fit.ts when /api/mcp started sharing it — one
+// module owns the number now, so read it from there.
+const quota = read("functions", "_shared", "quota.ts");
 
 const num = (src, key) => (src.match(new RegExp(`${key}:\\s*(\\d+)`)) || [])[1];
 
@@ -51,7 +53,7 @@ const RULES = [
   ["search exact-title bonus", (search.match(/includes\(q\)\) score \+= (\d+)/) || [])[1], (v) => `exact title +${v}`],
   ["search connected cap", (search.match(/connected\.slice\(0, (\d+)\)/) || [])[1], (v) => `max ${v}`],
   ["fit char cap", (fitPage.match(/MAX_CHARS = (\d+)/) || [])[1], (v) => `${Number(v) / 1000}k character cap`],
-  ["fit quota", (api.match(/used >= (\d+)/) || [])[1], () => "daily cap"],
+  ["fit quota", (quota.match(/DAILY_LIMIT = (\d+)/) || [])[1], () => "daily cap"],
 ];
 
 const failures = [];
