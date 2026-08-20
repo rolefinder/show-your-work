@@ -191,13 +191,49 @@ if (spawnSync("bun --version", { shell: true, stdio: "ignore" }).status !== 0) {
   missingDeps.push("node_modules missing — run: bun install --frozen-lockfile");
 }
 
-const pw = spawnSync("bunx playwright --version", { shell: true, stdio: "ignore" });
-if (pw.status !== 0) {
-  warnings.push(
-    "playwright unavailable — the build will produce an SPA-only dist, so per-route " +
-      "metadata will be invisible to crawlers. Run: bunx playwright install chromium",
+/* A TOOLING warning is a different kind from the content warnings above: it
+   says the build will run and still not verify what it claims to. A caller
+   wants that separately from "you have not written a blog post yet", so it is
+   also collected on its own and exposed in --json. Still pushed to `warnings`,
+   so the human-readable report is unchanged. */
+const toolingWarnings = [];
+
+/* Probe the BROWSER BINARY, not the CLI. `playwright --version` answers "is
+   the npm package installed", which is a different question and almost always
+   yes — it is a devDependency, so `bun install` satisfies it. The binaries it
+   drives are downloaded separately and live outside node_modules. A probe that
+   confuses the two reports a browser that is not there, and prerendering then
+   degrades to SPA-only with nothing but a warning. Found by Bugbot on PR #50,
+   and it is the reason a "playwright available" machine can still ship a dist
+   with every route carrying the home page's metadata. */
+let browser = "";
+try {
+  const { chromium } = await import("playwright");
+  if (!existsSync(chromium.executablePath())) browser = "binary";
+} catch {
+  browser = "package";
+}
+/* The two states fail in OPPOSITE directions, which is why they get separate
+   sentences. Every browser gate skips on a failed `import("playwright")` and
+   only on that, so a missing PACKAGE is the quiet one — the suite goes green
+   having run none of them. A missing BINARY gets past the import and dies at
+   chromium.launch(), so it is loud. Saying "will skip" for both, as an earlier
+   draft of this did, tells a reader to expect a warning where they will
+   actually get a failed build (Bugbot, PR #50). */
+if (browser === "package") {
+  toolingWarnings.push(
+    "playwright is not installed — prerendering, csp:smoke and ux:check all skip, so " +
+      "`bun run test` can pass without one of them having run. " +
+      "Run: bun install --frozen-lockfile",
+  );
+} else if (browser === "binary") {
+  toolingWarnings.push(
+    "playwright is installed but its Chromium is not — prerendering degrades to an " +
+      "SPA-only dist, and csp:smoke and ux:check fail outright rather than skipping. " +
+      "Run: bunx playwright install chromium",
   );
 }
+warnings.push(...toolingWarnings);
 
 // ---------- report ----------
 /* --json exists so an agent driving the setup flow branches on structure
@@ -213,6 +249,7 @@ if (process.argv.includes("--json")) {
         blockers,
         missingDependencies: missingDeps,
         warnings,
+        toolingWarnings,
         profile: { name, email, origin },
         corpus: { work: work.length, blog: blog.length, workDrafts },
       },

@@ -100,7 +100,8 @@ Three failure modes worth knowing about, because all three are quiet:
 - **`bun test` is not `bun run test`.** Bare `bun test` invokes bun's own test
   runner, which finds no `*.test.ts` in this repo, prints `0 test files
   matching` — and **exits 0**. Every gate is a `package.json` script, so the
-  runner never sees them. Always `bun run test`.
+  runner never sees them. Always `bun run test`. A `PreToolUse` hook now
+  refuses the bare form, so this is one you can no longer get wrong.
 - **Prerendering is optional.** Without Chromium the build still succeeds and
   produces an SPA-only `dist/` — you get a warning, not an error, and every
   route ships the home page's metadata. Set `PRERENDER_REQUIRED=1` when the

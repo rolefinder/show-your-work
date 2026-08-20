@@ -65,6 +65,12 @@ jobs:
         run: |
           set -e
           for f in scripts/*.mjs; do node --check "$f"; done
+          # Hooks are JS too, and a hook that does not parse fails open —
+          # silently guarding nothing, which is the state it exists to prevent.
+          # .claude/workflows/ is deliberately NOT here: a workflow script is
+          # evaluated inside an async wrapper, so its top-level `return` is
+          # legal there and a SyntaxError to `node --check`.
+          for f in .claude/hooks/*.mjs; do node --check "$f"; done
           python -m compileall -q scripts packages
           echo "lint: all scripts parse"
 
