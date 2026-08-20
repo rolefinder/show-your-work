@@ -158,28 +158,50 @@ ${GROUND_RULE}
 Return the slug, the path you wrote, and how many TODO markers you left.`,
       { label: `draft:${c.slug}`, phase: 'Draft', schema: DRAFT },
     ),
+  /* agentType, so the grounder CANNOT edit. Its whole value is that it judges
+     rather than repairs: an agent with Write can quietly fix the claim it was
+     asked to report, and then returns a clean verdict on a file it just
+     changed. .claude/agents/draft-grounder.md removes the editing tools and
+     carries the standing instructions, so only the per-draft facts belong
+     here. */
   (draft, c) =>
     agent(
       `Adversarially check the draft at ${draft && draft.path ? draft.path : `content/work/${c.slug}.yaml`}.
 
 Its ONLY permitted source is:
-${(c.facts || []).map((f) => `- ${f}`).join('\n')}
-
-Read the file and list every claim it makes that those facts do not support - invented metrics, implied scale, asserted dates, named employers, inferred outcomes. Judge the text as written, not as intended. An empty list means clean; do not pad it, and do not excuse a claim because it sounds plausible.`,
-      { label: `ground:${c.slug}`, phase: 'Ground', schema: VERDICT },
+${(c.facts || []).map((f) => `- ${f}`).join('\n')}`,
+      { label: `ground:${c.slug}`, phase: 'Ground', schema: VERDICT, agentType: 'draft-grounder' },
     ).then((v) => ({ candidate: c, draft, verdict: v })),
 )
 
 const clean = []
 const flagged = []
+const unchecked = []
 for (const r of results.filter(Boolean)) {
-  const bad = (r.verdict && r.verdict.ungrounded) || []
+  /* A MISSING verdict is not a clean one. This used to read
+     `(r.verdict && r.verdict.ungrounded) || []`, so a grounder that never
+     returned - a dead agent, a timeout, an unresolvable agentType - produced
+     an empty ungrounded list, and the draft was counted as clean and reported
+     to the human as checked. The grounding pass is the only thing between a
+     drafted claim and a Fit brief citing it to a recruiter; "we could not
+     check this" has to read differently from "we checked it and it was fine". */
+  if (!r.verdict) {
+    unchecked.push(r)
+    continue
+  }
+  const bad = r.verdict.ungrounded || []
   if (bad.length) flagged.push(r)
   else clean.push(r)
 }
 
 phase('Report')
 log(`${clean.length} clean draft(s), ${flagged.length} with ungrounded claims.`)
+if (unchecked.length) {
+  log(
+    `WARNING: ${unchecked.length} draft(s) were never grounded, so nothing verified them: ` +
+      `${unchecked.map((r) => r.candidate.slug).join(', ')}. Treat them as unreviewed.`,
+  )
+}
 
 return {
   drafted: results.filter(Boolean).map((r) => ({
@@ -187,7 +209,10 @@ return {
     path: r.draft && r.draft.path,
     todoCount: (r.draft && r.draft.todoCount) || 0,
     ungrounded: (r.verdict && r.verdict.ungrounded) || [],
+    // Distinguishes "checked, nothing found" from "never checked".
+    grounded: Boolean(r.verdict),
   })),
   cleanCount: clean.length,
   flaggedCount: flagged.length,
+  uncheckedCount: unchecked.length,
 }

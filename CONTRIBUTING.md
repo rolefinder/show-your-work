@@ -119,6 +119,21 @@ an unadopted fork, and `bun run ready` is where a person asks that question.
 The `lint` job runs `node --check` over `.claude/hooks/*.mjs` for the same
 reason it does over `scripts/`: a hook that does not parse fails open.
 
+## Subagents
+
+`.claude/agents/` holds subagent definitions. There is one, and it exists for
+a guarantee a prompt cannot give:
+
+`draft-grounder` is the adversarial pass in `.claude/workflows/draft-content.mjs`
+— it reads a drafted `content/` file and reports every claim the source does
+not support. Its frontmatter removes `Edit`, `Write`, `NotebookEdit` and
+`Bash`, so it **cannot** repair what it was asked to judge. An agent that can
+fix the claim quietly returns a clean verdict on a file it just changed, and
+the human is told the draft was checked.
+
+Add a subagent when tool restriction or a separate context window is the
+point. A subagent that only restates a skill is a second copy of that skill.
+
 ## Worktrees
 
 `.worktreeinclude` lists the gitignored files that get copied into a new
