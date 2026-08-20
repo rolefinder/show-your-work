@@ -119,6 +119,14 @@ an unadopted fork, and `bun run ready` is where a person asks that question.
 The `lint` job runs `node --check` over `.claude/hooks/*.mjs` for the same
 reason it does over `scripts/`: a hook that does not parse fails open.
 
+## Worktrees
+
+`.worktreeinclude` lists the gitignored files that get copied into a new
+worktree. Most of what this repo ignores is regenerable and deliberately
+absent; three files are not, and their absence is quiet rather than loud —
+`content/config/corpus-guard.local.yaml` most of all, because
+`publication:check` **passes** when it is missing rather than failing.
+
 ## Rules that load when they apply
 
 `.claude/rules/` holds instructions gated by `paths:` globs, so each one enters
