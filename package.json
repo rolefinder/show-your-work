@@ -2,7 +2,7 @@
   "name": "recruit-me",
   "version": "0.3.0",
   "private": true,
-  "description": "Open-source personal portfolio template + recruiter Fit (JD \u2192 cite-or-missing evidence brief).",
+  "description": "Open-source personal portfolio template + recruiter Fit (JD → cite-or-missing evidence brief).",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -50,11 +50,11 @@
   "devDependencies": {
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.2",
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
-    "playwright": "^1.62.0",
+    "playwright": "^1.62.1",
     "sigma": "^3.0.3",
-    "typescript": "^5.7.3"
+    "typescript": "^7.0.2"
   }
 }
