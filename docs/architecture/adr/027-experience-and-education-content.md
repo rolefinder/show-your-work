@@ -1,4 +1,4 @@
-# ADR 026: Experience and education as content types
+# ADR 027: Experience and education as content types
 
 **Status:** Accepted · 2026-08-11
 

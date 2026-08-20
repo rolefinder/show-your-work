@@ -11,7 +11,7 @@ Going from a fork to a deployed site under your own name.
 
 Everything that identifies your deployment lives in `content/`. The build
 reads it and writes the rest. If a step below asks you to edit a file under
-`src/` or `public/`, that is a bug in the template — `npm run config:check`
+`src/` or `public/`, that is a bug in the template — `bun run config:check`
 exists to fail the build when identity leaks into code.
 
 | Edit | Holds |
@@ -28,7 +28,7 @@ exists to fail the build when identity leaks into code.
 
 ## Steps
 
-1. **Fork or copy the template**, then `npm ci`.
+1. **Fork or copy the template**, then `bun install --frozen-lockfile`.
 
    Set `deploy.target: cloudflare-pages` in `content/config/site.yaml`. The
    default is `github-pages`, which makes the build inject the CSP as a
@@ -38,7 +38,7 @@ exists to fail the build when identity leaks into code.
 2. **Run the scaffolder.**
 
    ```bash
-   npm run init
+   bun run init
    ```
 
    It asks for your name, tagline, location, email, site origin, summary,
@@ -48,7 +48,7 @@ exists to fail the build when identity leaks into code.
    disclaimer, and sets `demo: false`. Add `--replace-content` to also swap the
    demo corpus for starter files that show the editorial contract, or
    `--dry-run` to see the plan first. Scriptable with
-   `npm run init -- --config me.json`.
+   `bun run init --config me.json`.
 
    `corpus:check` guards the *demo* corpus against real-person fingerprints and
    turns itself off once `demo: false` — your corpus is supposed to name a real
@@ -61,21 +61,23 @@ exists to fail the build when identity leaks into code.
    metadata is invisible to crawlers that don't run JS):
 
    ```bash
-   npx playwright install chromium
+   bunx playwright install chromium
    ```
-5. **Build.** `npm run build` — output is `dist/`. `npm test` runs the same
+5. **Build.** `bun run build` — output is `dist/`. `bun run test` runs the same
    build plus every gate.
 6. **Create the Pages project** pointing at `dist/` (direct upload), or connect
-   the repo with build command `npm ci && npm run build` and output directory
+   the repo with build command `bun install --frozen-lockfile && bun run build` and output directory
    `dist`. Set `PRERENDER_REQUIRED=1` in the build environment so a deploy can
-   never silently ship without prerendered documents.
+   never silently ship without prerendered documents. Cloudflare's build image
+   does not read `.bun-version` — set `BUN_VERSION` to match it if you want the
+   deploy on the same bun as CI.
 7. **Optional:** bind KV `FIT_QUOTA` for `/api/fit` (see
    `wrangler.example.toml`). The browser Fit path works without it.
 8. **Never commit real account IDs** — keep secrets in the dashboard / CI.
 
 ## Verify
 
-- `npm test` green, including `config:check` (no identity in code) and
+- `bun run test` green, including `config:check` (no identity in code) and
   `style:check` (no raw colors in the component layer).
 - `dist/index.html` `<title>` and `og:*` show **your** name, not the
   placeholder — that is `scripts/emit-html.ts` having run.

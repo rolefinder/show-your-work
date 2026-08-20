@@ -1,5 +1,5 @@
 /**
- * `npm run ux:check` — automated UI/UX review of the BUILT site.
+ * `bun run ux:check` — automated UI/UX review of the BUILT site.
  *
  * Every assertion here is a check that was previously done by hand, once, and
  * would silently rot: contrast measured in both schemes, no horizontal
@@ -32,7 +32,7 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
 }
 
 if (!existsSync(join(root, "dist", "index.html"))) {
-  console.error("check-ux: dist/ not built - run `npm run build` first");
+  console.error("check-ux: dist/ not built - run `bun run build` first");
   process.exit(2);
 }
 
@@ -40,7 +40,7 @@ let chromium;
 try {
   ({ chromium } = await import("playwright"));
 } catch {
-  console.warn("check-ux: playwright not installed - skipping. Run: npx playwright install chromium");
+  console.warn("check-ux: playwright not installed - skipping. Run: bunx playwright install chromium");
   process.exit(0);
 }
 

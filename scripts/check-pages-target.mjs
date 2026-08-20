@@ -1,5 +1,5 @@
 /**
- * `npm run pages:check` — will this actually serve at the root on GitHub Pages?
+ * `bun run pages:check` — will this actually serve at the root on GitHub Pages?
  *
  * Every asset in the document is referenced absolutely (`/app.js`,
  * `/styles.css`, `/assets/...`) and the client router reads

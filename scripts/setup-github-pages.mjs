@@ -1,5 +1,5 @@
 /**
- * `npm run pages:setup` — point GitHub Pages at the deploy workflow, over the
+ * `bun run pages:setup` — point GitHub Pages at the deploy workflow, over the
  * API, so nobody has to visit a settings page.
  *
  * Built to be driven by an agent, which means two properties matter more than
@@ -140,7 +140,7 @@ if (target.status !== 0) {
 record("root-path", target.stdout.trim().split("\n").pop().replace(/^check-pages-target:\s*/, ""));
 
 // ---------- 4b. is the repository public? ----------
-/* The free guardrail, and the only place the template can enforce it (ADR 027).
+/* The free guardrail, and the only place the template can enforce it (ADR 028).
    On a PRIVATE repo two things stop being free at once:
 
      - Pages itself requires a paid GitHub plan.

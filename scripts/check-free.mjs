@@ -14,7 +14,7 @@
  *
  * What is deliberately NOT checked: the adopter's own account. If someone puts
  * this behind a paid Cloudflare plan or buys a domain, that is their
- * infrastructure and their decision (ADR 027). This gate governs what the
+ * infrastructure and their decision (ADR 028). This gate governs what the
  * TEMPLATE ships.
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
@@ -78,7 +78,7 @@ for (const file of sources) {
   for (const [name, pattern] of METERED_BINDINGS) {
     if (pattern.test(text)) {
       failures.push(
-        `${rel}: references ${name}, which meters. A site built from this template must not be able to bill its owner — see ADR 027`,
+        `${rel}: references ${name}, which meters. A site built from this template must not be able to bill its owner — see ADR 028`,
       );
     }
   }

@@ -24,7 +24,7 @@ theme:
 ```
 
 The build writes those into `dist/tokens/adopter.css`, which `tokens.css`
-imports **last**, so they win. `npm run init` fills in `accent` for you if you
+imports **last**, so they win. `bun run init` fills in `accent` for you if you
 answer the accent prompt.
 
 Config rather than CSS because a palette edit inside `tokens/colors.css` is a
@@ -57,7 +57,7 @@ alpha ramps over the same ink rather than independently chosen hexes.
 
 ## The rule
 
-**No raw color in `styles.css`.** `npm run style:check` fails on it, and on two
+**No raw color in `styles.css`.** `bun run style:check` fails on it, and on two
 subtler things:
 
 - **A `var(--x)` that resolves to nothing.** This catches the silent-fallback
@@ -73,7 +73,7 @@ move, not a workaround.
 ## Contrast is measured, not assumed
 
 Every shipped text/background pair clears WCAG AA (4.5:1) in both schemes, and
-`npm run ux:check` re-measures it on every build — 9 routes × light/dark ×
+`bun run ux:check` re-measures it on every build — 9 routes × light/dark ×
 375/1280px, against the **real composited background**.
 
 That last part is load-bearing here. This palette is built almost entirely from

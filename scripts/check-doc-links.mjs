@@ -1,5 +1,5 @@
 /**
- * `npm run docs:links` — every relative link and anchor in the docs resolves.
+ * `bun run docs:links` — every relative link and anchor in the docs resolves.
  *
  * A README that links to a moved ADR is a small thing that erodes trust in the
  * whole document. Checks relative file links and in-page `#anchor` targets;

@@ -1,5 +1,5 @@
 /**
- * `npm run docs:check` — the documentation's numbers must match the source.
+ * `bun run docs:check` — the documentation's numbers must match the source.
  *
  * ARCHITECTURE.md and README.md quote specific values: Fit's scoring weights
  * and thresholds, the search ranking table, input caps, the quota. Those were

@@ -41,7 +41,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const quota = await charge(request, env);
   if (!quota.allowed) return json({ error: "quota_exceeded", remaining: 0 }, 429);
 
-  // Dynamic import of bundled engine (built by npm run build:fit-worker)
+  // Dynamic import of bundled engine (built by bun run build:fit-worker)
   const { matchFit } = await import("../_lib/fit-engine.js");
   const packUrl = new URL("/evidence.json", request.url);
   const packRes = await fetch(packUrl);

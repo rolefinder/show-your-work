@@ -76,7 +76,7 @@ If there are blockers, they are all things only the user can answer. Do not
 guess past them.
 
 For content: follow `/build-show-your-work` steps 2–4 — draft from
-`content/config/sources.yaml` if the user asked for it, then `npm test`, then
+`content/config/sources.yaml` if the user asked for it, then `bun run test`, then
 verify the artifact rather than trusting the exit code.
 
 **Report ungrounded claims prominently.** They are the drafting workflow
@@ -106,7 +106,7 @@ Three things this must get right:
   domain, or enable a paid plan to get past a problem — none of that is yours to
   arrange, and a bill that arrives because an agent was being helpful is worse
   than a site that is not up yet. Name the option, stop, let them decide
-  ([ADR 027](../../../docs/architecture/adr/027-free-to-serve.md)).
+  ([ADR 028](../../../docs/architecture/adr/028-free-to-serve.md)).
   `pages:setup` refuses a private repo for the same reason and says why.
 - **After the yes, do not ask again.** Steps 4–6 run without further prompts.
   Come back only for a blocker you genuinely cannot resolve.
@@ -114,8 +114,8 @@ Three things this must get right:
 ## 4. Publish
 
 ```bash
-npm run pages:setup -- --dry-run --json   # what it would do, changes nothing
-npm run pages:setup -- --json
+bun run pages:setup --dry-run --json   # what it would do, changes nothing
+bun run pages:setup --json
 ```
 
 It checks `gh` is installed and authenticated with the `repo` and `workflow`

@@ -65,7 +65,7 @@ flowchart LR
 ```
 
 The consequence: **adopting this template is a `content/` edit, not a fork.**
-`npm run config:check` reads your current identity out of the generated module
+`bun run config:check` reads your current identity out of the generated module
 and fails the build if any of those strings appear under `src/`, `functions/`,
 `graph/`, or the HTML templates. It needs no blocklist and keeps working after
 you rename yourself (ADR 016).
@@ -138,7 +138,7 @@ show-your-work/
 │   ├── prerender-routes.ts        per-route HTML + 1200×630 OG cards
 │   ├── run-prerender.mjs          optional locally, required via PRERENDER_REQUIRED
 │   ├── preview.mjs                static server; --spa mode for the prerenderer
-│   ├── init-site.mjs              `npm run init`
+│   ├── init-site.mjs              `bun run init`
 │   ├── banner.mjs                 the wordmark
 │   ├── check-{ready,adopter-config,style-tokens,layout,copy}.mjs
 │   ├── check-{fictional-corpus,secrets}.py
@@ -158,7 +158,7 @@ show-your-work/
 ├── functions/                   ▓ Cloudflare Pages Functions
 │   ├── _middleware.js             404 status + which document to serve
 │   ├── api/fit.ts                 optional POST /api/fit
-│   └── api/mcp.ts                 read-only MCP endpoint for agents (ADR 023)
+│   └── api/mcp.ts                 read-only MCP endpoint for agents (ADR 024)
 │
 ├── public/                      ▓ WEB ROOT — copied to dist/, never edited
 │   ├── index.html · 404.html      templates; identity injected at build
@@ -326,7 +326,7 @@ Node YAML dependency.
 
 ## The build pipeline
 
-`npm run build`, in `package.json` order.
+`bun run build`, in `package.json` order.
 
 ```mermaid
 flowchart TD
@@ -365,10 +365,10 @@ prerendered documents and the cards all derive from `scripts/lib/routes.ts`,
 built from the same generated module the client router uses. They cannot drift,
 because there is nothing to drift *from*.
 
-**Authoring skips most of this.** `npm run dev` watches `content/`, `src/`
+**Authoring skips most of this.** `bun run dev` watches `content/`, `src/`
 and `tokens/` and runs only the tier a change needs — ~2s for a work/blog edit,
 ~4s when identity changes, instant for CSS — and never prerenders. Prerendering
-is a publish-time concern, so `npm run build` remains the thing you run before
+is a publish-time concern, so `bun run build` remains the thing you run before
 deploying.
 
 **Prerendering degrades loudly.** `run-prerender.mjs` treats a missing
@@ -767,16 +767,16 @@ inferring claims from titles is exactly what the grounding phase prevents.
 
 Cloudflare Pages, `dist/` as the output directory.
 
-- Build command `npm ci && npm run build`, with **`PRERENDER_REQUIRED=1`** set
+- Build command `bun install --frozen-lockfile && bun run build`, with **`PRERENDER_REQUIRED=1`** set
   so a deploy can never silently ship without prerendered documents.
 - `_headers` and `_redirects` ship inside `dist/`.
 - `functions/` deploys automatically as Pages Functions. `/api/fit` is
   optional — the browser path works without it. Bind KV `FIT_QUOTA` to enable
   the per-client daily cap.
 - Prerendering needs Chromium in the build image:
-  `npx playwright install --with-deps chromium`.
+  `bunx playwright install --with-deps chromium`.
 
-`npm run ready` answers "is this configured enough to deploy" before you try.
+`bun run ready` answers "is this configured enough to deploy" before you try.
 
 ---
 

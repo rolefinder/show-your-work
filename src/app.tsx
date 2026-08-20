@@ -535,7 +535,7 @@ function App() {
                       ),
                     )
                   : null,
-                // Curated, not date-inferred (ADR 026). Only links to work that
+                // Curated, not date-inferred (ADR 027). Only links to work that
                 // is actually published, so an unpublished draft cannot leak a
                 // dangling link onto the career page.
                 (() => {

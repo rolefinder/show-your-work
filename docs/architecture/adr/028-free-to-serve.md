@@ -1,4 +1,4 @@
-# ADR 027: Free to serve, and the line the template will not cross
+# ADR 028: Free to serve, and the line the template will not cross
 
 **Status:** Accepted · 2026-08-11
 

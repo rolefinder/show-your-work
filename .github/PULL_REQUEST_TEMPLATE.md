@@ -10,11 +10,11 @@ This template is for changing the template itself.
 ## How it was verified
 
 <!--
-`npm test` is the bar. If a gate could not run locally, say which and why —
+`bun run test` is the bar. If a gate could not run locally, say which and why —
 Chromium missing means prerendering and ux:check silently skipped.
 -->
 
-- [ ] `npm test` passes locally
+- [ ] `bun run test` passes locally
 - [ ] Chromium installed, so prerendering and `ux:check` actually ran
 
 ## Checklist

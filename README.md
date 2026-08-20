@@ -61,10 +61,10 @@ that already exists in your `content/`.
 
 ```powershell
 pip install --user pyyaml
-npm ci
-npx playwright install chromium   # enables prerendering
-npm run test
-npm run preview
+bun install --frozen-lockfile
+bunx playwright install chromium   # enables prerendering
+bun run test
+bun run preview
 ```
 
 Open <http://localhost:4173/fit> and paste a real JD.
@@ -72,17 +72,17 @@ Open <http://localhost:4173/fit> and paste a real JD.
 While writing, use the authoring loop instead:
 
 ```powershell
-npm run dev
+bun run dev
 ```
 
 Watches `content/`, `src/`, `tokens/` and rebuilds only what changed — about
 2s for a content edit, versus ~23s for a full build. Prerendering is skipped
-because it is a publish-time concern; run `npm run build` before deploying.
+because it is a publish-time concern; run `bun run build` before deploying.
 
 ## Make it yours
 
 ```powershell
-npm run init
+bun run init
 ```
 
 Prompts for your identity and writes it into `content/`, swaps the demo
@@ -100,7 +100,7 @@ Then, in Claude Code:
 Preflights the config, optionally drafts project YAML from sources you name in
 `content/config/sources.yaml` (GitHub repos, a resume) as reviewable
 `visible: false` drafts, builds with prerendering, and verifies the artifact.
-`npm run ready` runs just the preflight.
+`bun run ready` runs just the preflight.
 
 ## What you get
 

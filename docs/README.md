@@ -34,11 +34,12 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [020](architecture/adr/020-github-pages-target-and-agent-autonomy.md) | **GitHub Pages as the default target**, and what an agent may do alone |
 | [021](architecture/adr/021-additive-only-adoption.md) | **Adoption is additive** — you add files, you never edit or delete them |
 | [022](architecture/adr/022-mit-license-and-third-party-notices.md) | MIT, and attribution for what is actually redistributed |
-| [023](architecture/adr/023-read-only-mcp-endpoint.md) | **A read-only MCP endpoint** — agents read the corpus without scraping |
-| [024](architecture/adr/024-directory-skeleton-gate.md) | The directory tree is machine-checked against the one documented |
-| [025](architecture/adr/025-copy-quality-gate.md) | Rendered copy is linted, because no other gate reads the words |
-| [026](architecture/adr/026-experience-and-education-content.md) | **Experience and education** as content types — roles become Fit evidence |
-| [027](architecture/adr/027-free-to-serve.md) | **Free to serve** — the template hosts your Pages site and provisions nothing else |
+| [023](architecture/adr/023-bun-toolchain.md) | **bun installs and runs TypeScript**; Node still runs the gates |
+| [024](architecture/adr/024-read-only-mcp-endpoint.md) | **A read-only MCP endpoint** — agents read the corpus without scraping |
+| [025](architecture/adr/025-directory-skeleton-gate.md) | The directory tree is machine-checked against the one documented |
+| [026](architecture/adr/026-copy-quality-gate.md) | Rendered copy is linted, because no other gate reads the words |
+| [027](architecture/adr/027-experience-and-education-content.md) | **Experience and education** as content types — roles become Fit evidence |
+| [028](architecture/adr/028-free-to-serve.md) | **Free to serve** — the template hosts your Pages site and provisions nothing else |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The

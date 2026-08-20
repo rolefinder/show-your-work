@@ -1,5 +1,5 @@
 /**
- * `npm run csp:smoke` — the site must work under its own Content-Security-Policy.
+ * `bun run csp:smoke` — the site must work under its own Content-Security-Policy.
  *
  * On the github-pages target the policy ships inside the document as a
  * `<meta http-equiv>`, because GitHub Pages cannot set response headers. That
@@ -64,12 +64,12 @@ let chromium;
 try {
   ({ chromium } = await import("playwright"));
 } catch {
-  console.warn("csp-smoke: playwright unavailable - skipping the runtime pass (install: npx playwright install chromium)");
+  console.warn("csp-smoke: playwright unavailable - skipping the runtime pass (install: bunx playwright install chromium)");
   report();
 }
 
 if (!existsSync(join(dist, "index.html"))) {
-  console.error("csp-smoke: dist/index.html missing - run npm run build first");
+  console.error("csp-smoke: dist/index.html missing - run bun run build first");
   process.exit(1);
 }
 

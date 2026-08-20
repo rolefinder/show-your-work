@@ -1,4 +1,4 @@
-# ADR 024: The directory tree is machine-checked against the documented one
+# ADR 025: The directory tree is machine-checked against the documented one
 
 **Status:** Accepted · 2026-08-11
 

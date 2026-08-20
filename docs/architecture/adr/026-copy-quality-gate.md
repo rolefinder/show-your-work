@@ -1,4 +1,4 @@
-# ADR 025: Rendered copy is linted, because no other gate reads the words
+# ADR 026: Rendered copy is linted, because no other gate reads the words
 
 **Status:** Accepted · 2026-08-11
 

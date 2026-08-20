@@ -18,7 +18,7 @@ published page. That only works if the published pages are true. So:
 - **Never publish unreviewed drafts.** Drafting writes `visible: false`. Only
   the human flips that.
 - **Never edit `src/`** to make a build work. Identity and content belong in
-  `content/`; `npm run config:check` fails the build if identity leaks into
+  `content/`; `bun run config:check` fails the build if identity leaks into
   code. If something can only be fixed in `src/`, that is a template bug worth
   reporting, not a setup step.
 
@@ -32,7 +32,7 @@ node scripts/check-ready.mjs
 
 Exit 0 = ready. Exit 1 = placeholders remain; it lists each one. Report the
 list verbatim and stop — do not guess the user's name, domain, or skills to
-get past it. If they haven't set up at all, point them at `npm run init`.
+get past it. If they haven't set up at all, point them at `bun run init`.
 
 Warnings (missing Playwright, missing `outcome`/`evidence`, drafts awaiting
 review) do not block. Surface them; they change the quality of the result.
@@ -61,16 +61,16 @@ Then re-run step 1.
 ### 3. Build
 
 ```bash
-npm test
+bun run test
 ```
 
 This runs every gate plus the full build: content emit → typecheck → bundle →
 identity injection → SEO artifacts → evidence pack → Fit worker → prerender.
-Prefer it over `npm run build` — the gates are the point.
+Prefer it over `bun run build` — the gates are the point.
 
 If Playwright is missing, the build warns and produces an SPA-only `dist`.
 That is a legitimate state, but say so plainly: per-route metadata will be
-invisible to crawlers that don't run JS. `npx playwright install chromium`
+invisible to crawlers that don't run JS. `bunx playwright install chromium`
 fixes it.
 
 ### 4. Verify what actually shipped

@@ -1,4 +1,4 @@
-# ADR 023: A read-only MCP endpoint, and why it can never cost anything
+# ADR 024: A read-only MCP endpoint, and why it can never cost anything
 
 **Status:** Accepted · 2026-08-11
 

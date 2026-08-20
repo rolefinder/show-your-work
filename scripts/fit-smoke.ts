@@ -93,7 +93,7 @@ assert(
  * DEMO expectations ("a CI/CD JD must cite the merge-gate project") are about THIS
  * repo's fictional corpus. On an adopter's own content they are meaningless
  * and fail, which would mean a correctly-initialized site cannot pass
- * `npm test` — the same trap the fictional-corpus gate had.
+ * `bun run test` — the same trap the fictional-corpus gate had.
  */
 const cicdJd = `
 Senior Platform Engineer

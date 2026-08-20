@@ -72,7 +72,7 @@ stay out.
 - No real secrets in tree; `wrangler.example.toml` only; `.env*` gitignored;
   pre-commit **gitleaks** / **trufflehog**.
 - GitHub secret scanning + push protection enabled.
-- **Dependabot** or **Renovate** for Actions and npm/pip.
+- **Dependabot** or **Renovate** for Actions and bun/pip.
 - **CodeQL** and/or **Semgrep** on PRs.
 - **OpenSSF Scorecard** monitored after public; fix easy wins (pinned Actions
   SHAs, branch protection, etc.).
@@ -90,8 +90,8 @@ stay out.
 ### Optional later
 
 - Cosign / SLSA provenance on release artifacts.
-- npm provenance if publishing packages.
-- Periodic `npm audit` / `pip-audit` in CI.
+- Package provenance attestations if publishing packages.
+- Periodic `bun audit` / `pip-audit` in CI.
 
 ---
 

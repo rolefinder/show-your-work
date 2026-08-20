@@ -20,7 +20,7 @@ asks once before anything goes public, and hands back a URL.
 **Nothing, on the default path.** GitHub Pages on a public repository is free,
 and so are the Actions minutes that build it. There is no metered resource in a
 site built from this template, so there is no usage number to watch — that is
-enforced by `free:check`, not just intended ([ADR 027](../architecture/adr/027-free-to-serve.md)).
+enforced by `free:check`, not just intended ([ADR 028](../architecture/adr/028-free-to-serve.md)).
 
 Three things cost money, and you have to choose all three deliberately:
 
@@ -44,7 +44,7 @@ decisions with recurring costs, and they are yours to make.
 | | GitHub Pages | Cloudflare Pages |
 |---|---|---|
 | Account needed | none beyond GitHub | a Cloudflare account |
-| Setup | `npm run pages:setup`, no dashboard visit | project created in the dashboard |
+| Setup | `bun run pages:setup`, no dashboard visit | project created in the dashboard |
 | **CSP** | `<meta http-equiv>` only | real `Content-Security-Policy` header |
 | **`frame-ancestors`** | **unavailable** — invalid in a meta tag | enforced |
 | **X-Frame-Options** | **unavailable** — header only | `DENY` |
@@ -81,7 +81,7 @@ So the site must serve at the root, which means one of:
 - **`deploy.custom_domain`** is set to a domain you own.
 
 ```bash
-npm run pages:check
+bun run pages:check
 ```
 
 fails with both fixes spelled out if neither holds. It also fails if `origin`
@@ -93,8 +93,8 @@ It skips while `demo: true` — the template repo is not a deployment.
 ### Standing it up
 
 ```bash
-npm run pages:setup -- --dry-run    # prints what it would do, changes nothing
-npm run pages:setup
+bun run pages:setup --dry-run    # prints what it would do, changes nothing
+bun run pages:setup
 ```
 
 This enables Pages over the API with the workflow as the build source, so there
@@ -126,6 +126,12 @@ injecting the meta CSP and lets `public/_headers` do the work.
 Set `PRERENDER_REQUIRED=1` in the Pages build environment. Without it a build
 on a machine with no browser silently produces an SPA-only site where every
 route carries the home page's metadata.
+
+Cloudflare's build image ships its own bun and does **not** read
+`.bun-version`, so set `BUN_VERSION` in the build environment to the value in
+that file if you want the deploy building on the same bun as CI. The floor in
+`package.json` is 1.2, which the default image already clears — this is about
+reproducing CI exactly, not about whether the build runs.
 
 ## Moving between them
 
