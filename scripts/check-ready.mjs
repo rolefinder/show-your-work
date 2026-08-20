@@ -213,16 +213,24 @@ try {
 } catch {
   browser = "package";
 }
+/* The two states fail in OPPOSITE directions, which is why they get separate
+   sentences. Every browser gate skips on a failed `import("playwright")` and
+   only on that, so a missing PACKAGE is the quiet one — the suite goes green
+   having run none of them. A missing BINARY gets past the import and dies at
+   chromium.launch(), so it is loud. Saying "will skip" for both, as an earlier
+   draft of this did, tells a reader to expect a warning where they will
+   actually get a failed build (Bugbot, PR #50). */
 if (browser === "package") {
   toolingWarnings.push(
-    "playwright is not installed — prerendering and ux:check will both skip, so the " +
-      "build ships an SPA-only dist. Run: bun install --frozen-lockfile",
+    "playwright is not installed — prerendering, csp:smoke and ux:check all skip, so " +
+      "`bun run test` can pass without one of them having run. " +
+      "Run: bun install --frozen-lockfile",
   );
 } else if (browser === "binary") {
   toolingWarnings.push(
-    "playwright is installed but its Chromium is not — the build will produce an " +
-      "SPA-only dist, so per-route metadata will be invisible to crawlers, and " +
-      "ux:check will skip. Run: bunx playwright install chromium",
+    "playwright is installed but its Chromium is not — prerendering degrades to an " +
+      "SPA-only dist, and csp:smoke and ux:check fail outright rather than skipping. " +
+      "Run: bunx playwright install chromium",
   );
 }
 warnings.push(...toolingWarnings);
