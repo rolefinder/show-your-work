@@ -21,6 +21,7 @@
  * nothing.
  */
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 
 const root = process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -60,9 +61,14 @@ export function globToRegExp(glob) {
 }
 
 export function findMatch(relPath, rows) {
-  return rows.find(
-    (r) => globToRegExp(r.pattern).test(relPath) || relPath.startsWith(r.pattern.replace(/\*+$/, "")),
-  );
+  return rows.find((r) => {
+    if (globToRegExp(r.pattern).test(relPath)) return true;
+    // `dist/**` should also cover the bare directory and anything under it.
+    // Only patterns that END in a wildcard may prefix-match: without that
+    // guard `src/generated/content.ts` would also swallow `content.ts.bak`.
+    if (!/\*$/.test(r.pattern)) return false;
+    return relPath.startsWith(r.pattern.replace(/\*+$/, ""));
+  });
 }
 
 function main() {
@@ -111,4 +117,10 @@ function main() {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+/* pathToFileURL, not string concatenation: Node percent-encodes
+   import.meta.url (a space becomes %20) and Windows file URLs take a
+   different shape, so the naive comparison silently disagrees and main()
+   never runs — a guard that FAILS OPEN. Found by Bugbot on PR #50. */
+// argv[1] is undefined when this module is imported rather than run
+// (a test harness, `node -e`), and pathToFileURL throws on undefined.
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) main();

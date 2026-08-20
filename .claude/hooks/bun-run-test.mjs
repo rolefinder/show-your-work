@@ -13,6 +13,7 @@
  * degrades to "allowed" rather than to "no Bash tool".
  */
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 /** Command separators. Splitting inside a quoted string only ever produces
     MORE segments, and a segment must *start* with the invocation to match, so
@@ -29,7 +30,9 @@ export function isBareBunTest(command) {
     .some((segment) => {
       const bare = segment.trim().replace(LEADING_ENV, "");
       // `bun run test` does not match: the token after `bun` is `run`.
-      return /^bun\s+test(?:\s|$)/.test(bare);
+      // The optional path prefix catches `/usr/local/bin/bun test` and
+      // `./node_modules/.bin/bun test`, which are the same mistake.
+      return /^(?:\S*\/)?bun\s+test(?:\s|$)/.test(bare);
     });
 }
 
@@ -56,4 +59,10 @@ function main() {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+/* pathToFileURL, not string concatenation: Node percent-encodes
+   import.meta.url (a space becomes %20) and Windows file URLs take a
+   different shape, so the naive comparison silently disagrees and main()
+   never runs — a guard that FAILS OPEN. Found by Bugbot on PR #50. */
+// argv[1] is undefined when this module is imported rather than run
+// (a test harness, `node -e`), and pathToFileURL throws on undefined.
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) main();

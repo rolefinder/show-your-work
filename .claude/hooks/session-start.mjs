@@ -28,19 +28,23 @@
 import { spawnSync } from "node:child_process";
 
 const root = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-const run = (cmd) => spawnSync(cmd, { cwd: root, shell: true, encoding: "utf8" });
+/* Timeouts, because this runs before the session does: a wedged install or a
+   probe waiting on a network would otherwise hold the whole session open. A
+   timeout kills the child and surfaces as a non-zero status, which both
+   callers below already handle. */
+const run = (cmd, timeout) => spawnSync(cmd, { cwd: root, shell: true, encoding: "utf8", timeout });
 
 const lines = [];
 
 /* --frozen-lockfile: a session start must never silently rewrite bun.lock.
    If it fails, say so and carry on — check-ready below reports the
    consequence (node_modules missing) in its own words. */
-const install = run("bun install --frozen-lockfile");
+const install = run("bun install --frozen-lockfile", 120_000);
 if (install.status !== 0) {
   lines.push("- `bun install --frozen-lockfile` failed. Dependencies may be incomplete.");
 }
 
-const ready = run("node scripts/check-ready.mjs --json");
+const ready = run("node scripts/check-ready.mjs --json", 60_000);
 let report;
 try {
   report = JSON.parse(ready.stdout);

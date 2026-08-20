@@ -198,11 +198,31 @@ if (spawnSync("bun --version", { shell: true, stdio: "ignore" }).status !== 0) {
    so the human-readable report is unchanged. */
 const toolingWarnings = [];
 
-const pw = spawnSync("bunx playwright --version", { shell: true, stdio: "ignore" });
-if (pw.status !== 0) {
+/* Probe the BROWSER BINARY, not the CLI. `playwright --version` answers "is
+   the npm package installed", which is a different question and almost always
+   yes — it is a devDependency, so `bun install` satisfies it. The binaries it
+   drives are downloaded separately and live outside node_modules. A probe that
+   confuses the two reports a browser that is not there, and prerendering then
+   degrades to SPA-only with nothing but a warning. Found by Bugbot on PR #50,
+   and it is the reason a "playwright available" machine can still ship a dist
+   with every route carrying the home page's metadata. */
+let browser = "";
+try {
+  const { chromium } = await import("playwright");
+  if (!existsSync(chromium.executablePath())) browser = "binary";
+} catch {
+  browser = "package";
+}
+if (browser === "package") {
   toolingWarnings.push(
-    "playwright unavailable — the build will produce an SPA-only dist, so per-route " +
-      "metadata will be invisible to crawlers. Run: bunx playwright install chromium",
+    "playwright is not installed — prerendering and ux:check will both skip, so the " +
+      "build ships an SPA-only dist. Run: bun install --frozen-lockfile",
+  );
+} else if (browser === "binary") {
+  toolingWarnings.push(
+    "playwright is installed but its Chromium is not — the build will produce an " +
+      "SPA-only dist, so per-route metadata will be invisible to crawlers, and " +
+      "ux:check will skip. Run: bunx playwright install chromium",
   );
 }
 warnings.push(...toolingWarnings);
