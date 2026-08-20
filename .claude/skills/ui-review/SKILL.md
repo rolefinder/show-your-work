@@ -1,6 +1,7 @@
 ---
 name: ui-review
 description: Review the built site's UI/UX against the real rendered DOM — contrast, layout, keyboard, hierarchy, responsive behaviour — going beyond what scripts/check-ux.mjs can assert mechanically. Use when the user runs /ui-review, or asks to "review the design", "check accessibility", "how does this look on mobile", or after a visual change.
+context: fork
 ---
 
 # /ui-review

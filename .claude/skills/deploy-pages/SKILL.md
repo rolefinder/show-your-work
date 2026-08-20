@@ -1,6 +1,7 @@
 ---
 name: deploy-pages
 description: Take a filled-in show-your-work fork from local build to a live site on Cloudflare Pages — what to edit, how to build with prerendering, how to create the Pages project, and how to verify the deploy is really yours. Use when the user runs /deploy-pages, or asks to "deploy my site", "put this on Cloudflare", or "how do I go live".
+disable-model-invocation: true
 ---
 
 # /deploy-pages
