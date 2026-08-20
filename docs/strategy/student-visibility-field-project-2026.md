@@ -44,23 +44,30 @@ institution has already published*. The department does not need to define a
 skill taxonomy — it wrote one, in each course syllabus, the semester the course
 was approved. The student does not need a platform's write API — the platform
 already offers a member-initiated data export that says precisely which parts of
-their profile are empty.
+their profile are empty. The same move covers professional certifications: the
+issuer publishes an exam guide naming, in its own words, the skills a passing
+candidate is expected to have.
 
 The proposed system is [show-your-work](https://github.com/rolefinder/show-your-work):
 an MIT-licensed static site the candidate owns, built from a corpus they author
 once and derive many times, with a deterministic matcher that answers a pasted
-job description by citing pages they actually published. It adds two mechanisms
-this document specifies for the first time:
+job description by citing pages they actually published. It adds three
+mechanisms this document specifies for the first time:
 
-1. **Syllabus-derived skill vocabulary.** Read the learning outcomes out of the
-   syllabi for courses the student passed. Those outcomes are the institution's
-   own written statement of what passing means, and they supply the vocabulary
-   the 2022 study wanted a department to invent.
-2. **Profile draft export.** Diff the corpus against a LinkedIn data export,
+1. **Curriculum-derived skill vocabulary.** Read the learning outcomes out of
+   the syllabi for courses the student passed. Those outcomes are the
+   institution's own written statement of what passing means, and they supply
+   the vocabulary the 2022 study wanted a department to invent.
+2. **Certifications as verifiable accolades.** A credential is the inverse case:
+   whether you passed is independently checkable, while what you can *do* is
+   not. Its published "Skills in" list joins the same vocabulary, its credential
+   ID gives the site its one third-party-verifiable fact, and its expiry date is
+   the only machine-readable decay signal in the whole corpus.
+3. **Profile draft export.** Diff the corpus against a LinkedIn data export,
    find the sections that are empty, and draft copy for them from published
    projects — write-ups the candidate reviews and pastes.
 
-Neither mechanism can publish a claim on its own. Both are governed by one rule,
+No mechanism can publish a claim on its own. All three are governed by one rule,
 which is the entire difference between this proposal and the one it replaces:
 
 > **A skill may be published only when something the candidate published
@@ -83,14 +90,15 @@ since, and each one removes a dependency that design could not avoid.
 | Recruiters find candidates by searching a marketplace | Recruiters and their agents increasingly *read*. A machine-readable corpus — `llms.txt`, JSON-LD, an MCP endpoint — is a first-class distribution channel that did not meaningfully exist in 2022 |
 | Publishing a real site needs hosting budget and ops | Static hosting with per-route prerendering is free and fits in a `git push` |
 | Structured intake requires a form someone is compelled to fill | An agent can draft structured content from sources the candidate already has — a resume, public repositories, a syllabus — and ask only for what the source does not state |
-| A skill taxonomy must be defined by an authority | The authority already wrote one. Every syllabus contains a learning-outcomes section |
+| A skill taxonomy must be defined by an authority | The authority already wrote one — and publishes it. Every syllabus has a learning-outcomes section; every certification has an exam guide naming the skills it tests |
 
 The fourth is the important one, and it is the pivot of this proposal. The 2022
 study asked a department to build and maintain a canonical MIS skill list, then
 persuade a vendor to expose it as a search filter. That list already exists,
 distributed across the syllabi of the courses the department teaches, written by
-the faculty who teach them, approved through curriculum review. Nobody has to
-build it. It has to be *read*.
+the faculty who teach them, approved through curriculum review — and, for
+anyone holding a professional certification, published by the issuer as a formal
+exam guide. Nobody has to build it. It has to be *read*.
 
 A fifth change is about the reader, not the technology. In 2022 the audience for
 a candidate's material was a human skimming under time pressure. In 2026 it is
@@ -286,7 +294,7 @@ service purely to move data between four vendors' products. In a single-repo
 build system that tier does not exist: `content/*.yaml → emit → typed module` is
 the same transformation, at build time, for nothing.
 
-### 4.2 Process 2.0 — syllabus-derived skill vocabulary
+### 4.2 Process 2.0 — the curriculum is already written
 
 **This is the first of the two new mechanisms, and it is the 2022 study's own
 idea with its dependency removed.**
@@ -357,7 +365,126 @@ already done. The 2022 system asked students to describe skills they could not
 articulate. This one hands them the institution's own words and asks them to
 point at the artefact.
 
-### 4.3 Process 3.0 — the evidence gate
+### 4.3 Process 2.1 — certifications, where the evidence is reversed
+
+A syllabus and a professional certification are the same kind of source: an
+issuer publishing what it certifies. Reading either gives you vocabulary you did
+not have to invent. But their evidential shape is exactly opposite, and that
+difference is what decides how each may appear on the site.
+
+A **syllabus** publishes what a course teaches. That document is public and
+checkable. What is not checkable is whether you passed it — a transcript is
+private, and "I took this course" is self-asserted.
+
+A **certification** inverts both halves. Whether you passed *is* the checkable
+part: a credential ID anyone can verify with the issuer, which makes it the only
+fact in this entire system that does not rest on the candidate's word. What is
+not checkable is whether you can do anything with it. An exam measures recall
+under time pressure. The issuer is candid about this — AWS states that the target
+candidate for the Solutions Architect – Associate has "at least 1 year of
+hands-on experience designing cloud solutions that use AWS services," which
+frames the hands-on work as a *prerequisite* the exam assumes rather than
+something it verifies.
+
+So each source is missing precisely what the other has, and in both cases the
+artefact is what completes it.
+
+**What the issuer actually publishes.** AWS's exam guide decomposes into four
+weighted domains, each into task statements, and each task statement into two
+labelled lists:
+
+```
+Task Statement 1.1: Design secure access to AWS resources
+
+  Knowledge of:
+    - AWS federated access and identity services (for example, IAM)
+    - The AWS shared responsibility model
+
+  Skills in:
+    - Applying AWS security best practices to IAM users and root users
+    - Designing a flexible authorization model that includes IAM users,
+      groups, roles, and policies
+```
+
+The issuer has already done the classification we would otherwise have to do by
+hand. **"Knowledge of" is what you know; "Skills in" is what you can do.** Only
+the second becomes a candidate skill label. The first is discarded — being able
+to describe the shared responsibility model is not a thing anyone shipped.
+
+**Three tiers, with different rights.**
+
+1. **The credential is an accolade.** Issuer, name, code, date earned, expiry,
+   and a verification link. It renders alongside education, and it is the tier
+   this proposal previously had no home for — a place on the site for the thing
+   itself.
+2. **The "Skills in" bullets are candidate vocabulary**, gated by exactly the
+   subset rule coursework answers to. AWS asserting that a certified architect
+   can design an authorization model is not evidence that *you* designed one.
+3. **The labs are work entries.** A certification you earned by building as you
+   went produces artefacts, and those are what carry citations.
+
+Tier three is where the value concentrates, and it is why a hands-on
+certification is worth more here than an exam-only one: it arrives with tier
+three already populated. The schema should make that asymmetry visible rather
+than flatten it.
+
+```yaml
+slug: aws-saa-c03
+issuer: Amazon Web Services
+name: AWS Certified Solutions Architect – Associate
+code: SAA-C03
+earned: "2026-03"
+expires: "2029-03"
+credential_id: ABC123DEF456
+verify_url: https://cp.certmetrics.com/amazon/en/public/verify/credential
+
+# Parsed from the issuer's published exam guide, "Skills in:" only.
+# Each must also appear on a linked project — the gate enforces it.
+skills:
+  - IAM authorization design
+  - VPC network design
+
+projects:
+  - multi-account-iam-baseline
+
+visible: true
+```
+
+**One property certifications have that nothing else in the corpus does: a
+machine-readable expiry.** Section 4.7 argues for staleness detection and notes
+that every other content type forces you to *infer* decay from a date. A
+certification states it. That makes `expires:` the first legitimate consumer of
+a time-based gate — not a heuristic about whether a project feels old, but a
+fact the issuer published. A lapsed credential should stop presenting itself as
+current, and unlike everything else here, the build can know.
+
+**Should a certification be citable in a Fit brief?** My recommendation is no,
+and the reasoning is worth stating because the opposite case is respectable.
+
+Against: a certification title is a bag of generic tokens — "Solutions",
+"Architect", "Associate", "Cloud", "Developer". That is the precise failure mode
+already documented in this codebase, where a skill tag reading `design systems`
+made a *Rust systems programming* requirement come back aligned. A credential
+name is that hazard with a vendor's marketing attached. And the route into Fit
+already exists and is better: the gated skills live on the projects, and a
+project is the stronger citation anyway.
+
+For: a verifiable credential genuinely is different in kind from a self-asserted
+skill tag. It is the one item on the site a recruiter could check without
+trusting the candidate at all. If you wanted it citable, the honest construction
+is a whole authored sentence — "Holds AWS Certified Solutions Architect –
+Associate, credential ABC123, verifiable at the issuer" — entering the evidence
+pack as a claim while the title stays out of the matchable text, so the
+collision surface stays closed and the citation stays a full sentence.
+
+That is a bigger change than it looks. It would put something into the evidence
+pack that is not the candidate's own work for the first time, and the governing
+rule would widen from *every citation traces to work you did* to *…or to a
+credential someone else issued and still vouches for*. That is a defensible
+rule. It is simply not the current one, and it should be adopted deliberately or
+not at all.
+
+### 4.4 Process 3.0 — the evidence gate
 
 One rule, enforced at build time rather than intended:
 
@@ -375,7 +502,7 @@ That last property is the thesis of the whole project applied to coursework:
 *show your work.* A transcript line is not a portfolio entry. A transcript line
 attached to a schema you built and published is.
 
-### 4.4 Process 5.0 — profile draft export
+### 4.5 Process 5.0 — profile draft export
 
 **This is the second new mechanism: populate the platform profile, from the
 corpus, where the profile is empty.**
@@ -434,7 +561,7 @@ want. **The system stops at the clipboard, not the credential** — and that
 boundary is a feature, because the last review before something becomes a public
 claim about a person should be performed by that person.
 
-### 4.5 Process 6.0 — answering the job description
+### 4.6 Process 6.0 — answering the job description
 
 This is the existing Fit surface and it is unchanged by this proposal, but it is
 where the preceding work pays out, so it belongs in the flow.
@@ -451,7 +578,7 @@ design had no analogue for, and it is the reason the vocabulary work in 2.0 is
 worth doing: a controlled vocabulary that produces uncited matches makes a
 candidate findable and unbelievable at once.
 
-### 4.6 Process 7.0 — self-audit and freshness
+### 4.7 Process 7.0 — self-audit and freshness
 
 The 2022 study's sharpest observation was about decay: *"students who do use
 [the platform] may not actively maintain and update their profile."* Its remedy
@@ -589,13 +716,16 @@ rather than presented as a feature.
 2. **`content/courses/` and the evidence gate.** The corpus directory, the
    subset rule in `check-content.py`, and an assertion that courses never enter
    the evidence pack — the safety property should be tested, not assumed.
-3. **Profile draft export.** LinkedIn export parser, diff against the corpus,
+3. **`content/certifications/` and the exam-guide parser.** Same corpus shape and
+   the same subset gate, plus `"Skills in:"` extraction and an `expires:` check.
+   Ships after courses because it reuses that gate wholesale.
+4. **Profile draft export.** LinkedIn export parser, diff against the corpus,
    templates for About / Experience / Projects. Output is a file for review.
-4. **Self-audit and freshness.** `fit:audit` over saved job descriptions; a
+5. **Self-audit and freshness.** `fit:audit` over saved job descriptions; a
    staleness warning in the readiness check. Read the date from the YAML, not
    from filesystem timestamps — a fresh clone rewrites those and would report
    everything as stale.
-5. **Record the decisions.** The courses corpus needs its own decision record,
+6. **Record the decisions.** The courses corpus needs its own decision record,
    which must state that it deliberately does not revisit the existing exclusion
    of education from the evidence pack.
 
