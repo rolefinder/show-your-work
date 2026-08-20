@@ -68,6 +68,9 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 - [Internship-system review, 2026-08](strategy/internship-system-review-2026-08.md) —
   an outside proposal for the same problem, what transfers, and the defects
   mapping it onto this tree surfaced
+- [Making a candidate legible, 2026](strategy/student-visibility-field-project-2026.md) —
+  the case for this approach as a field project, and the two mechanisms it
+  proposes: syllabus-derived skills and profile draft export
 
 ## There is no project-history section
 
