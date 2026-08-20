@@ -5,7 +5,7 @@ description: Review the built site's UI/UX against the real rendered DOM — con
 
 # /ui-review
 
-`npm run ux:check` already asserts the mechanical invariants on every build.
+`bun run ux:check` already asserts the mechanical invariants on every build.
 This is for the judgement calls it can't make: hierarchy, rhythm, whether a
 page reads well, whether an interaction is discoverable.
 
@@ -15,7 +15,7 @@ before forming opinions about taste.
 ## 1. Mechanical baseline
 
 ```bash
-npm run build && npm run ux:check
+bun run build && bun run ux:check
 ```
 
 Covers, across 9 routes × light/dark × 375/1280px: text contrast against the
@@ -28,7 +28,7 @@ Report failures verbatim. Do not re-derive them by eye.
 ## 2. Look at it
 
 ```bash
-npm run preview
+bun run preview
 ```
 
 Then drive the browser. Check each at **375px and 1280px, in both schemes**:

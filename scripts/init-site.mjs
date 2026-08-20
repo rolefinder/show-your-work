@@ -1,5 +1,5 @@
 /**
- * `npm run init` — turn this template into YOUR site.
+ * `bun run init` — turn this template into YOUR site.
  *
  * Everything the setup runbook asks a human to do by hand, done in one pass:
  * creates content/config/site.yaml, content/about/profile.yaml and
@@ -346,7 +346,7 @@ function main(answers) {
       ? "  2. Fill in content/work/first-project.yaml — the demo projects are already out of the site"
       : "  2. Add content/work/<slug>.yaml — the demo projects drop out as soon as you add one",
   );
-  console.log("  3. npm run ready");
+  console.log("  3. bun run ready");
 }
 
 main(await collect());

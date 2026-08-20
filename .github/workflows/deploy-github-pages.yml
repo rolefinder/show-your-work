@@ -1,7 +1,7 @@
 # Build and publish to GitHub Pages.
 #
 # Enabled by setting Pages' build source to "GitHub Actions" — which
-# `npm run pages:setup` does over the API, so no dashboard visit is required.
+# `bun run pages:setup` does over the API, so no dashboard visit is required.
 #
 # This deliberately does NOT reuse ci.yml's artifact. A deploy must be built
 # from the commit being deployed, with PRERENDER_REQUIRED set, so a missing
@@ -54,19 +54,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: npm
+          node-version-file: .nvmrc
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pyyaml
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
 
       - name: Build
-        run: npm run build
+        run: bun run build
         env:
           PRERENDER_REQUIRED: "1"
 
@@ -76,9 +78,9 @@ jobs:
       - name: Verify
         run: |
           set -e
-          npm run config:check
-          npm run seo:smoke
-          npm run fit:smoke
+          bun run config:check
+          bun run seo:smoke
+          bun run fit:smoke
 
       # Root-path only: every asset href in the document is absolute, so a
       # project site served under /<repo>/ would 404 on all of them. Checked

@@ -5,7 +5,7 @@ the third-party code that is **committed into this repository and shipped to
 the browser**, because that is redistribution and MIT requires the copyright
 notice to travel with it.
 
-Build-time tooling (esbuild, TypeScript, tsx, Playwright, the `@types/*`
+Build-time tooling (bun, esbuild, TypeScript, Playwright, the `@types/*`
 packages) is *not* listed. It never reaches `dist/`, so it is not redistributed.
 
 Every dependency below is MIT, the same license as this project. The full
@@ -38,7 +38,7 @@ own, so their notices live here rather than inside the artifact. The build sets
 esbuild's `legalComments: "eof"`, so if any of them starts shipping a banner it
 survives into the file instead of being dropped.
 
-Versions come from `package.json` / `package-lock.json`; when you bump one of
+Versions come from `package.json` / `bun.lock`; when you bump one of
 these, update the row.
 
 ## MIT License

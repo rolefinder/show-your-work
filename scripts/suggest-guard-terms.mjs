@@ -1,5 +1,5 @@
 /**
- * `npm run guard:suggest` — who have you worked for, according to your own sources?
+ * `bun run guard:suggest` — who have you worked for, according to your own sources?
  *
  * The publication guard needs to know your employers. Hardcoding them would be
  * wrong twice over: it is adopter-specific data in a template, and it would be
@@ -138,5 +138,5 @@ console.log(
   "\nFor each one you keep, decide WHERE it goes:\n" +
     "  content/config/corpus-guard.yaml        committed - fine for a public company name\n" +
     "  content/config/corpus-guard.local.yaml  gitignored - anything you would not publish\n" +
-    "Then: npm run publication:check\n",
+    "Then: bun run publication:check\n",
 );

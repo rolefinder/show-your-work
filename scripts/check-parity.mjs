@@ -1,5 +1,5 @@
 /**
- * `npm run parity:check` — the two content resolvers must agree.
+ * `bun run parity:check` — the two content resolvers must agree.
  *
  * Some facts in this repo have to be read from both Python and Node. The
  * emitters and content gates are Python; the preflight, the deploy guard and

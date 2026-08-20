@@ -7,7 +7,7 @@ dashboard/account actions on services this template doesn't control.
 ## Before anything else
 
 - [ ] Set your real domain in `content/config/site.yaml` (`origin:`),
-      re-run `npm run build`, and confirm `dist/sitemap.xml`/`dist/robots.txt`
+      re-run `bun run build`, and confirm `dist/sitemap.xml`/`dist/robots.txt`
       no longer say `example.com`.
 
 ## Google Search Console

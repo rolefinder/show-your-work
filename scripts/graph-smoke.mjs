@@ -12,7 +12,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bundle = join(root, "assets", "graph-engine.js");
 
 if (!existsSync(bundle)) {
-  console.error("FAIL: assets/graph-engine.js missing — run npm run build:graph");
+  console.error("FAIL: assets/graph-engine.js missing — run bun run build:graph");
   process.exit(1);
 }
 

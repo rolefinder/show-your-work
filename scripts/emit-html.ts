@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 // Build-time identity injection for the base document.
 //
 // index.html, 404.html and manifest.json ship as templates carrying visible
@@ -11,7 +11,7 @@
 // is not, what this writes is what ships, so the home document must be
 // complete on its own.
 //
-// Usage: npx tsx scripts/emit-html.ts
+// Usage: bun scripts/emit-html.ts
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -179,7 +179,7 @@ export function emitHtml(): void {
 }
 
 // Still runnable on its own; scripts/emit-artifacts.ts imports it instead
-// so the build pays tsx's ~1.6s startup once rather than per emitter.
+// so the pair runs in one process, in the order known-paths.json needs.
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
   emitHtml();
 }

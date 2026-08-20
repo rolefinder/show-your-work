@@ -24,7 +24,7 @@ mechanism ships in the template at all.
 - **No third-party requests.** Every asset — scripts, styles, fonts, the WebGL
   graph vendor bundle — is served from the site's own origin. No CDN, no
   third-party font provider. A strict Content-Security-Policy enforces this
-  rather than leaving it to good intentions, and `npm run csp:smoke` checks it.
+  rather than leaving it to good intentions, and `bun run csp:smoke` checks it.
 - **No accounts, no sign-in, no uploads, no payments.** There is nothing to log
   into and no file storage.
 - **No AI, and no LLM call.** The Fit matcher is deterministic text matching
@@ -84,7 +84,7 @@ collection point that needs describing here.
 **Keep this file reachable.** A privacy notice nobody can find does not do the
 job. Link it from your site's footer, or paste its content into a page of your
 own — adoption here is additive, so add a route rather than editing template
-files (`npm run additive:check`).
+files (`bun run additive:check`).
 
 **Before publishing, run `/sanitize`.** Your own content is the likelier
 liability: an employer's internal codename or client name in a project write-up

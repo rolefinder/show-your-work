@@ -17,9 +17,10 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const required = process.env.PRERENDER_REQUIRED === "1";
 
-// shell:true — on Windows `npx` is a .cmd shim that spawnSync cannot exec
-// directly, and gets back status null with an EINVAL in res.error.
-const res = spawnSync("npx --yes tsx scripts/prerender-routes.ts", {
+// shell:true — so a `bun` that is only on PATH via a shell profile (fnm, asdf,
+// the Windows installer's shim) still resolves. spawnSync without a shell would
+// come back status null with an ENOENT in res.error instead.
+const res = spawnSync("bun scripts/prerender-routes.ts", {
   cwd: root,
   stdio: "inherit",
   shell: true,
@@ -36,14 +37,14 @@ if (res.status === 2) {
   if (required) {
     console.error(
       "run-prerender: PRERENDER_REQUIRED=1 but Playwright/Chromium is unavailable - " +
-        "refusing to publish an SPA-only dist. Run: npx playwright install chromium",
+        "refusing to publish an SPA-only dist. Run: bunx playwright install chromium",
     );
     process.exit(1);
   }
   console.warn(
     "run-prerender: prerender skipped - dist is SPA-only, so per-route metadata " +
       "will not be visible to crawlers that do not execute JS. " +
-      "Run `npx playwright install chromium` to enable it.",
+      "Run `bunx playwright install chromium` to enable it.",
   );
   process.exit(0);
 }

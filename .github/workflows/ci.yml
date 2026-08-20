@@ -15,20 +15,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      # bun installs and runs the TypeScript steps; the .mjs gates and
+      # `node --check` below are still Node programs, so both runtimes are set
+      # up deliberately rather than leaning on whatever the runner ships.
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: npm
+          node-version-file: .nvmrc
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pyyaml
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       # Prerendering AND the UX audit both need a real browser. Without this
       # the build degrades to an SPA-only dist with a warning and check-ux
       # skips - so the two checks that matter most would quietly not run.
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test
         # Having installed Chromium above, a skipped prerender now means
         # something broke — fail instead of silently shipping SPA-only.
         env:
@@ -49,7 +54,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
