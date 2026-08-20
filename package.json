@@ -50,7 +50,7 @@
   "devDependencies": {
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.2",
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
     "playwright": "^1.62.0",
