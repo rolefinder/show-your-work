@@ -38,7 +38,7 @@ jobs:
     outputs:
       deploy: ${{ steps.check.outputs.deploy }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Asks the checker rather than re-deciding in bash. An earlier version
       # grepped content/config/site.yaml for a demo flag, which diverged from
       # the checker on quoted, capitalised and comment-trailed values — and
@@ -53,14 +53,14 @@ jobs:
     if: needs.decide.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install pyyaml
@@ -89,7 +89,7 @@ jobs:
       - name: Confirm the site will serve at the root
         run: node scripts/check-pages-target.mjs
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
 
@@ -102,4 +102,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
