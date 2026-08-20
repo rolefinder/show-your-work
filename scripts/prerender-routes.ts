@@ -12,32 +12,50 @@
 // caller should degrade with a warning; anything else = attempted and failed.
 // PRERENDER=0 forces a skip.
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { SITE_PROFILE } from "../src/generated/content";
 import { buildRoutes, notFoundRoute } from "./lib/routes";
 import { applyRouteHead, esc, SITE, type RouteMeta } from "./lib/site-meta";
-import { SITE_CONFIG } from "../src/generated/content";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 const PORT = Number(process.env.PRERENDER_PORT || 4178);
 
 /**
- * The card's accent stripe is the BRAND colour, which lives in
- * tokens/colors.css as --syw-brand — not in site.yaml. site.yaml's theme_color
- * is the page background, so using it painted a beige bar on a near-black
- * card. Read the token instead of duplicating the value into config, so the
- * card can't drift from the site.
+ * The card renders against the site's REAL tokens.
+ *
+ * This used to regex `--syw-brand` out of tokens/colors.css — the file
+ * docs/guide/theming.md tells adopters never to edit. Adopter overrides land in
+ * dist/tokens/adopter.css, which that never read, so setting theme.accent
+ * turned the whole site purple and left every social card in the template's
+ * shipped teal. The card is the first thing a recruiter sees, and it was the
+ * one surface still wearing someone else's colours.
+ *
+ * Reading dist/ rather than the source tree is what fixes it: by the time
+ * prerender runs (last in the build), scripts/build.mjs has copied tokens/ and
+ * emit-html.ts has written adopter.css from site.yaml. Import order matches
+ * tokens/tokens.css — adopter.css LAST, so its :root wins, the same ordering
+ * additive:check asserts for the served page.
  */
-function brandAccent(): string {
-  const css = readFileSync(join(root, "tokens", "colors.css"), "utf8");
-  const m = css.match(/--syw-brand:\s*(#[0-9a-f]{3,8})/i);
-  return m ? m[1] : SITE_CONFIG.themeColorDark;
+const CARD_TOKEN_FILES = [
+  "colors.css",
+  "typography.css",
+  "spacing.css",
+  "effects.css",
+  "adopter.css",
+];
+
+function cardCss(): string {
+  const tokens = CARD_TOKEN_FILES.map((f) => {
+    const path = join(dist, "tokens", f);
+    return existsSync(path) ? readFileSync(path, "utf8") : "";
+  }).join("\n");
+  const card = readFileSync(join(root, "scripts", "lib", "og-card.css"), "utf8");
+  return tokens + "\n" + card;
 }
-const ACCENT = brandAccent();
 
 if (process.env.PRERENDER === "0") {
   console.warn("prerender: skipped (PRERENDER=0)");
@@ -60,28 +78,17 @@ const SECRET_RE =
   /(-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-)/;
 
 /* ---------------------------- OG card template ----------------------------
-   Uses the same system font stack as the site (tokens/typography.css) — the
-   template ships no webfont, so the card must not depend on one. */
-function cardHtml(route: RouteMeta): string {
-  return `<!doctype html><html><head><meta charset="utf-8"><style>
-    * { margin: 0; box-sizing: border-box; }
-    body { width: 1200px; height: 630px;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: ${esc(SITE_CONFIG.themeColorDark)}; color: #f4f1ea;
-      display: flex; flex-direction: column; justify-content: space-between; padding: 72px 80px; }
-    .eyebrow { font-size: 26px; letter-spacing: 0.14em; text-transform: uppercase;
-      color: rgba(244,241,234,0.62); font-weight: 500; }
-    h1 { font-size: ${route.card.length > 34 ? 60 : 76}px; font-weight: 600; letter-spacing: -0.02em;
-      line-height: 1.06; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .desc { font-size: 30px; line-height: 1.4; color: rgba(244,241,234,0.72); max-width: 20em;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .foot { display: flex; justify-content: space-between; align-items: baseline;
-      font-size: 28px; color: rgba(244,241,234,0.62); font-weight: 500; }
-    .accent { width: 120px; height: 6px; background: ${esc(ACCENT)}; border-radius: 3px; margin-bottom: 28px; }
-  </style></head><body>
+   Markup only. Every value lives in scripts/lib/og-card.css, against the real
+   tokens inlined by cardCss() — so the card cannot drift from the site, and
+   check-style-tokens can see it. */
+function cardHtml(route: RouteMeta, css: string): string {
+  // A long title needs the smaller type step; expressed as a class so the size
+  // stays in the stylesheet rather than being interpolated in here.
+  const bodyClass = route.card.length > 34 ? ' class="long-title"' : "";
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body${bodyClass}>
     <div class="eyebrow">${esc(route.eyebrow)}</div>
     <div><div class="accent"></div><h1>${esc(route.card)}</h1>
-    <p class="desc" style="margin-top:24px">${esc(route.desc)}</p></div>
+    <p class="desc">${esc(route.desc)}</p></div>
     <div class="foot"><span>${esc(SITE_PROFILE.name)}</span><span>${esc(SITE.replace(/^https?:\/\//, ""))}</span></div>
   </body></html>`;
 }
@@ -180,15 +187,24 @@ try {
     docCount++;
   }
 
-  /* Social cards — same session, card-sized viewport. */
-  const cardPage = await context.newPage();
-  await cardPage.setViewportSize({ width: 1200, height: 630 });
+  /* Social cards — card-sized viewport, in a context pinned to the light
+     scheme. The card paints --surface-inverse over --fg-on-inverse, and those
+     two swap under prefers-color-scheme: dark. Inheriting the runner's scheme
+     would mean the same commit produced a dark card on one machine and a light
+     one on another. */
+  const cardContext = await browser.newContext({
+    viewport: { width: 1200, height: 630 },
+    colorScheme: "light",
+  });
+  const cardPage = await cardContext.newPage();
+  const css = cardCss();
   let cardCount = 0;
   for (const route of routes) {
-    await cardPage.setContent(cardHtml(route), { waitUntil: "networkidle" });
+    await cardPage.setContent(cardHtml(route, css), { waitUntil: "networkidle" });
     await cardPage.screenshot({ path: join(dist, "assets", "og", `${route.key}.png`) });
     cardCount++;
   }
+  await cardContext.close();
 
   console.log(`prerender: ok - ${docCount} route docs, ${cardCount} og cards`);
 } catch (err) {

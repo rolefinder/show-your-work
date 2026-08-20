@@ -154,6 +154,44 @@
   letter-spacing: var(--tracking-display);
 }
 
+/* The home page is the one place the type scale reaches its top step. Until
+   something used --text-display, the largest type anywhere was a 28→40px h1,
+   which is the mechanical reason the page read flat. */
+.page--home h1 {
+  font-size: var(--text-display);
+}
+
+/* One line under the CTA row saying what Fit is. Sits with the buttons rather
+   than starting a new block, so it reads as their caption.
+
+   text-wrap: pretty because a two-word orphan on the second line is exactly
+   what this sentence produced at desktop width. Ignored by browsers that do
+   not support it, which is the correct degradation for a wrapping hint. */
+.cta-note {
+  margin-top: var(--space-3);
+  max-width: var(--measure-reading);
+  font-size: var(--text-body);
+  color: var(--fg-muted);
+  text-wrap: pretty;
+}
+
+.featured {
+  margin-top: var(--section-gap);
+}
+
+.featured__more {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-4);
+  font-size: var(--text-body);
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+
+.featured__more:hover {
+  color: var(--fg);
+}
+
 .page h2 {
   margin-top: var(--space-10);
 }
@@ -176,6 +214,7 @@
   font-size: var(--text-lead);
   line-height: var(--line-body);
   color: var(--fg-muted);
+  text-wrap: pretty;
 }
 
 .prose {
@@ -183,6 +222,113 @@
   font-size: var(--text-reading);
   line-height: var(--line-reading);
   color: var(--fg-reading);
+}
+
+/* ---------- Long-form body blocks ----------
+   The element scope for an authored body (packages/content/body.py).
+
+   Rhythm is owned by the flow, not by each block: the reset below clears every
+   child's own margins, then one rule spaces every sibling, so a block type
+   added later inherits the rhythm instead of inventing one. The corollary is
+   that no rule further down may set `margin` — a `margin: 0` in a block rule is
+   more specific than the flow rule and silently zeroes the gap above it, which
+   is exactly what the first version of this section did to ul, blockquote and
+   pre. Set padding and borders on blocks; leave margins to these three rules. */
+.prose > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose > * + * {
+  margin-top: var(--space-5);
+}
+
+/* A heading belongs to what follows it, so it opens a clear gap above itself
+   and closes the one below. Done as a sibling selector rather than a negative
+   margin-bottom: the negative version has to be kept in arithmetic sync with
+   the flow gap, and reads as a correction rather than as an intent. */
+.prose h2,
+.prose h3 {
+  margin-top: var(--space-10);
+}
+
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: var(--space-3);
+}
+
+.prose h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+}
+
+.prose h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.3rem;
+}
+
+.prose li + li {
+  margin-top: var(--space-2);
+}
+
+/* Quotes carry a rule rather than quotation marks: the mark would be typed
+   into the text on some pages and not others, and the rule always renders. */
+.prose blockquote {
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--border);
+  color: var(--fg-muted);
+}
+
+.prose blockquote p {
+  font-style: italic;
+}
+
+.prose blockquote cite {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-body);
+  font-style: normal;
+  color: var(--fg-subtle);
+}
+
+/* Code scrolls inside its own box. Wrapping a shell line at a random column
+   makes it unrunnable, so the overflow is horizontal and contained here rather
+   than pushing the page sideways — which is what check-ux's overflow rule
+   would catch. */
+.prose pre {
+  padding: var(--space-4);
+  overflow-x: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: var(--ink-05);
+  font-size: var(--text-xs);
+  line-height: var(--line-body);
+}
+
+/* The inline-code chip treatment would double up inside a block. */
+.prose pre code {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* An aside the reader can skip, marked by weight of surface rather than by a
+   color that would have to carry meaning on its own. */
+.prose .note {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: var(--text-body);
+  line-height: var(--line-body);
+  color: var(--fg-muted);
 }
 
 .muted {
@@ -291,6 +437,10 @@ button.linkish {
   text-decoration: underline;
   text-underline-offset: 0.18em;
   cursor: pointer;
+}
+
+button.linkish:active {
+  color: var(--brand-deep);
 }
 
 .prose-link {
@@ -522,9 +672,11 @@ a.tag:hover {
   border-color: var(--border);
 }
 
+/* The one genuinely stateful chip in the system: --brand-deep is specified as
+   the pressed accent, and this is what "pressed" means here. */
 .skill-chip.pressed {
   background: var(--brand-soft);
-  border-color: var(--accent);
+  border-color: var(--brand-deep);
   color: var(--fg);
 }
 

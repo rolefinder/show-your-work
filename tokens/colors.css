@@ -63,7 +63,6 @@
   /* ---------- Semantic aliases (LIGHT — default) ---------- */
   --bg: var(--cream);
   --surface: var(--white);
-  --surface-sunk: var(--cream);
   --surface-inverse: var(--ink);
 
   --fg: var(--ink);
@@ -79,7 +78,17 @@
   /* Decorative only (dots, separators) — fails AA for text. */
   --fg-faint: var(--ink-40);
   --fg-on-inverse: var(--cream);
-  --fg-on-brand: #ffffff;
+  /* Secondary and tertiary ink for an inverse surface — the social card sets
+     an eyebrow, a description and a footer on --surface-inverse. Written as
+     explicit channels rather than an alpha of --cream because a var() cannot be
+     given an alpha without color-mix, and the component layer may not call it.
+     Both clear AA against --surface-inverse at the 26-30px the card uses. */
+  --fg-on-inverse-muted: rgb(255 253 249 / 0.72);
+  --fg-on-inverse-dim: rgb(255 253 249 / 0.66);
+  /* No --fg-on-brand: nothing in the system sets text on a solid accent fill.
+     The primary button is ink-on-cream (--surface-inverse/--fg-on-inverse) and
+     pressed states use the --brand-soft tint, which keeps --fg. Add it back
+     with the component that needs it, and measure the pair then. */
 
   --border: var(--ink-15);
   --border-soft: var(--ink-10);
@@ -101,7 +110,6 @@
   :root {
     --bg: var(--ink-900);
     --surface: var(--ink-800);
-    --surface-sunk: var(--ink-900);
     --surface-inverse: #f0ece4;
 
     --fg: #ece7dd;
@@ -125,7 +133,6 @@
     --brand: #6fd0b4;
     --brand-deep: #9ae3cd;
     --brand-soft: rgb(111 208 180 / 0.16);
-    --fg-on-brand: var(--ink-900);
 
     --border: rgb(236 231 221 / 0.16);
     --border-soft: rgb(236 231 221 / 0.11);

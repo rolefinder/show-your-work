@@ -1,4 +1,5 @@
 import type { BlogPost, WorkItem } from "../types";
+import { bodyText } from "../content/bodyText";
 import { linkTokens, stripTokens } from "./richText";
 
 export type SearchKind = "work" | "blog" | "skill" | "page";
@@ -59,7 +60,7 @@ export function buildSearchGraph(
     .forEach((w) => {
       const id = "work:" + w.slug;
       const chips = [...(w.skills || [])];
-      const text = [w.title, w.summary, stripTokens(w.body), chips.join(" ")]
+      const text = [w.title, w.summary, stripTokens(bodyText(w.body)), chips.join(" ")]
         .filter(Boolean)
         .join(" — ");
       nodes.push({
@@ -72,7 +73,7 @@ export function buildSearchGraph(
         href: "/work/" + w.slug,
         text,
       });
-      linkTokens(w.body || "").forEach((tid) => addEdge(id, tid));
+      linkTokens(bodyText(w.body)).forEach((tid) => addEdge(id, tid));
       linkTokens(w.summary || "").forEach((tid) => addEdge(id, tid));
     });
 
@@ -81,7 +82,7 @@ export function buildSearchGraph(
     .forEach((b) => {
       const id = "blog:" + b.slug;
       const chips = [...(b.skills || [])];
-      const text = [b.title, b.summary, stripTokens(b.body), chips.join(" ")]
+      const text = [b.title, b.summary, stripTokens(bodyText(b.body)), chips.join(" ")]
         .filter(Boolean)
         .join(" — ");
       nodes.push({
@@ -94,7 +95,7 @@ export function buildSearchGraph(
         href: "/blog/" + b.slug,
         text,
       });
-      linkTokens(b.body || "").forEach((tid) => addEdge(id, tid));
+      linkTokens(bodyText(b.body)).forEach((tid) => addEdge(id, tid));
       linkTokens(b.summary || "").forEach((tid) => addEdge(id, tid));
     });
 

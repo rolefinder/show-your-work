@@ -53,6 +53,7 @@ decisions with recurring costs, and they are yours to make.
 | `POST /api/fit` | unavailable | optional Function |
 | `POST /api/mcp` (agents) | **unavailable** — Functions only | read-only MCP server, plus `.well-known/mcp.json` |
 | Browser Fit | works | works |
+| `llms.txt`, `evidence.json` | identical | identical |
 | Prerendering, SEO, sitemap, OG cards | identical | identical |
 
 The reason for the whole middle block is one fact: **GitHub Pages cannot set
@@ -65,6 +66,54 @@ clickjacking protection, which has no meta equivalent.
 
 For a portfolio, that is usually an acceptable trade, and it is stated here
 rather than glossed so it can be an actual decision.
+
+## Agents and answer engines
+
+> **If you deploy to Cloudflare, read this before anything else.**
+>
+> Since **1 July 2025**, every newly created Cloudflare zone blocks AI crawlers
+> **by default** with a managed WAF rule — GPTBot, ClaudeBot, PerplexityBot,
+> OAI-SearchBot, Google-Extended and others. The rule does not distinguish
+> training crawlers from the search crawlers that cite you.
+>
+> This happens **at the edge, before your `robots.txt` is ever read.** You can
+> ship a perfect `robots.txt`, a complete `llms.txt` and a live MCP endpoint,
+> and ChatGPT Search, Claude and Perplexity will still be unable to see any of
+> it. For a site whose entire purpose is being found by a recruiter's
+> assistant, this is the single most expensive default in the stack.
+>
+> **Fix it in the dashboard** — the repo cannot: open **AI Crawl Control** (the
+> tool formerly called AI Audit) and allow at least the search and
+> user-initiated crawlers. The Crawlers tab shows which AI services actually
+> requested your content in the last 24 hours, so you can confirm the change
+> took effect rather than assume it.
+>
+> GitHub Pages has no such default. This is a Cloudflare-only trap.
+
+
+
+Cloudflare deploys get `POST /api/mcp`, a read-only [MCP](https://modelcontextprotocol.io)
+endpoint (ADR 024) so an assistant can enumerate your pages, read them, and
+score a job description against them without scraping. It exposes three tools —
+`list_pages`, `get_page`, `fit_brief` — over the same corpus and the same
+deterministic matcher the site uses. No model runs on the server, so nothing it
+returns is generated: every aligned claim cites one of your pages and quotes
+text already on it.
+
+The endpoint speaks both protocol eras on one URL: the current stateless
+revision (`2026-07-28`, per-request metadata and validated headers) and the
+older `initialize` handshake used by revisions through `2025-11-25`. Clients
+built against either one work without configuration.
+
+`.well-known/mcp.json` and the `llms.txt` entry are written **only** on the
+Cloudflare target, because advertising an endpoint that 404s is worse than
+advertising none.
+
+On GitHub Pages the agent-facing surface is still real, just static:
+`llms.txt` indexes the site and `evidence.json` is the whole corpus as JSON —
+id, title, canonical URL, full text and skills per page. Both ship identically
+on either target, so an agent can always read your work; only the live scoring
+call needs Functions.
 
 ## GitHub Pages
 

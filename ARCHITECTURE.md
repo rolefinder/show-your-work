@@ -97,6 +97,9 @@ show-your-work/
 │   ├── profile-links.ts           platform key → display label (shared w/ build)
 │   ├── globals.d.ts               vendored React/ReactDOM as globals
 │   ├── generated/content.ts       ▒ GENERATED from content/
+│   ├── content/
+│   │   ├── bodyText.ts            body blocks → flat prose (Fit/search; no code)
+│   │   └── Body.tsx               body blocks → elements
 │   ├── fit/
 │   │   ├── config.ts              tunables, defaults, caveat resolution
 │   │   ├── extract.ts             JD → requirement lines; tokenize; synonym expand
@@ -156,7 +159,7 @@ show-your-work/
 │   └── theme.mjs                  reads pg-* CSS vars via canvas readback
 │
 ├── functions/                   ▓ Cloudflare Pages Functions
-│   ├── _middleware.js             404 status + which document to serve
+│   ├── _middleware.js             404 status + which document to serve; /api/* → next()
 │   ├── api/fit.ts                 optional POST /api/fit
 │   └── api/mcp.ts                 read-only MCP endpoint for agents (ADR 024)
 │

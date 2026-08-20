@@ -16,8 +16,75 @@ function fail(msg) {
   process.exit(1);
 }
 
-for (const name of ["sitemap.xml", "robots.txt", "known-paths.json", "manifest.json", "404.html"]) {
+let ogChecked = 0;
+
+/** og:image and twitter:image must both point at a file that exists in dist/. */
+function checkOgImage(doc, label) {
+  for (const [attr, re] of [
+    ["og:image", /<meta property="og:image" content="([^"]*)"/],
+    ["twitter:image", /<meta name="twitter:image" content="([^"]*)"/],
+  ]) {
+    const url = (doc.match(re) || [])[1];
+    if (!url) fail(`${label} has no ${attr}`);
+    // Same-origin absolute URL -> a path under dist/.
+    const path = url.replace(/^https?:\/\/[^/]+/, "");
+    if (!path.startsWith("/")) fail(`${label} ${attr} is not an absolute URL: ${url}`);
+    const file = join(dist, ...path.split("/").filter(Boolean));
+    if (!existsSync(file)) {
+      fail(`${label} ${attr} points at ${path}, but dist${path} does not exist`);
+    }
+    ogChecked++;
+  }
+}
+
+for (const name of ["sitemap.xml", "robots.txt", "known-paths.json", "manifest.json", "404.html", "llms.txt", "llms-full.txt"]) {
   if (!existsSync(join(dist, name))) fail(`dist/${name} missing`);
+}
+
+/* ---------------------------------------------------------------- AEO ------
+   The agent-facing surface rots silently: nothing renders it, so a regression
+   here is invisible until a site stops being cited and nobody knows why. */
+
+const robotsTxt = readFileSync(join(dist, "robots.txt"), "utf8");
+/* A blanket `User-agent: *` cannot express intent across crawlers that train,
+   crawlers that index for citation, and crawlers fetching one page because a
+   user just asked. The search group is the one that matters for a portfolio. */
+for (const agent of ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"]) {
+  if (!new RegExp(`^User-agent: ${agent}$`, "m").test(robotsTxt)) {
+    fail(`robots.txt does not name ${agent} — AI answer engines are the distribution channel for this site`);
+  }
+}
+
+const llmsFull = readFileSync(join(dist, "llms-full.txt"), "utf8");
+const llmsIndex = readFileSync(join(dist, "llms.txt"), "utf8");
+/* Cross-link tokens are renderer markup. Left in, an answer engine quotes
+   "{{work:slug|Label}}" back at a reader verbatim.
+
+   Checked strictly on llms.txt only, which is prose end to end. llms-full.txt
+   reproduces code blocks verbatim, and code legitimately contains brace syntax
+   — a GitHub Actions sample is full of `${{ … }}`, and a page documenting this
+   project's own cross-link syntax has the real thing inside a fence. Failing
+   the build on either would be the gate breaking valid content. The guarantee
+   there comes from bodyFullText stripping per block instead, leaving code
+   alone. */
+if (llmsIndex.includes("{{")) {
+  fail("llms.txt contains raw {{…}} cross-link tokens — strip them before publishing");
+}
+if (llmsFull.length <= llmsIndex.length) {
+  fail("llms-full.txt is not longer than llms.txt — it should carry full page text, not just the index");
+}
+/* "Full" has to mean full. The editorial contract is the most citable copy on
+   a work page — Fit prefers `outcome` and `evidence` as quotes precisely
+   because they are whole authored claims — and the first version of this file
+   rendered only summary + body, silently dropping all of it. */
+const evidencePack = JSON.parse(readFileSync(join(dist, "evidence.json"), "utf8"));
+for (const doc of evidencePack.docs.filter((d) => d.kind === "work")) {
+  for (const claim of doc.claims || []) {
+    const needle = claim.slice(0, 60);
+    if (!llmsFull.replace(/\s+/g, " ").includes(needle.replace(/\s+/g, " "))) {
+      fail(`llms-full.txt omits a claim Fit would cite, from ${doc.url}: "${needle}…"`);
+    }
+  }
 }
 
 const sitemap = readFileSync(join(dist, "sitemap.xml"), "utf8");
@@ -87,9 +154,16 @@ if (prerendered) {
     if (!/<script type="application\/ld\+json">\s*\{"@context"/.test(doc)) {
       fail(`dist${p}.html missing JSON-LD`);
     }
+    /* The tag and the artifact have to agree. Every route emits an og:image
+       URL, and nothing checked that a file existed at the other end — a card
+       that failed to render, or a route key that stopped matching its filename,
+       would ship a broken preview to every recruiter the link reaches while
+       every gate stayed green. */
+    checkOgImage(doc, `dist${p}.html`);
     assertLdJsonEscaped(`dist${p}.html`, doc);
     checkedRoutes++;
   }
+  checkOgImage(readFileSync(join(dist, "index.html"), "utf8"), "dist/index.html");
 }
 
 /*
@@ -128,5 +202,6 @@ console.log("seo-smoke ok", {
   knownPaths: knownPaths.length,
   prerendered,
   checkedRoutes,
+  ogImagesResolved: ogChecked,
   citationAnchors: anchors,
 });

@@ -19,6 +19,16 @@ export async function onRequest(context) {
   // must never go through this — let Cloudflare serve them normally.
   if (path !== "/" && /\.[a-z0-9]+$/i.test(path)) return context.next();
 
+  /* /api/* belongs to Pages Functions, not to the SPA router.
+     This middleware runs ahead of the matching Function, and an API path has
+     no file extension, so without this it fell through to the known-paths
+     lookup — which lists the site's ROUTES, never its endpoints — and every
+     API request was answered with a 404 document before its handler ran.
+     POST /api/fit was unreachable on Cloudflare for exactly this reason.
+     Functions own their own methods and status codes; a 404 for a path with
+     no handler still comes back from context.next(). */
+  if (path === "/api" || path.startsWith("/api/")) return context.next();
+
   let knownPaths;
   try {
     const manifestRes = await context.env.ASSETS.fetch(new URL("/known-paths.json", url));

@@ -1,6 +1,7 @@
 import type { WorkItem } from "./types";
 import { linkLabel } from "./profile-links";
 import { BLOG, EDUCATION, EXPERIENCE, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { Body } from "./content/Body";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
@@ -450,11 +451,16 @@ function App() {
           activeSkills.every((s) => (w.skills || []).includes(s)),
         );
 
+  /* The home page shows proof, not just a description of it. Authoring order
+     decides what leads — the same order /work uses — so it is an editorial
+     choice made in content/, not a ranking invented here. */
+  const featuredWork = visibleWork.slice(0, 3);
+
   let body: React.ReactNode = null;
   if (view.name === "home") {
     body = React.createElement(
       "section",
-      { className: "page" },
+      { className: "page page--home" },
       SITE_CONFIG.demo
         ? React.createElement("p", { className: "eyebrow" }, "show-your-work demo")
         : null,
@@ -462,13 +468,51 @@ function App() {
       React.createElement("p", { className: "lede" }, SITE_PROFILE.tagline),
       React.createElement("p", { className: "prose" }, SITE_PROFILE.summary),
       React.createElement(ContactRow, null),
+      /* Fit leads. It is the one thing here that is not another portfolio, and
+         it shipped as the third of three buttons in the de-emphasized variant,
+         with nothing saying what it does. */
       React.createElement(
         "div",
         { className: "cta-row" },
-        React.createElement(Link, { href: "/work", className: "btn" }, "Work"),
+        React.createElement(Link, { href: "/fit", className: "btn" }, "Try Fit"),
+        React.createElement(Link, { href: "/work", className: "btn secondary" }, "Work"),
         React.createElement(Link, { href: "/graph", className: "btn secondary" }, "Graph"),
-        React.createElement(Link, { href: "/fit", className: "btn secondary" }, "Try Fit"),
       ),
+      React.createElement(
+        "p",
+        { className: "cta-note" },
+        "Paste a job description — every aligned claim cites a page on this site, quoted from it.",
+      ),
+      featuredWork.length
+        ? React.createElement(
+            "section",
+            { className: "featured" },
+            React.createElement("p", { className: "eyebrow" }, "Selected work"),
+            React.createElement(
+              "ul",
+              { className: "card-list card-list--split" },
+              featuredWork.map((w) =>
+                React.createElement(
+                  "li",
+                  { key: w.slug },
+                  React.createElement(
+                    Link,
+                    { href: "/work/" + w.slug, className: "card-link u-card-link" },
+                    React.createElement("span", { className: "card-link__title" }, w.title),
+                    React.createElement("span", { className: "card-link__summary" }, w.summary),
+                  ),
+                ),
+              ),
+            ),
+            visibleWork.length > featuredWork.length
+              ? React.createElement(
+                  Link,
+                  { href: "/work", className: "featured__more" },
+                  `All ${visibleWork.length} projects →`,
+                )
+              : null,
+          )
+        : null,
       React.createElement(SkillBank, {
         groups: homeSkillGroups,
         intro: "Every skill across work and blog, grouped by tenant config. Click one to open Work filtered to that skill.",
@@ -674,7 +718,7 @@ function App() {
           React.createElement("h1", null, w.title),
           React.createElement("p", { className: "lede" }, w.summary),
           React.createElement(ProjectBrief, { item: w }),
-          React.createElement("p", { className: "prose" }, richText(w.body, navigate)),
+          React.createElement(Body, { blocks: w.body, navigate }),
           React.createElement(SkillTags, { item: w, Link }),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
@@ -710,7 +754,7 @@ function App() {
           React.createElement(Link, { href: "/blog", className: "page-back" }, "← Blog"),
           React.createElement("h1", null, b.title),
           React.createElement("p", { className: "lede" }, b.summary),
-          React.createElement("p", { className: "prose" }, richText(b.body, navigate)),
+          React.createElement(Body, { blocks: b.body, navigate }),
         )
       : React.createElement("section", { className: "page" }, React.createElement("h1", null, "Not found"));
   } else if (view.name === "fit") {

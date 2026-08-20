@@ -18,6 +18,7 @@ export const SITE_CONFIG: SiteConfig = {
   themeColorDark: "#131211",
   demo: true,
   deployTarget: "github-pages",
+  aiCrawlers: { search: true, training: true },
   customDomain: "",
   theme: {},
 };
@@ -37,7 +38,9 @@ export const WORK: WorkItem[] = [
     slug: "fake-project-content-emit",
     title: "Fake Project: Content Emit",
     summary: "YAML-to-SPA content emitter that keeps portfolio copy out of hand-edited bundles.",
-    body: "Fake Project: Content Emit reads content/about, content/work, and content/blog YAML, validates slugs, and writes a typed generated module (src/generated/content.ts) via packages/content. Humans edit YAML; the build owns the emitted module. Cross-links use {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{blog:fake-post-cite-or-missing|cite or missing}} tokens rendered CSP-safe in the SPA.",
+    body: [
+      "Fake Project: Content Emit reads content/about, content/work, and content/blog YAML, validates slugs, and writes a typed generated module (src/generated/content.ts) via packages/content. Humans edit YAML; the build owns the emitted module. Cross-links use {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{blog:fake-post-cite-or-missing|cite or missing}} tokens rendered CSP-safe in the SPA."
+    ],
     skills: ["Python", "YAML", "content pipelines", "TypeScript"],
     visible: true,
     date: "2026-05",
@@ -51,7 +54,9 @@ export const WORK: WorkItem[] = [
     slug: "fake-project-merge-gate",
     title: "Fake Project: Merge Gate",
     summary: "A CI/CD gate that blocks merges until smoke checks and content emit pass on Cloudflare Pages.",
-    body: "Fake Project: Merge Gate wires GitHub Actions to a Pages preview deploy, runs fit-smoke and build gates, and publishes a deterministic evidence pack. It pairs with {{work:fake-project-content-emit|Fake Project: Content Emit}} for content regeneration and the {{blog:fake-post-cite-or-missing|cite or missing}} Fit contract. It demonstrates continuous integration, continuous delivery, and pipeline design without claiming Kubernetes or multi-cloud ops.",
+    body: [
+      "Fake Project: Merge Gate wires GitHub Actions to a Pages preview deploy, runs fit-smoke and build gates, and publishes a deterministic evidence pack. It pairs with {{work:fake-project-content-emit|Fake Project: Content Emit}} for content regeneration and the {{blog:fake-post-cite-or-missing|cite or missing}} Fit contract. It demonstrates continuous integration, continuous delivery, and pipeline design without claiming Kubernetes or multi-cloud ops."
+    ],
     skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "pipelines", "TypeScript"],
     visible: true,
     date: "2026-06",
@@ -68,7 +73,17 @@ export const BLOG: BlogPost[] = [
     slug: "fake-post-cite-or-missing",
     title: "Fake Post: cite or missing",
     summary: "Why a JD fit brief should refuse aligned claims without citations.",
-    body: "Recruiters need requirement-to-evidence mapping, not a chatty bio bot. The cite-or-missing contract marks gaps honestly and links only to published /work and /blog pages — for example {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{work:fake-project-content-emit|Fake Project: Content Emit}}. Deterministic matchers are a safe v1; RAG can swap in later behind the same JSON shape.",
+    body: [
+      "Recruiters need requirement-to-evidence mapping, not a chatty bio bot. The cite-or-missing contract marks gaps honestly and links only to published /work and /blog pages — for example {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{work:fake-project-content-emit|Fake Project: Content Emit}}.",
+      { h2: "What the contract actually says" },
+      "The rule is narrow enough to enforce mechanically, which is the only kind of rule that survives contact with a deadline.",
+      { list: ["An aligned verdict requires at least one citation.", "A citation quotes text that already exists on a published page.", "A requirement with no match is reported as a gap, not softened."] },
+      { quote: "A brief that cannot cite is a brief that is guessing.", cite: "The cite-or-missing rule, in one line" },
+      { h3: "Why deterministic retrieval" },
+      "A model would write a smoother brief and would occasionally invent an employer. Keyword retrieval cannot, because it can only surface sentences that are already in the corpus. Smoothness is not worth a fabricated date.",
+      { code: "bun run fit:smoke\n# asserts: aligned => at least one citation, on every fixture", lang: "bash" },
+      { note: "Deterministic matchers are a safe v1; RAG can swap in later behind the same JSON shape, because the contract is about citations rather than about how a candidate sentence was found." }
+    ],
     skills: ["Fit", "evidence", "CI/CD"],
     visible: true,
     date: "2026-07",

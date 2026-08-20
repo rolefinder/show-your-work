@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * `npm run copy:check` — lint the *rendered* copy in dist/.
+ * `bun run copy:check` — lint the *rendered* copy in dist/.
  *
  * Every other gate here checks structure: do slugs resolve, does the sitemap
  * match, is the config complete. None of them read the words. That is a real
@@ -23,7 +23,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
 
 if (!existsSync(dist)) {
-  console.error("FAIL: dist/ does not exist — run `npm run build` first");
+  console.error("FAIL: dist/ does not exist — run `bun run build` first");
   process.exit(1);
 }
 

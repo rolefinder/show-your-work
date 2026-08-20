@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * `npm run layout:check` — the repo's top-level shape matches the tree in
+ * `bun run layout:check` — the repo's top-level shape matches the tree in
  * ARCHITECTURE.md, and no junk is committed.
  *
  * Agents are a primary contributor here, and a prose directory map is exactly

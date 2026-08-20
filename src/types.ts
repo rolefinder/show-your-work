@@ -33,13 +33,38 @@ export type SiteConfig = {
      shipped palette". Written into dist/tokens/adopter.css at build time so
      theming never means editing a file under tokens/. */
   theme: Partial<Record<"accent" | "accentDeep" | "bg" | "fg", string>>;
+  /* Which classes of AI crawler robots.txt invites. A single `User-agent: *`
+     cannot express this: the bots do three different jobs, and for a portfolio
+     the search-index ones are the whole point — they are how an assistant asked
+     about you cites a real page instead of guessing. See ADR 031. */
+  aiCrawlers: { search: boolean; training: boolean };
 };
+
+/**
+ * One entry in a `body`. A plain string is a paragraph — the shape every body
+ * had before this existed, and still the common case. The grammar and its
+ * authoring form are documented in packages/content/body.py, which normalizes
+ * an authored `body:` into this array at emit time; nothing downstream ever
+ * sees the bare-string form.
+ *
+ * `image` and `figure` belong in this union too, and are not here yet: each
+ * needs a subsystem that does not exist (an asset pipeline, a diagram kit).
+ * Adding a variant is additive, which is why they can wait.
+ */
+export type BodyBlock =
+  | string
+  | { h2: string }
+  | { h3: string }
+  | { list: string[]; ordered?: boolean }
+  | { quote: string; cite?: string }
+  | { code: string; lang?: string }
+  | { note: string };
 
 export type WorkItem = {
   slug: string;
   title: string;
   summary: string;
-  body: string;
+  body: BodyBlock[];
   skills: string[];
   visible: boolean;
   date?: string;
@@ -60,7 +85,7 @@ export type BlogPost = {
   slug: string;
   title: string;
   summary: string;
-  body: string;
+  body: BodyBlock[];
   skills: string[];
   visible: boolean;
   date?: string;

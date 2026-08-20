@@ -12,6 +12,8 @@ try:
 except ImportError as exc:  # pragma: no cover
     raise SystemExit("PyYAML required: pip install --user pyyaml") from exc
 
+from .body import BLOCK_KEYS, BodyError
+from .body import normalize as normalize_body
 from .paths import ROOT, corpus_dir, is_demo, is_own, rel, resolve
 
 ABOUT = resolve("about", "profile.yaml")
@@ -30,6 +32,37 @@ def ts_string(s: str) -> str:
 
 def ts_string_array(items: list[str]) -> str:
     return "[" + ", ".join(ts_string(x) for x in items) + "]"
+
+
+def ts_body(value: Any) -> str:
+    """Authored `body:` -> a BodyBlock[] literal.
+
+    Normalization happens here, at the emit boundary, so the browser only ever
+    sees the array form and no runtime code has to re-handle "string or list".
+    """
+    blocks = normalize_body(value)
+    if not blocks:
+        return "[]"
+
+    parts: list[str] = []
+    for block in blocks:
+        if isinstance(block, str):
+            parts.append(f"      {ts_string(block)}")
+            continue
+        if "list" in block:
+            fields = [f"list: {ts_string_array(block['list'])}"]
+            if block.get("ordered"):
+                fields.append("ordered: true")
+        else:
+            key = next(k for k in block if k in BLOCK_KEYS)
+            fields = [f"{key}: {ts_string(block[key])}"]
+            fields += [
+                f"{extra}: {ts_string(block[extra])}"
+                for extra in sorted(BLOCK_KEYS[key])
+                if extra in block
+            ]
+        parts.append("      { " + ", ".join(fields) + " }")
+    return "[\n" + ",\n".join(parts) + "\n    ]"
 
 
 def emit_profile(data: dict[str, Any]) -> str:
@@ -108,6 +141,32 @@ def emit_theme(cfg: dict[str, Any]) -> str:
     return "{ " + ", ".join(out) + " }" if out else "{}"
 
 
+def ai_crawlers(cfg: dict[str, Any]) -> str:
+    """Which classes of AI crawler robots.txt invites.
+
+    Both default to true, which is the right default for a portfolio: the
+    search crawlers are how an assistant asked about you cites a real page
+    instead of guessing, and a site whose whole purpose is being found has
+    little to gain from opting out of the training corpora that answer
+    questions about it. An adopter who disagrees flips a boolean.
+    """
+    raw = cfg.get("ai_crawlers") or {}
+    if not isinstance(raw, dict):
+        raise SystemExit(f"{rel(SITE_CFG)}: ai_crawlers must be a mapping of booleans")
+    unknown = sorted(set(raw) - {"search", "training"})
+    if unknown:
+        raise SystemExit(
+            f"{rel(SITE_CFG)}: ai_crawlers does not take {unknown} (it takes: search, training)"
+        )
+    parts = []
+    for key in ("search", "training"):
+        value = raw.get(key, True)
+        if not isinstance(value, bool):
+            raise SystemExit(f"{rel(SITE_CFG)}: ai_crawlers.{key} must be true or false, got {value!r}")
+        parts.append(f"{key}: {'true' if value else 'false'}")
+    return "{ " + ", ".join(parts) + " }"
+
+
 def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
     """Everything that identifies this deployment, for src/ and emit-html."""
     return "\n".join(
@@ -125,6 +184,7 @@ def emit_site_config(cfg: dict[str, Any], origin: str) -> str:
             # exactly while content/about/profile.yaml has not been added.
             f"  demo: {'true' if is_demo() else 'false'},",
             f"  deployTarget: {ts_string(deploy_target(cfg))},",
+            f"  aiCrawlers: {ai_crawlers(cfg)},",
             f"  customDomain: {ts_string(str((cfg.get('deploy') or {}).get('custom_domain') or '').strip())},",
             f"  theme: {emit_theme(cfg)},",
             "};",
@@ -167,7 +227,7 @@ def emit_work_item(w: dict[str, Any]) -> str:
         f"    slug: {ts_string(w['slug'])},\n"
         f"    title: {ts_string(w.get('title') or w['slug'])},\n"
         f"    summary: {ts_string(str(w.get('summary') or '').strip())},\n"
-        f"    body: {ts_string(str(w.get('body') or '').strip())},\n"
+        f"    body: {ts_body(w.get('body'))},\n"
         f"    skills: {ts_string_array(list(w.get('skills') or []))},\n"
         f"    visible: {visible},\n"
         f"{date_line}"
@@ -194,7 +254,7 @@ def emit_blog_item(b: dict[str, Any]) -> str:
         f"    slug: {ts_string(b['slug'])},\n"
         f"    title: {ts_string(b.get('title') or b['slug'])},\n"
         f"    summary: {ts_string(str(b.get('summary') or '').strip())},\n"
-        f"    body: {ts_string(str(b.get('body') or '').strip())},\n"
+        f"    body: {ts_body(b.get('body'))},\n"
         f"    skills: {ts_string_array(list(b.get('skills') or []))},\n"
         f"    visible: {visible},\n"
         f"{date_line}"
@@ -291,6 +351,13 @@ def load_yaml_dir(directory: Path) -> list[dict[str, Any]]:
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         if raw.get("slug") != path.stem:
             raise SystemExit(f"{path.name}: slug must match filename")
+        # Validate the body here rather than letting ts_body raise mid-emit: a
+        # bare traceback naming an index in a list nobody can see is the
+        # failure mode platform-review-2026-07 P2(c) called out.
+        try:
+            normalize_body(raw.get("body"))
+        except BodyError as exc:
+            raise SystemExit(f"{rel(path)}: {exc}") from exc
         items.append(raw)
     return items
 

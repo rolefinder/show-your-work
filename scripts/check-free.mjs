@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * `npm run free:check` — a site built from this template cannot bill its owner.
+ * `bun run free:check` — a site built from this template cannot bill its owner.
  *
  * The promise: you fork this, you get a live site, and nothing about it can
  * produce an invoice. Not "probably cheap" — no metered resource is reachable

@@ -40,6 +40,9 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [026](architecture/adr/026-copy-quality-gate.md) | Rendered copy is linted, because no other gate reads the words |
 | [027](architecture/adr/027-experience-and-education-content.md) | **Experience and education** as content types — roles become Fit evidence |
 | [028](architecture/adr/028-free-to-serve.md) | **Free to serve** — the template hosts your Pages site and provisions nothing else |
+| [029](architecture/adr/029-long-form-body-grammar.md) | **Long-form body grammar** — blocks, and why code is not citable |
+| [030](architecture/adr/030-mcp-2026-07-28-conformance.md) | `/api/mcp` speaks **MCP 2026-07-28**, and the era before it — supersedes 024's protocol choice |
+| [031](architecture/adr/031-aeo-crawler-policy.md) | **AEO crawler policy** — per-class robots.txt, llms-full.txt, and the Cloudflare default that blocks it all |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The
@@ -60,6 +63,8 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 - [Recruiter Fit PRD](strategy/recruiter-fit-prd.md) — the module
 - [Platform review, 2026-07](strategy/platform-review-2026-07.md) —
   standardization and adopter-UX findings, each with a repro
+- [Design review, 2026-08](strategy/design-review-2026-08.md) — where the visual
+  and editorial layer falls short of the dogfood site, each with a repro
 
 ## There is no project-history section
 
