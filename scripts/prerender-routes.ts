@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 // Build-time prerender: snapshot every route of the built SPA into its own
 // dist/<route>.html with per-route title/description/canonical/OG tags,
 // route-appropriate JSON-LD, and a generated 1200x630 social card, using

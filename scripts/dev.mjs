@@ -1,7 +1,7 @@
 /**
- * `npm run dev` — the authoring loop.
+ * `bun run dev` — the authoring loop.
  *
- * A full `npm run build` is ~23s, and 59% of that is prerendering, which is a
+ * A full `bun run build` is ~23s, and 59% of that is prerendering, which is a
  * PUBLISH-time concern: nothing you do while writing needs per-route documents
  * or social cards. So this runs the smallest chain that makes a change visible
  * and skips prerender entirely.
@@ -53,12 +53,12 @@ function rebuild(tier) {
       if (existsSync(from)) copyFileSync(from, join(dist, "tokens", f));
     }
   } else if (tier === "app") {
-    ok = run("npm run bundle");
+    ok = run("bun run bundle");
   } else {
-    ok = run("npm run emit") && run("npm run bundle");
-    if (ok) ok = run("npm run emit:evidence") && run("npm run emit:fit-config");
+    ok = run("bun run emit") && run("bun run bundle");
+    if (ok) ok = run("bun run emit:evidence") && run("bun run emit:fit-config");
     // Identity and the route table only move when config/profile do.
-    if (ok && tier === "identity") ok = run("npm run emit:artifacts");
+    if (ok && tier === "identity") ok = run("bun run emit:artifacts");
   }
 
   const ms = Date.now() - started;
@@ -78,7 +78,7 @@ function tierFor(changed) {
 }
 
 console.log("dev: first build (full, minus prerender)…");
-if (!run("npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:artifacts && npm run emit:evidence && npm run emit:fit-config")) {
+if (!run("bun run emit && bun run typecheck && bun run build:graph && bun run bundle && bun run emit:artifacts && bun run emit:evidence && bun run emit:fit-config")) {
   console.error("dev: initial build failed — fix the error above and re-run");
   process.exit(1);
 }
@@ -136,5 +136,5 @@ for (const [target, fallback] of WATCH) {
 }
 
 console.log(
-  `dev: watching content/ src/ tokens/ styles.css — prerender is skipped (run \`npm run build\` before deploying)`,
+  `dev: watching content/ src/ tokens/ styles.css — prerender is skipped (run \`bun run build\` before deploying)`,
 );

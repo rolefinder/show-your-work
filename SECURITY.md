@@ -18,12 +18,12 @@ after a public flip, prefer coordinated disclosure.
 - Demo corpus is fictional and self-evidently so (**Fake Name**, `fake-*`
   slugs); never paste real portfolio YAML from a private dogfood site into
   this repo
-- `npm run corpus:check` fails if `content/demo/` contains real-person or
+- `bun run corpus:check` fails if `content/demo/` contains real-person or
   employer fingerprints. The patterns are derived from your own
   `content/about/profile.yaml` plus anything you list in
   `content/config/corpus-guard.yaml`; no names are hardcoded in the source
-- `npm run secrets:check` fails on high-signal credential patterns (AWS keys,
-  GitHub PATs, private key blocks, etc.) — wired into `npm test` / CI
+- `bun run secrets:check` fails on high-signal credential patterns (AWS keys,
+  GitHub PATs, private key blocks, etc.) — wired into `bun run test` / CI
 - Browser CSP stays strict (`script-src 'self'`, `connect-src 'self'`); do not
   widen for third-party model CDNs in v1
 - Fit `aligned` claims require ≥1 citation to published content
@@ -34,8 +34,8 @@ after a public flip, prefer coordinated disclosure.
 
 Done in-tree:
 
-- [x] Dependabot (npm + Actions)
-- [x] CI `npm run test` (corpus + secrets + build + fit/graph smoke)
+- [x] Dependabot (bun + Actions)
+- [x] CI `bun run test` (corpus + secrets + build + fit/graph smoke)
 - [x] Strict CSP `_headers`
 - [x] Fictional corpus gate
 - [x] Local secret pattern scan (`scripts/check-secrets.py`)

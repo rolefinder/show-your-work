@@ -42,7 +42,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     await env.FIT_QUOTA.put(key, String(used + 1), { expirationTtl: 60 * 60 * 48 });
   }
 
-  // Dynamic import of bundled engine (built by npm run build:fit-worker)
+  // Dynamic import of bundled engine (built by bun run build:fit-worker)
   const { matchFit } = await import("../_lib/fit-engine.js");
   const packUrl = new URL("/evidence.json", request.url);
   const packRes = await fetch(packUrl);

@@ -4,21 +4,22 @@
 
 | Need | Why | Check |
 |---|---|---|
-| **Node 20+** | esbuild, tsx and Playwright all require 18+, and 18 is end-of-life. `.nvmrc` pins 22, which is what CI runs | `node --version` |
+| **bun 1.2+** | Installs the dependencies and runs the four TypeScript build steps directly — which is why there is no `tsx` in `package.json`. `.bun-version` pins the version CI installs | `bun --version` |
+| **Node 20+** | esbuild and Playwright both require 18+, and 18 is end-of-life. Every gate under `scripts/*.mjs` is a Node program. `.nvmrc` pins 22, which is what CI runs | `node --version` |
 | **Python 3.9+** with PyYAML | The content emitter and three gates are Python. CI runs 3.12, which is the tested configuration | `python -c "import yaml"` |
-| **Chromium via Playwright** | Prerendering and the UX audit both drive a real browser | `npx playwright --version` |
+| **Chromium via Playwright** | Prerendering and the UX audit both drive a real browser | `bunx playwright --version` |
 
 ```bash
-npm ci
+bun install --frozen-lockfile
 pip install --user pyyaml
-npx playwright install chromium
+bunx playwright install chromium
 ```
 
 ### The three things that actually go wrong
 
 **`python3` is not `python` on Windows.** `python3` is the Microsoft Store
 stub: it exists, satisfies `command -v`, and exits non-zero with an install
-advert. `npm run ready` probes by *running* each interpreter rather than
+advert. `bun run ready` probes by *running* each interpreter rather than
 looking it up on `PATH`, for exactly this reason. Use `python`.
 
 **Playwright is optional, and that is the trap.** Without Chromium the build
@@ -28,22 +29,22 @@ JavaScript sees one page. You get a warning, not an error. Set
 `PRERENDER_REQUIRED=1` in CI and in your Pages build environment so a deploy
 can never silently ship that way.
 
-**PyYAML is not installed by `npm ci`.** Two package managers, two install
-steps. `npm run ready` exits `2` (distinct from a config problem) and names the
+**PyYAML is not installed by `bun install`.** Two package managers, two install
+steps. `bun run ready` exits `2` (distinct from a config problem) and names the
 `pip` command if it is missing.
 
 ## First build
 
 ```bash
-npm run build     # -> dist/
-npm run preview   # http://localhost:4173
+bun run build     # -> dist/
+bun run preview   # http://localhost:4173
 ```
 
 Open <http://localhost:4173/fit> and paste a real job description. What you are
 looking at is the demo persona's corpus, so the brief will cite fake projects —
 that is the point, it proves nothing is invented.
 
-`npm test` runs the same build plus every gate. Run it before you push.
+`bun run test` runs the same build plus every gate. Run it before you push.
 
 ## Make it yours
 
@@ -53,7 +54,7 @@ authorization before anything goes public, and hands back the link. The rest
 of this page is what it runs.
 
 ```bash
-npm run init
+bun run init
 ```
 
 Prompts for name, tagline, location, email, origin, summary, profile links and
@@ -87,7 +88,7 @@ what you add, because your corpus is *supposed* to name a real person.
 ## Is it ready?
 
 ```bash
-npm run ready
+bun run ready
 ```
 
 Answers one question deterministically: is this config filled in, or is it
@@ -106,14 +107,14 @@ with prerendering, and verifies the artifact.
 
 ## The authoring loop
 
-Do not use `npm run build` while writing. Use:
+Do not use `bun run build` while writing. Use:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 It watches `content/`, `src/`, `tokens/` and `styles.css` and rebuilds only the
 tier a change needs — roughly 2s for a content edit against ~23s for a full
 build. Most of the saving is that prerendering is skipped: per-route documents
 and social cards are a publish-time concern, not something you need while
-writing a paragraph. Run `npm run build` before you deploy.
+writing a paragraph. Run `bun run build` before you deploy.

@@ -161,10 +161,11 @@ if (workDrafts && workDrafts === work.length) {
 }
 
 // ---------- dependencies ----------
-/* Node first, because every other probe below runs on it. esbuild, tsx and
-   playwright all require 18+, and 18 is end-of-life — package.json says >=20,
-   but npm only WARNS on an engines mismatch, so an adopter on an old Node
-   otherwise discovers it as an unrelated syntax error deep in the build. */
+/* Node first, because every other probe below runs on it. esbuild and
+   playwright both require 18+, and 18 is end-of-life — package.json says >=20,
+   but bun, like npm before it, only WARNS on an engines mismatch, so an adopter
+   on an old Node otherwise discovers it as an unrelated syntax error deep in
+   the build. */
 const major = Number(process.versions.node.split(".")[0]);
 if (major < 20) {
   missingDeps.push(`node ${process.versions.node} is too old — this build needs Node 20 or newer (see .nvmrc)`);
@@ -181,13 +182,20 @@ if (!py) missingDeps.push("no working python interpreter (needed by the content 
 else if (spawnSync(`${py} -c "import yaml"`, { shell: true, stdio: "ignore" }).status !== 0) {
   missingDeps.push(`${py} cannot import yaml — run: pip install --user pyyaml`);
 }
-if (!existsSync(join(root, "node_modules"))) missingDeps.push("node_modules missing — run: npm ci");
+/* bun installs the dependencies AND runs the four TypeScript build steps, so a
+   missing bun is not a slow build — it is no build. Probed by running it, for
+   the same reason python3 is: a shim on PATH is not an interpreter. */
+if (spawnSync("bun --version", { shell: true, stdio: "ignore" }).status !== 0) {
+  missingDeps.push("bun missing — install it from https://bun.sh, then run: bun install");
+} else if (!existsSync(join(root, "node_modules"))) {
+  missingDeps.push("node_modules missing — run: bun install --frozen-lockfile");
+}
 
-const pw = spawnSync("npx --yes playwright --version", { shell: true, stdio: "ignore" });
+const pw = spawnSync("bunx playwright --version", { shell: true, stdio: "ignore" });
 if (pw.status !== 0) {
   warnings.push(
     "playwright unavailable — the build will produce an SPA-only dist, so per-route " +
-      "metadata will be invisible to crawlers. Run: npx playwright install chromium",
+      "metadata will be invisible to crawlers. Run: bunx playwright install chromium",
   );
 }
 

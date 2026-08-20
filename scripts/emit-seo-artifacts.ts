@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 // Build-time SEO artifacts: sitemap.xml, robots.txt, llms.txt, and
 // known-paths.json.
 //
@@ -7,7 +7,7 @@
 // 200 vs 404. Every artifact here is derived from scripts/lib/routes.ts, the
 // same table the prerenderer walks, so they cannot drift apart.
 //
-// Usage: npx tsx scripts/emit-seo-artifacts.ts
+// Usage: bun scripts/emit-seo-artifacts.ts
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -106,7 +106,7 @@ export function emitSeoArtifacts(): void {
 }
 
 // Still runnable on its own; scripts/emit-artifacts.ts imports it instead
-// so the build pays tsx's ~1.6s startup once rather than per emitter.
+// so the pair runs in one process, in the order known-paths.json needs.
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
   emitSeoArtifacts();
 }

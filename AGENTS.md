@@ -14,7 +14,7 @@ is a bug worth reporting, not a step. `init` refuses to overwrite for the same
 reason.
 
 You should not be editing code either. Everything that identifies a deployment lives in `content/`, and
-`npm run config:check` fails the build if a name, email or title suffix appears
+`bun run config:check` fails the build if a name, email or title suffix appears
 under `src/`, `functions/`, `graph/` or `public/`. If a task seems to require a
 code edit to stand up a site, that is a bug in the template — report it rather
 than working around it. Use **`/launch`** for the whole path, fork to live URL.
@@ -69,20 +69,25 @@ So when drafting content from a source:
 
 - Write drafts as `visible: false`. Nothing publishes until a human flips it.
 - Anything the source does not state becomes a `TODO:` marker. Never a guess.
-- `npm run ready` blocks on a published file that still contains `TODO`.
+- `bun run ready` blocks on a published file that still contains `TODO`.
 
 ## Verify by running, not by reading
 
-`npm test` runs ten gates and each one names what it found. Do not report work
-as done on the strength of having read the diff.
+`bun run test` runs fourteen gates around one full build, and each one names
+what it found. Do not report work as done on the strength of having read the
+diff.
 
 ```bash
-npm run dev     # authoring loop, ~2s rebuilds — use this while iterating
-npm test        # before you push
+bun run dev     # authoring loop, ~2s rebuilds — use this while iterating
+bun run test    # before you push
 ```
 
-Two failure modes worth knowing about, because both are quiet:
+Three failure modes worth knowing about, because all three are quiet:
 
+- **`bun test` is not `bun run test`.** Bare `bun test` invokes bun's own test
+  runner, which finds no `*.test.ts` in this repo, prints `0 test files
+  matching` — and **exits 0**. Every gate is a `package.json` script, so the
+  runner never sees them. Always `bun run test`.
 - **Prerendering is optional.** Without Chromium the build still succeeds and
   produces an SPA-only `dist/` — you get a warning, not an error, and every
   route ships the home page's metadata. Set `PRERENDER_REQUIRED=1` when the

@@ -52,12 +52,12 @@ function resolveFile(pathname) {
  * Serving dist/ says nothing about whether dist/ matches content/. Editing a
  * YAML file and forgetting to rebuild shows stale content with no signal at
  * all, which is a genuinely confusing five minutes. Compare mtimes once at
- * startup and say so. `npm run dev` makes this moot by rebuilding for you.
+ * startup and say so. `bun run dev` makes this moot by rebuilding for you.
  */
 function warnIfStale() {
   const built = join(root, "index.html");
   if (!isFile(built)) {
-    console.warn("preview: dist/ has no index.html — run `npm run build` first");
+    console.warn("preview: dist/ has no index.html — run `bun run build` first");
     return;
   }
   const builtAt = statSync(built).mtimeMs;
@@ -79,7 +79,7 @@ function warnIfStale() {
     const rel = newestFile.split(/[\\/]/).slice(-3).join("/");
     console.warn(
       `preview: STALE — ${rel} is newer than dist/index.html.\n` +
-        "         You are looking at an older build. Run `npm run build`, or `npm run dev` to rebuild on save.",
+        "         You are looking at an older build. Run `bun run build`, or `bun run dev` to rebuild on save.",
     );
   }
 }

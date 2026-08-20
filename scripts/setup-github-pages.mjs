@@ -1,5 +1,5 @@
 /**
- * `npm run pages:setup` — point GitHub Pages at the deploy workflow, over the
+ * `bun run pages:setup` — point GitHub Pages at the deploy workflow, over the
  * API, so nobody has to visit a settings page.
  *
  * Built to be driven by an agent, which means two properties matter more than

@@ -2,10 +2,11 @@
   "name": "recruit-me",
   "version": "0.3.0",
   "private": true,
-  "description": "Open-source personal portfolio template + recruiter Fit (JD → cite-or-missing evidence brief).",
+  "description": "Open-source personal portfolio template + recruiter Fit (JD \u2192 cite-or-missing evidence brief).",
   "license": "MIT",
   "type": "module",
   "engines": {
+    "bun": ">=1.2",
     "node": ">=20"
   },
   "scripts": {
@@ -31,20 +32,20 @@
     "build:graph": "node scripts/build-graph-vendor.mjs",
     "bundle": "node scripts/build.mjs",
     "build:fit-worker": "node scripts/build-fit-worker.mjs",
-    "emit:artifacts": "npx --yes tsx scripts/emit-artifacts.ts",
-    "emit:html": "npx --yes tsx scripts/emit-html.ts",
-    "emit:seo": "npx --yes tsx scripts/emit-seo-artifacts.ts",
-    "prerender": "npx --yes tsx scripts/prerender-routes.ts",
-    "build": "npm run emit && npm run typecheck && npm run build:graph && npm run bundle && npm run emit:artifacts && npm run emit:evidence && npm run emit:fit-config && npm run build:fit-worker && node scripts/run-prerender.mjs",
+    "emit:artifacts": "bun scripts/emit-artifacts.ts",
+    "emit:html": "bun scripts/emit-html.ts",
+    "emit:seo": "bun scripts/emit-seo-artifacts.ts",
+    "prerender": "bun scripts/prerender-routes.ts",
+    "build": "bun run emit && bun run typecheck && bun run build:graph && bun run bundle && bun run emit:artifacts && bun run emit:evidence && bun run emit:fit-config && bun run build:fit-worker && node scripts/run-prerender.mjs",
     "preview": "node scripts/preview.mjs",
-    "fit:smoke": "npx --yes tsx scripts/fit-smoke.ts",
+    "fit:smoke": "bun scripts/fit-smoke.ts",
     "graph:smoke": "node scripts/graph-smoke.mjs",
     "seo:smoke": "node scripts/seo-smoke.mjs",
     "csp:smoke": "node scripts/csp-smoke.mjs",
     "ux:check": "node scripts/check-ux.mjs",
     "docs:check": "node scripts/check-doc-drift.mjs",
     "docs:links": "node scripts/check-doc-links.mjs",
-    "test": "npm run additive:check && npm run parity:check && npm run corpus:check && npm run content:check && npm run secrets:check && npm run style:check && npm run build && npm run config:check && npm run publication:check && npm run pages:check && npm run fit:smoke && npm run graph:smoke && npm run seo:smoke && npm run csp:smoke && npm run ux:check"
+    "test": "bun run additive:check && bun run parity:check && bun run corpus:check && bun run content:check && bun run secrets:check && bun run style:check && bun run build && bun run config:check && bun run publication:check && bun run pages:check && bun run fit:smoke && bun run graph:smoke && bun run seo:smoke && bun run csp:smoke && bun run ux:check"
   },
   "devDependencies": {
     "@types/react": "^18.3.18",
@@ -54,7 +55,6 @@
     "graphology-layout-forceatlas2": "^0.10.1",
     "playwright": "^1.62.0",
     "sigma": "^3.0.3",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }
