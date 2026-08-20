@@ -34,6 +34,11 @@ Available in any fork with no install step, because they live in
 | `/ui-review` | The design judgement `ux:check` cannot make |
 | `/sanitize` | Find employer-internal detail before it publishes, and guard against its return. Employers are discovered from the adopter's own resume and GitHub, never hardcoded |
 
+`/launch` and `/deploy-pages` are the two that publish, so both carry
+`disable-model-invocation: true`: an agent cannot start either on its own
+initiative — a person types the command. That is the frontmatter half of the
+single-authorization rule below, enforced rather than intended.
+
 ## Working on the human's behalf
 
 The design goal is that a person answers questions once and then leaves. Two

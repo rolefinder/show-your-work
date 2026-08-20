@@ -1,6 +1,7 @@
 ---
 name: launch
 description: Take someone from a fresh show-your-work fork to a live site end to end — gather their identity in one pass, scaffold the config, draft and build the site, and publish it to GitHub Pages. Runs autonomously between a single up-front authorization and the final URL. Use when the user runs /launch, or asks to "set up my site", "get me a portfolio", "put my site online", or "do the whole thing for me".
+disable-model-invocation: true
 ---
 
 # /launch
