@@ -119,6 +119,22 @@ an unadopted fork, and `bun run ready` is where a person asks that question.
 The `lint` job runs `node --check` over `.claude/hooks/*.mjs` for the same
 reason it does over `scripts/`: a hook that does not parse fails open.
 
+## Rules that load when they apply
+
+`.claude/rules/` holds instructions gated by `paths:` globs, so each one enters
+context only when a matching file does. They carry *procedure* — the shape a
+thing should take — rather than repeating the invariants in
+[AGENTS.md](./AGENTS.md), which loads every session regardless.
+
+| Rule | Loads when you open | Covers |
+|---|---|---|
+| `adr.md` | `docs/architecture/adr/**` | numbering, the status line, the `> Rejected:` blockquote, indexing it in `docs/README.md` |
+| `gate-scripts.md` | `scripts/**` | the header docstring, the `0`/`1`/`2` exit contract, the `--help` idiom, when to add `--json` |
+
+Neither is a substitute for a gate. Rules are guidance an agent reads; if a
+thing must not happen, it belongs in `.claude/hooks/` or in `permissions.deny`
+above.
+
 ## What CI runs
 
 `bun run test` — eighteen gates around one full build, in this order:
