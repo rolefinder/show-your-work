@@ -1,0 +1,24 @@
+# Gitignored files to copy into each new worktree.
+#
+# A worktree is a fresh checkout, so nothing gitignored comes with it. Most of
+# what this repo ignores is regenerable — node_modules/ is a 17ms `bun install`
+# away, and dist/ is a build. These three are not: they hold state that exists
+# only on this machine, and their absence is silent rather than loud.
+#
+# .gitignore syntax. Only files that match AND are gitignored are copied, so
+# nothing tracked is ever duplicated.
+
+# The never-publish list, and the reason this file exists at all.
+# `publication:check` reports "no terms declared - nothing to enforce" and
+# EXITS 0 when it is missing. So a worktree without it does not fail the leak
+# gate — it passes it, vacuously, which is the worst way to pass a gate whose
+# whole job is to stop an employer's codename reaching a public site.
+content/config/corpus-guard.local.yaml
+
+# Real Cloudflare bindings. wrangler.example.toml is committed and this is not,
+# so a worktree otherwise has an example where the account expects an account.
+wrangler.toml
+
+# Per-developer Claude Code settings. Without it a worktree silently drops your
+# permission and hook overrides, and behaves unlike the checkout you left.
+.claude/settings.local.json
