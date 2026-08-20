@@ -38,7 +38,7 @@ jobs:
     outputs:
       deploy: ${{ steps.check.outputs.deploy }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Asks the checker rather than re-deciding in bash. An earlier version
       # grepped content/config/site.yaml for a demo flag, which diverged from
       # the checker on quoted, capitalised and comment-trailed values — and
@@ -53,7 +53,7 @@ jobs:
     if: needs.decide.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
