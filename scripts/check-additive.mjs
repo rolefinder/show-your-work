@@ -1,5 +1,5 @@
 /**
- * `npm run additive:check` — the template must stay add-only.
+ * `bun run additive:check` — the template must stay add-only.
  *
  * The contract: an adopter never edits and never deletes a file this template
  * ships. They add files, and each one takes over from its demo counterpart.
@@ -44,7 +44,7 @@ const ADOPTER_FILES = [
   ["config", "sources.yaml"],
   ["config", "corpus-guard.yaml"],
 ];
-const CORPORA = ["work", "blog"];
+const CORPORA = ["work", "blog", "experience", "education"];
 
 const errors = [];
 

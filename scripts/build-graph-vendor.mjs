@@ -16,7 +16,7 @@ await build({
   outfile: outFile,
   bundle: true,
   format: "iife",
-  globalName: "RMPortfolioGraphBundle",
+  globalName: "SYWPortfolioGraphBundle",
   platform: "browser",
   target: ["es2020"],
   minify: true,
@@ -36,8 +36,8 @@ writeFileSync(
 );
 
 const src = readFileSync(outFile, "utf8");
-if (!src.includes("RMPortfolioGraph")) {
-  console.error("graph-engine.js missing RMPortfolioGraph export");
+if (!src.includes("SYWPortfolioGraph")) {
+  console.error("graph-engine.js missing SYWPortfolioGraph export");
   process.exit(1);
 }
 console.log("built assets/graph-engine.js");

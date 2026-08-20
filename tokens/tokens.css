@@ -1,5 +1,5 @@
 /* ============================================================
-   recruit-me Design System — token entry point
+   show-your-work Design System — token entry point
    An @import manifest only: every token and the base reset is
    reached from here. Component styles live in /styles.css and
    read these tokens — never raw hex values (enforced by
@@ -16,5 +16,5 @@
 @import "./effects.css";
 @import "./base.css";
 
-/* Last, so an adopter's --rm-* values win over the shipped palette. */
+/* Last, so an adopter's --syw-* values win over the shipped palette. */
 @import "./adopter.css";

@@ -13,7 +13,7 @@ import { buildEvidencePack } from "../src/fit/evidence";
 import { matchFit } from "../src/fit/match";
 import type { FitMatchConfig } from "../src/fit/config";
 import type { EvidenceDoc } from "../src/types";
-import { BLOG, SITE_CONFIG, SITE_PROFILE, WORK } from "../src/generated/content";
+import { BLOG, EXPERIENCE, SITE_CONFIG, SITE_PROFILE, WORK } from "../src/generated/content";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -29,7 +29,7 @@ function assert(cond: unknown, msg: string): asserts cond {
    dist/evidence.json, built independently by scripts/emit-evidence.py. Two
    implementations of one contract, so compare them directly — otherwise the
    two Fit paths can quietly answer differently for the same JD. */
-const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG);
+const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE);
 const workerPack = loadJson<{ docs: EvidenceDoc[] }>("dist", "evidence.json");
 
 assert(
@@ -93,7 +93,7 @@ assert(
  * DEMO expectations ("a CI/CD JD must cite the merge-gate project") are about THIS
  * repo's fictional corpus. On an adopter's own content they are meaningless
  * and fail, which would mean a correctly-initialized site cannot pass
- * `npm test` — the same trap the fictional-corpus gate had.
+ * `bun run test` — the same trap the fictional-corpus gate had.
  */
 const cicdJd = `
 Senior Platform Engineer

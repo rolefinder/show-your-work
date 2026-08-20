@@ -15,19 +15,43 @@ deploy:
 Or let an agent do the whole thing: **`/launch`** gathers your details, builds,
 asks once before anything goes public, and hands back a URL.
 
+## What this costs
+
+**Nothing, on the default path.** GitHub Pages on a public repository is free,
+and so are the Actions minutes that build it. There is no metered resource in a
+site built from this template, so there is no usage number to watch — that is
+enforced by `free:check`, not just intended ([ADR 028](../architecture/adr/028-free-to-serve.md)).
+
+Three things cost money, and you have to choose all three deliberately:
+
+| | What it costs | Why you might |
+|---|---|---|
+| A **custom domain** | Whatever your registrar charges | `you.com` instead of `you.github.io` |
+| **Cloudflare Pages** on a paid Workers plan | Their pricing | Real response headers, `/api/fit`, `/api/mcp` |
+| A **private repo** | GitHub Pro, plus billable Actions minutes | You do not want `content/` world-readable |
+
+That last one is the trap, so `pages:setup` refuses it rather than letting the
+API fail with a 403: on a private repo, Pages needs a paid plan **and** every
+push starts billing Actions minutes, because the build installs a browser. If
+you want the repo private, deploy somewhere you already pay for instead.
+
+The template will use infrastructure you own. It will not create any for you —
+no Cloudflare project, no domain registration, no paid plan. Those are one-time
+decisions with recurring costs, and they are yours to make.
+
 ## What differs, honestly
 
 | | GitHub Pages | Cloudflare Pages |
 |---|---|---|
 | Account needed | none beyond GitHub | a Cloudflare account |
-| Setup | `npm run pages:setup`, no dashboard visit | project created in the dashboard |
+| Setup | `bun run pages:setup`, no dashboard visit | project created in the dashboard |
 | **CSP** | `<meta http-equiv>` only | real `Content-Security-Policy` header |
 | **`frame-ancestors`** | **unavailable** — invalid in a meta tag | enforced |
 | **X-Frame-Options** | **unavailable** — header only | `DENY` |
 | HSTS, COOP, CORP | **unavailable** — headers only | set by `public/_headers` |
 | Cache-Control on assets | Pages' defaults | immutable, one year |
 | `POST /api/fit` | unavailable | optional Function |
-| **`POST /api/mcp`** (agents) | **unavailable** — no Functions | read-only MCP endpoint |
+| `POST /api/mcp` (agents) | **unavailable** — Functions only | read-only MCP server, plus `.well-known/mcp.json` |
 | Browser Fit | works | works |
 | `llms.txt`, `evidence.json` | identical | identical |
 | Prerendering, SEO, sitemap, OG cards | identical | identical |
@@ -106,7 +130,7 @@ So the site must serve at the root, which means one of:
 - **`deploy.custom_domain`** is set to a domain you own.
 
 ```bash
-npm run pages:check
+bun run pages:check
 ```
 
 fails with both fixes spelled out if neither holds. It also fails if `origin`
@@ -118,8 +142,8 @@ It skips while `demo: true` — the template repo is not a deployment.
 ### Standing it up
 
 ```bash
-npm run pages:setup -- --dry-run    # prints what it would do, changes nothing
-npm run pages:setup
+bun run pages:setup --dry-run    # prints what it would do, changes nothing
+bun run pages:setup
 ```
 
 This enables Pages over the API with the workflow as the build source, so there
@@ -151,6 +175,12 @@ injecting the meta CSP and lets `public/_headers` do the work.
 Set `PRERENDER_REQUIRED=1` in the Pages build environment. Without it a build
 on a machine with no browser silently produces an SPA-only site where every
 route carries the home page's metadata.
+
+Cloudflare's build image ships its own bun and does **not** read
+`.bun-version`, so set `BUN_VERSION` in the build environment to the value in
+that file if you want the deploy building on the same bun as CI. The floor in
+`package.json` is 1.2, which the default image already clears — this is about
+reproducing CI exactly, not about whether the build runs.
 
 ## Moving between them
 

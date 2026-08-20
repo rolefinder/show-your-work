@@ -1,4 +1,4 @@
-import type { BlogPost, EvidenceDoc, SiteProfile, WorkItem } from "../types";
+import type { BlogPost, EvidenceDoc, ExperienceItem, SiteProfile, WorkItem } from "../types";
 import { bodyText } from "../content/bodyText";
 
 /** Build a flat evidence pack from site content (visible only). */
@@ -6,6 +6,7 @@ export function buildEvidencePack(
   profile: SiteProfile,
   work: WorkItem[],
   blog: BlogPost[],
+  experience: ExperienceItem[] = [],
 ): EvidenceDoc[] {
   const docs: EvidenceDoc[] = [
     {
@@ -49,6 +50,28 @@ export function buildEvidencePack(
       url: `/blog/${b.slug}`,
       text: [b.title, b.summary, bodyText(b.body), b.skills.join(" ")].join(" "),
       skills: b.skills.slice(),
+    });
+  }
+
+  // Roles last, and they matter: a JD asking for "N years doing X" is answered
+  // by employment history, not by a project page. Highlights are already whole
+  // authored statements, so they become claims — the same treatment work's
+  // outcome and evidence bullets get, for the same reason.
+  for (const e of experience) {
+    if (e.visible === false) continue;
+    const claims = e.highlights
+      .map((h) => String(h || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    docs.push({
+      id: `experience:${e.slug}`,
+      kind: "experience",
+      title: `${e.role} — ${e.organization}`,
+      url: `/experience#${e.slug}`,
+      text: [e.role, e.organization, e.summary, ...claims, e.skills.join(" ")]
+        .filter(Boolean)
+        .join(" "),
+      skills: e.skills.slice(),
+      claims,
     });
   }
 

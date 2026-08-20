@@ -159,7 +159,7 @@ def main() -> int:
     failures: list[str] = []
 
     # Say so rather than quietly checking half of what the name implies. This
-    # gate was briefly ordered BEFORE `build` in npm test, so on a clean CI
+    # gate was briefly ordered BEFORE `build` in bun run test, so on a clean CI
     # checkout dist/ did not exist and only the YAML was scanned - and a term
     # that reaches the artifact through a Fit quote, without appearing
     # literally in any content file, would have passed unseen.
@@ -168,7 +168,7 @@ def main() -> int:
             "check-publication-safety: WARNING - dist/ not built, so only your source\n"
             "  content was scanned. A term can reach the published artifact through a Fit\n"
             "  quote or a JSON-LD field without appearing literally in any YAML.\n"
-            "  Run `npm run build` first.",
+            "  Run `bun run build` first.",
             file=sys.stderr,
         )
 

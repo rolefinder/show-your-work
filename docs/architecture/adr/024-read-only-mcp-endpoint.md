@@ -1,144 +1,112 @@
-# ADR 024: Read-only MCP endpoint (`/api/mcp`)
+# ADR 024: A read-only MCP endpoint, and why it can never cost anything
 
-**Status:** Accepted
-**Date:** 2026-08-15 (revised same day — see *Correction* below)
+**Status:** Accepted · 2026-08-11
 
 ## Context
 
-The site already publishes two machine-readable surfaces: `llms.txt` (an index
-for answer engines, ADR 014) and `evidence.json` (the URL-cited corpus behind
-`/fit`). Both are *pull* artifacts — an agent has to know they exist, fetch them
-and parse them. MCP is how agents actually connect to software, and the audience
-for a recruiter-facing portfolio now includes screeners and assistants that
-never render a page.
+The template already publishes two machine-readable surfaces: `llms.txt`, an
+index for answer engines, and `evidence.json`, the URL-cited corpus behind
+`/fit`. Both are pull artifacts — an agent has to already know to fetch and
+parse them.
 
-The constraint is the one that shapes everything else here: no surface may cost
-money, and no surface may weaken the cite-or-missing honesty of a published
-claim.
+The audience for a portfolio now includes screeners and assistants that are
+agents, and MCP is how agents connect to things. A site whose entire premise is
+"every claim cites a page you actually published" should be readable by the
+software doing the reading, rather than scraped out of rendered HTML where the
+citations are lost.
 
-## Correction
-
-The first implementation of this endpoint was adapted from the sibling site's
-equivalent rather than written against the specification. That produced a
-**legacy-era server**: it advertised `2025-06-18` as its newest protocol
-version, implemented the `initialize` handshake, and did none of the header
-validation, per-request metadata, or discovery that the current revision
-requires.
-
-The current revision is **2026-07-28**. By the spec's own compatibility matrix,
-*Modern client → Legacy server* is rated **"Fails."** The endpoint would not
-have worked with a client built against the then-three-week-old spec.
-
-This ADR records the corrected decision. The lesson is cheap to state and was
-expensive to miss: **prior art in a sibling repo is not a substitute for the
-specification**, especially for a protocol revising on a ~4-month cadence.
+The constraint is the one that governs every surface here: nothing may cost
+money, and nothing may weaken cite-or-missing.
 
 ## Decision
 
-`functions/api/mcp.ts` — a Pages Function implementing MCP's Streamable HTTP
-transport, **dual-era**.
+`functions/api/mcp.ts` implements MCP's Streamable HTTP transport in its
+simplest legal form.
 
-1. **Both protocol eras on one endpoint.** The spec provides for this
-   (`basic/versioning` § Backward Compatibility): a request carrying modern
-   per-request `_meta` is served statelessly per 2026-07-28; an `initialize`
-   request selects legacy semantics. A dual-era server **MAY** serve both
-   concurrently on the same endpoint.
+### Stateless, single-response
 
-   Era is chosen by how the client opens — any modern header or a `_meta`
-   protocol version means modern. Modern-only would strand every client built
-   against an older revision; legacy-only is what shipped first and fails
-   outright against a modern client.
+Each POST carries one JSON-RPC message and gets one JSON response. No sessions,
+no SSE, no server-initiated messages, no batching. GET returns 405 because
+there is no stream to offer. A notification — a message with **no `id` member
+at all** — gets a bare 202; `id: null` is discouraged-but-valid and still
+expects a response, so only a truly absent id counts.
 
-   Advertised: `2026-07-28` (modern), and `2025-11-25` / `2025-06-18` /
-   `2025-03-26` / `2024-11-05` through the handshake. `initialize` never echoes
-   `2026-07-28` — that revision has no handshake, so offering it to a legacy
-   client would be a dead end. An unrecognized ask falls back to the newest
-   *legacy* revision.
+Protocol versions 2025-06-18 / 2025-03-26 / 2024-11-05 are supported; the
+client's is echoed when recognised, otherwise the newest.
 
-2. **`server/discover`** (MUST) returns `supportedVersions`, `capabilities`,
-   `instructions`, and identity in `_meta["io.modelcontextprotocol/serverInfo"]`.
-   Answered on either path, because clients use it as a compatibility probe.
+### Three read-only tools, all over `evidence.json`
 
-3. **Header validation** (MUST). `MCP-Protocol-Version` and `Mcp-Method` are
-   required on modern requests, `Mcp-Name` on `tools/call`, and each is checked
-   against the body. A disagreement is the confused-deputy case the spec
-   requires servers to reject — a gateway routing on the header while the server
-   executes the body — and returns `400` with `-32020`. `Mcp-Name` is decoded
-   from the `=?base64?…?=` sentinel before comparison.
+| Tool | Returns |
+|---|---|
+| `list_pages` | every published page as `{id, kind, title, url, skills}`, optionally filtered by kind |
+| `get_page` | one page's full text by evidence id |
+| `fit_brief` | the deterministic matcher's brief for a pasted job description |
 
-4. **Version gate** (MUST). An unsupported version returns `400` with `-32022`
-   and `data: {supported, requested}` so the client can retry.
+`fit_brief` calls the same `functions/_lib/fit-engine.js` that `/api/fit` calls,
+loaded with the same `fit-config.json` the browser path reads. There is no
+second matcher to drift — an agent gets exactly the brief the site would render,
+citations included. The job description is untrusted input and reaches nothing
+but the deterministic matcher (ADR 012).
 
-5. **Result shape.** Every result carries `resultType: "complete"` and the
-   server's identity in `_meta`. `server/discover` and `tools/list` carry
-   `ttlMs` (1 hour) and `cacheScope: "public"` — public is correct because the
-   corpus is the published site and identical for every caller. `tools/call`
-   results are deliberately *not* cacheable; the spec does not list them, and a
-   Fit brief depends on the JD.
+### One quota, shared with `/api/fit`
 
-6. **Three read-only tools** over the published corpus: `list_pages`,
-   `get_page`, and `fit_brief` — the last running the same bundled matcher
-   **and the same `fit-config.json`** `/api/fit` and the browser use, so all
-   three entry points answer a JD identically.
+**Amended 2026-08-11.** This section originally said "zero metered resources":
+no Workers AI, no secrets, no bindings, and the invocation itself under the
+free-plan cap. That was true of the *resources* and wrong about the *control*.
 
-7. **No model runs server-side.** ADR 010's rule is that nothing in the matching
-   path may hallucinate, and the README's claim is that a brief cannot invent an
-   employer, a date or a metric because it can only quote text already in
-   `content/`. Summarizing the corpus with an LLM would break exactly the
-   property that makes the output worth trusting, and would add an API key, a
-   bill, and a prompt-injection surface fed by an untrusted job description.
-   **The intelligence is the agent's; the honesty is ours.**
+`/api/fit` charges 2 briefs per day per IP. This endpoint exposes the same
+matcher through `fit_brief` and, as first written, charged nothing — so the
+limit had a second unmetered door, and anyone wanting unlimited briefs simply
+called MCP instead. A limit with a second door is not a limit.
 
-8. **Zero metered resources.** No KV, no secrets, no bindings, no outbound
-   calls. Input caps: 64 KB body, 12 000-character JD (matching `/api/fit`).
+Both endpoints now call `functions/_shared/quota.ts` and use **the same key**,
+so the budget is per caller rather than per endpoint. Only `fit_brief` is
+charged; `list_pages` and `get_page` are reads of a static file and stay free,
+so an agent can always enumerate and read the corpus even after the matcher is
+exhausted. `mcp-smoke` asserts all three properties.
 
-9. **Wildcard CORS, and an explicit Origin policy.** The corpus is public by
-   construction, so every origin is valid here. Stated in code rather than
-   omitted, because "we have no policy" and "our policy is to allow all" look
-   identical from the outside and only one is a decision.
+Still true: no Workers AI, no secrets, no bindings beyond the quota counter,
+which holds a hashed IP and an integer. Input caps are 64 KB of body and 12,000
+characters of job description, matching `/api/fit`.
 
-10. **Discovery is emitted only where the endpoint exists.** GitHub Pages, the
-    default target, runs no Functions, so `.well-known/mcp.json` and the
-    `llms.txt` entry are written only for `cloudflare-pages`. Advertising an
-    endpoint that 404s is worse than advertising none. `evidence.json` is
-    static and identical on both targets and is listed unconditionally as the
-    fallback.
+### Wildcard CORS, deliberately
 
-11. **Identity comes from the corpus**, never a constant — `config:check` fails
-    the build on a name or origin hardcoded under `functions/`, and it is right
-    to: this file ships to every fork.
+The corpus **is** the published site, so there is no origin-gated state to
+protect and no session to rebind — which is what the spec's origin-validation
+guidance defends against. `Access-Control-Allow-Origin: *` lets browser-based
+agents connect to something that is public by construction.
 
-## Not implemented, deliberately
+### Discovery is gated on the deploy target
 
-- **`subscriptions/listen`** — nothing changes at runtime. The corpus is a build
-  artifact, so there is no change to notify about between deploys.
-- **MRTR / `InputRequiredResult`** — no tool needs input from the user to finish.
-- **The Tasks extension** — every tool here is fast and synchronous.
-- **Resources and prompts** — the corpus is better served as tools that return
-  cited text than as opaque resource URIs.
+`.well-known/mcp.json` and the `llms.txt` entry are emitted **only when the
+deploy target is Cloudflare Pages.** Pages Functions do not exist on GitHub
+Pages, which is this template's default target, so publishing a discovery
+document there would advertise an endpoint that 404s.
 
-Each is an omission with a reason, not a gap.
+> That is worse than publishing nothing. An agent that finds no manifest
+> concludes the site has no MCP server; an agent that finds one pointing at a
+> 404 concludes the server is broken, and may well report that to whoever asked.
+
+### Identity stays data
+
+`serverInfo.name` is the constant `show-your-work-portfolio` — a stable protocol
+identifier, not a person. The human-readable `title` is read from the built
+`manifest.json` at request time. Hardcoding the adopter's name would fail
+`config:check`, which is the point of ADR 016.
 
 ## Consequences
 
-- Agents can enumerate, read and score the portfolio without scraping, and every
-  claim they surface carries a canonical URL back to the site.
-- **A pre-existing bug had to be fixed first.** `functions/_middleware.js` runs
-  ahead of every Function, and an `/api` path has no file extension, so it fell
-  through to the known-paths lookup — which lists the site's *routes*, never its
-  *endpoints* — and was answered with a 404 document before any handler ran.
-  `POST /api/fit` was unreachable on Cloudflare for this reason.
-- `npm run mcp:smoke` asserts routing, the legacy era, the modern era, header
-  validation and the version gate, in-process rather than under
-  `wrangler pages dev` (which needs a login-shaped environment and would make it
-  the kind of check that gets skipped). Every assertion was verified to fail
-  when its behaviour is removed.
-- **`.well-known/mcp.json` is a de-facto convention, not a standard.** Discovery
-  is not in the core spec; it is two competing draft proposals — SEP-1649
-  (server cards at `/.well-known/mcp/server-card.json`) and SEP-1960 (a manifest
-  at `/.well-known/mcp`). The file shipped here uses the widely-used
-  `{name, description, remotes[]}` shape. Expect to revisit it when one of those
-  proposals lands; nothing depends on it, so churn is cheap.
-- Protocol revisions land roughly every four months. This endpoint should be
-  re-read against the spec on each one, and `PROTOCOL_VERSIONS` is the first
-  thing to check.
+- An agent can enumerate, read and score the portfolio without scraping, and
+  every claim it surfaces carries a canonical URL back to the site.
+- No deploy step is added: `functions/` is already bundled by both deploy paths.
+- `mcp:smoke` drives the handler with real `Request` objects and a `fetch` stub
+  that serves `dist/` off disk, so it needs neither wrangler nor a port. It
+  asserts the protocol basics, that `kind` filtering does not leak another kind,
+  that an unknown tool and an oversized JD are refused — and that **every
+  `aligned` row carries a citation**, the same contract `fit-smoke` enforces for
+  the site.
+- GitHub Pages adopters get no MCP endpoint. Stated in `docs/guide/deploy.md`
+  alongside the other Functions-only capabilities rather than discovered.
+- If MCP later grows capabilities worth exposing — resources, prompts — they
+  stay read-only over committed artifacts. Anything metered would need a quota
+  and fail-closed behaviour first.

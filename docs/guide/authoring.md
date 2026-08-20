@@ -29,7 +29,7 @@ Two rules there are worth stating plainly, because they are deliberate:
 **A config file you add is used whole.** Leave `title_suffix` out and it is
 empty — it does not fall back to `Fake Name`. A site with your origin and the
 demo's name in every page title is a *wrong* site; a site with no title suffix
-is merely an incomplete one, and `npm run ready` names it.
+is merely an incomplete one, and `bun run ready` names it.
 
 **A corpus you add replaces, never merges.** One real project means the two
 fictional ones are gone. A portfolio listing two of your projects alongside two
@@ -97,7 +97,7 @@ evidence pack, so the citation is a whole statement:
 Write each `evidence` bullet so it survives being read alone, with no
 surrounding paragraph. That is the whole trick.
 
-`npm run ready` warns — it does not block — on a project with no `outcome` or
+`bun run ready` warns — it does not block — on a project with no `outcome` or
 `evidence`, and tells you Fit will quote fragments there.
 
 ## Long-form bodies
@@ -133,7 +133,7 @@ body:
     cite: Who said it
 
   - code: |
-      npm run build
+      bun run build
     lang: bash
 
   - note: >
@@ -208,17 +208,17 @@ on that project.
 `visible: false` keeps a file out of the built site — no page, no sitemap
 entry, no graph node. Use it for drafts.
 
-`/build-recruit-me` writes drafted content as `visible: false` with `TODO:`
+`/build-show-your-work` writes drafted content as `visible: false` with `TODO:`
 markers wherever the source did not actually say something. Nothing it could
 not trace to a source is ever guessed. You review it, fill the TODOs, and flip
 the flag.
 
-`npm run ready` blocks on a **published** file containing `TODO`, and on every
+`bun run ready` blocks on a **published** file containing `TODO`, and on every
 project being an unreviewed draft — which would publish an empty site.
 
 ## What the content gate checks
 
-`npm run content:check`, also part of `npm test`:
+`bun run content:check`, also part of `bun run test`:
 
 | Blocks on | |
 |---|---|

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in **recruit-me**.
+Thanks for your interest in **show-your-work**.
 
 If you are here to *use* the template rather than change it, you want
 [docs/guide](./docs/guide/README.md) instead — building your own site should
@@ -9,18 +9,19 @@ never require touching this repository's code.
 ## Setup
 
 ```bash
-npm ci
+bun install --frozen-lockfile
 pip install --user pyyaml
-npx playwright install chromium
+bunx playwright install chromium
 ```
 
-Node 20+ (`.nvmrc` pins 22, which is what CI runs) and Python 3.9+.
+bun 1.2+ (`.bun-version` pins what CI installs), Node 20+ (`.nvmrc` pins 22,
+which is what CI runs) and Python 3.9+.
 Full detail, including the three things that go wrong on a fresh machine, is in
 [docs/guide/setup.md](./docs/guide/setup.md).
 
 ```bash
-npm run dev      # authoring loop, ~2s rebuilds
-npm test         # every gate — run this before you push
+bun run dev     # authoring loop, ~2s rebuilds
+bun run test    # every gate — run this before you push
 ```
 
 ## Ground rules
@@ -92,14 +93,20 @@ Do not hand-edit these; edit their source and rebuild.
 
 ## What CI runs
 
-`npm test` — ten gates, in this order:
+`bun run test` — eighteen gates around one full build, in this order:
 
 ```
-additive:check -> parity:check -> corpus:check -> publication:check -> content:check -> secrets:check -> style:check
+layout:check -> free:check -> additive:check -> parity:check -> corpus:check -> content:check -> secrets:check -> style:check
   -> build
-  -> config:check -> pages:check -> fit:smoke -> graph:smoke -> seo:smoke
-  -> csp:smoke -> ux:check
+  -> config:check -> publication:check -> pages:check -> fit:smoke -> mcp:smoke -> graph:smoke -> seo:smoke
+  -> csp:smoke -> ux:check -> copy:check
 ```
+
+`publication:check` runs *after* `build` on purpose: it reads `dist/`, so on a
+clean checkout it has nothing to scan until the build has produced one.
+
+Note `bun run test`, not `bun test` — the latter is bun's own test runner,
+which matches no files here and exits 0 without running a single gate.
 
 plus a `lint` job: every script parses, content YAML parses, documented numbers
 still match source (`docs:check`), and every relative doc link resolves
@@ -114,8 +121,9 @@ starting point — see the table in
 
 - **ADRs are records.** Add a new one rather than rewriting an old one to match
   a later decision. `docs/architecture/adr/`.
-- **`docs/history/` is unmaintained** by design. Do not update it to match
-  current reality; that is what makes it history.
+- **Don't add project archaeology.** Planning docs, handoffs and status
+  snapshots age into noise for everyone who arrives later. If a decision is
+  worth keeping, it is worth an ADR.
 - If you change a number the docs quote — a Fit weight, a search score, an
   input cap — `docs:check` will fail until the prose is updated too.
 

@@ -42,7 +42,7 @@ body:
     that are already in the corpus. Smoothness is not worth a fabricated date.
 
   - code: |
-      npm run fit:smoke
+      bun run fit:smoke
       # asserts: aligned => at least one citation, on every fixture
     lang: bash
 

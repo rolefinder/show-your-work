@@ -12,12 +12,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bundle = join(root, "assets", "graph-engine.js");
 
 if (!existsSync(bundle)) {
-  console.error("FAIL: assets/graph-engine.js missing — run npm run build:graph");
+  console.error("FAIL: assets/graph-engine.js missing — run bun run build:graph");
   process.exit(1);
 }
 
 const src = readFileSync(bundle, "utf8");
-for (const needle of ["RMPortfolioGraph", "create"]) {
+for (const needle of ["SYWPortfolioGraph", "create"]) {
   if (!src.includes(needle)) {
     console.error(`FAIL: bundle missing ${needle}`);
     process.exit(1);

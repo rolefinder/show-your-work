@@ -1,6 +1,6 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 /**
- * `npm run mcp:smoke` — exercise /api/mcp's JSON-RPC surface, and the
+ * `bun run mcp:smoke` — exercise /api/mcp's JSON-RPC surface, and the
  * middleware routing that has to let it through.
  *
  * Runs the handler in-process against dist/ rather than under `wrangler pages
@@ -16,7 +16,7 @@
  * test that passes while the route 404s in production would be worse than no
  * test, so both are asserted here.
  *
- * Usage: npx tsx scripts/mcp-smoke.ts [--help]
+ * Usage: bun scripts/mcp-smoke.ts [--help]
  * Exit 0 = pass · 1 = failure · 2 = can't run (no dist).
  */
 import { existsSync, readFileSync } from "node:fs";
@@ -32,11 +32,11 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
 }
 
 if (!existsSync(join(dist, "evidence.json"))) {
-  console.error("mcp-smoke: dist/evidence.json missing - run `npm run build` first");
+  console.error("mcp-smoke: dist/evidence.json missing - run `bun run build` first");
   process.exit(2);
 }
 if (!existsSync(join(root, "functions", "_lib", "fit-engine.js"))) {
-  console.error("mcp-smoke: functions/_lib/fit-engine.js missing - run `npm run build` first");
+  console.error("mcp-smoke: functions/_lib/fit-engine.js missing - run `bun run build` first");
   process.exit(2);
 }
 
@@ -61,6 +61,18 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
 }) as typeof fetch;
 
 const mcp = await import("../functions/api/mcp.ts");
+const { DAILY_LIMIT } = await import("../functions/_shared/quota.ts");
+
+/* A KV stand-in, so the quota path can be exercised without wrangler. An
+   absent binding means no metering, which is the real behaviour on GitHub
+   Pages and in local dev — so every other assertion here runs unmetered. */
+function stubKv() {
+  const store = new Map<string, string>();
+  return {
+    get: async (k: string) => store.get(k) ?? null,
+    put: async (k: string, v: string) => void store.set(k, v),
+  } as unknown as KVNamespace;
+}
 const middleware = await import("../functions/_middleware.js");
 
 /* ---------------------------------------------------------------- routing --
@@ -95,13 +107,18 @@ const missRoute = await routed("/does-not-exist", "GET");
 ok("middleware still 404s unknown routes", missRoute.status === 404);
 
 /* --------------------------------------------------------------- protocol -- */
-const post = async (body: unknown, headers?: Record<string, string>) => {
+const post = async (
+  body: unknown,
+  headers?: Record<string, string>,
+  env: { FIT_QUOTA?: KVNamespace } = {},
+) => {
   const res = await mcp.onRequestPost({
     request: new Request("https://smoke.local/api/mcp", {
       method: "POST",
       headers,
       body: typeof body === "string" ? body : JSON.stringify(body),
     }),
+    env,
   } as never);
   const text = await res.text();
   return { status: res.status, body: text ? JSON.parse(text) : null, res };
@@ -139,8 +156,16 @@ const modernPost = async (
     headers,
   );
 };
-const call = async (name: string, args: Record<string, unknown> = {}) => {
-  const r = await post({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } });
+const call = async (
+  name: string,
+  args: Record<string, unknown> = {},
+  env: { FIT_QUOTA?: KVNamespace } = {},
+) => {
+  const r = await post(
+    { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } },
+    undefined,
+    env,
+  );
   const raw = r.body?.result?.content?.[0]?.text;
   return { ...r, isError: !!r.body?.result?.isError, data: raw && !r.body.result.isError ? JSON.parse(raw) : raw };
 };
@@ -275,9 +300,35 @@ ok("GET is 405 with an Allow header", get.status === 405 && get.headers.get("all
 const options = await mcp.onRequestOptions();
 ok("OPTIONS preflight is 204 with CORS", options.status === 204 && options.headers.get("access-control-allow-origin") === "*");
 
+/* ------------------------------------------------------------------ quota --
+ * The budget is SHARED with POST /api/fit, not per-endpoint.
+ *
+ * This exists because it was once absent: /api/fit charged 2/day and this
+ * endpoint, exposing the same matcher through fit_brief, charged nothing — so
+ * the limit had a second unmetered door (ADR 024). Reads stay free; only the
+ * tool that runs the matcher is charged.
+ */
+const quotaEnv = { FIT_QUOTA: stubKv() };
+const quotaJd = "Requirements\n- Experience building CI/CD pipelines with GitHub Actions\n";
+for (let i = 1; i <= DAILY_LIMIT; i++) {
+  const r = await call("fit_brief", { job_description: quotaJd }, quotaEnv);
+  ok(`fit_brief is allowed on call ${i} of ${DAILY_LIMIT}`, !r.isError, String(r.data));
+}
+const overLimit = await call("fit_brief", { job_description: quotaJd }, quotaEnv);
+ok(
+  `a fit_brief past ${DAILY_LIMIT}/day is refused`,
+  overLimit.isError,
+  "the /api/fit quota has an unmetered door again",
+);
+const stillFree = await call("list_pages", {}, quotaEnv);
+ok("list_pages stays free", !stillFree.isError, "a static read was charged against the Fit quota");
+
 if (failures.length) {
   console.error("mcp-smoke: FAILED");
   for (const f of failures) console.error("  - " + f);
   process.exit(1);
 }
-console.log(`mcp-smoke ok (${pages.data.total} pages, ${brief.data.requirements.length} requirements scored, routing + protocol asserted)`);
+console.log(
+  `mcp-smoke ok (${pages.data.total} pages, ${brief.data.requirements.length} requirements scored, ` +
+    `routing + protocol asserted, quota ${DAILY_LIMIT}/day shared with /api/fit, reads free)`,
+);

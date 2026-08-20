@@ -1,4 +1,4 @@
-# ADR 025: AEO — per-class crawler policy, and the full-text corpus
+# ADR 031: AEO — per-class crawler policy, and the full-text corpus
 
 **Status:** Accepted
 **Date:** 2026-08-15
@@ -62,7 +62,7 @@ answer engine — with no signal that anything is wrong.
 2. **`llms-full.txt`** joins `llms.txt`. The index tells an engine what exists;
    the expansion means one request gets every page's full text. That is the
    difference between being summarized from a one-line description and being
-   quoted from what you wrote. Built from the ADR 023 body grammar, so it
+   quoted from what you wrote. Built from the ADR 029 body grammar, so it
    cannot drift from the rendered page.
 
 3. **Cross-link tokens are stripped** from both files. `{{work:slug|Label}}` is

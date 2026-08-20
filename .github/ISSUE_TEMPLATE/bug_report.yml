@@ -7,7 +7,7 @@ body:
       value: |
         If a build gate is failing on **your own content**, that is usually the
         gate working — start with the table in
-        [docs/guide](https://github.com/rolefinder/recruit-me/blob/main/docs/guide/README.md#when-something-fails).
+        [docs/guide](https://github.com/rolefinder/show-your-work/blob/main/docs/guide/README.md#when-something-fails).
         File here when the template itself is wrong.
 
   - type: textarea
@@ -15,7 +15,7 @@ body:
     attributes:
       label: What happened, and what you expected instead
       placeholder: |
-        `npm run build` succeeded but /work/<slug> prerendered without a canonical.
+        `bun run build` succeeded but /work/<slug> prerendered without a canonical.
         seo:smoke passed, so the gate missed it too.
     validations:
       required: true
@@ -28,9 +28,9 @@ body:
         The smallest path from a fresh clone. If it needs specific content,
         paste the YAML — redact anything real first.
       placeholder: |
-        1. git clone && npm ci && pip install pyyaml
+        1. git clone && bun install --frozen-lockfile && pip install pyyaml
         2. add content/work/example.yaml with the block below
-        3. npm run build
+        3. bun run build
         4. open dist/work/example/index.html
     validations:
       required: true
@@ -55,14 +55,14 @@ body:
     id: env
     attributes:
       label: Node, Python, OS
-      placeholder: node 22.14.0, python 3.13.1, Windows 11
+      placeholder: bun 1.2.21, node 22.14.0, python 3.13.1, Windows 11
 
   - type: checkboxes
     id: checks
     attributes:
       label: Before filing
       options:
-        - label: "`npm test` was run, and I have included what failed"
-        - label: Chromium is installed (`npx playwright install chromium`) — without it, prerendering and `ux:check` silently skip
+        - label: "`bun run test` was run, and I have included what failed"
+        - label: Chromium is installed (`bunx playwright install chromium`) — without it, prerendering and `ux:check` silently skip
         - label: No real names, employers, or credentials in anything I pasted
           required: true

@@ -16,12 +16,12 @@ title_suffix: "Fake Name"
 # Fallback <meta name="description"> and og:description, for the initial HTML
 # and for routes that don't supply their own (the client sets per-route values
 # on navigation).
-description: "Demo portfolio for the recruit-me open-source template. Fake Name is a placeholder, not a real person."
+description: "Demo portfolio for the show-your-work open-source template. Fake Name is a placeholder, not a real person."
 
 # PWA manifest identity.
 short_name: "Fake Name"
 
-# Browser chrome color per scheme. Keep in sync with --rm-bg in
+# Browser chrome color per scheme. Keep in sync with --syw-bg in
 # tokens/colors.css and the dark --bg — they are the same two surfaces.
 theme_color: "#f7f4ef"
 theme_color_dark: "#131211"

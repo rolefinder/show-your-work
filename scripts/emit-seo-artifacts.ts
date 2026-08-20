@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 // Build-time SEO artifacts: sitemap.xml, robots.txt, llms.txt, and
 // known-paths.json.
 //
@@ -7,7 +7,7 @@
 // 200 vs 404. Every artifact here is derived from scripts/lib/routes.ts, the
 // same table the prerenderer walks, so they cannot drift apart.
 //
-// Usage: npx tsx scripts/emit-seo-artifacts.ts
+// Usage: bun scripts/emit-seo-artifacts.ts
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -71,7 +71,7 @@ function llmsTxt(): string {
      serves no Functions, so listing it there would send every agent that reads
      this file to a 404. evidence.json above is the static equivalent and works
      on both targets. */
-  if (MCP_AVAILABLE) {
+  if (HAS_FUNCTIONS) {
     lines.push(
       `- [MCP](${SITE}/api/mcp): Model Context Protocol endpoint (streamable-http, read-only, ` +
         "protocol 2026-07-28 with legacy fallback) — tools: list_pages, get_page, fit_brief. " +
@@ -91,7 +91,7 @@ function llmsTxt(): string {
  * between being summarized from a one-line description and being quoted from
  * what you actually wrote.
  *
- * Built from the same body grammar the pages render (ADR 023), so it cannot
+ * Built from the same body grammar the pages render (ADR 029), so it cannot
  * drift from what a reader sees.
  */
 function llmsFullTxt(): string {
@@ -149,8 +149,17 @@ function llmsFullTxt(): string {
   return lines.join("\n");
 }
 
-/** Pages Functions exist only on Cloudflare; GitHub Pages cannot run them. */
-const MCP_AVAILABLE = SITE_CONFIG.deployTarget === "cloudflare-pages";
+/*
+ * Pages Functions exist on Cloudflare Pages and nowhere else. On the
+ * GitHub Pages target /api/* is simply absent, so advertising an MCP endpoint
+ * there would publish a discovery document pointing at a 404 — worse than
+ * publishing nothing, because an agent would treat it as broken rather than
+ * missing.
+ *
+ * Written as "not github-pages" rather than "is cloudflare-pages" so that a
+ * third target that does run Functions is covered without editing this line.
+ */
+const HAS_FUNCTIONS = SITE_CONFIG.deployTarget !== "github-pages";
 
 /**
  * AI crawlers, grouped by the job they actually do.
@@ -241,8 +250,9 @@ function mcpManifest(): string {
   return (
     JSON.stringify(
       {
-        name: SITE_PROFILE.name,
-        description: `Read-only portfolio corpus for ${SITE_PROFILE.name}. Enumerate pages, read their text, and score a job description against published evidence.`,
+        name: `${SITE_PROFILE.name} — portfolio`,
+        description:
+          "Read-only portfolio corpus: enumerate published pages, read one, or score a job description against published evidence.",
         remotes: [{ type: "streamable-http", url: `${SITE}/api/mcp` }],
       },
       null,
@@ -289,7 +299,7 @@ export function emitSeoArtifacts(): void {
   writeFileSync(join(dist, "llms-full.txt"), llmsFullTxt(), "utf8");
   writeFileSync(join(dist, "known-paths.json"), JSON.stringify(paths), "utf8");
 
-  if (MCP_AVAILABLE) {
+  if (HAS_FUNCTIONS) {
     mkdirSync(join(dist, ".well-known"), { recursive: true });
     writeFileSync(join(dist, ".well-known", "mcp.json"), mcpManifest(), "utf8");
   }
@@ -297,12 +307,12 @@ export function emitSeoArtifacts(): void {
   console.log(
     `emit-seo-artifacts: ok - ${paths.length} sitemap URLs, ${paths.length} known paths, ` +
       `llms.txt + llms-full.txt (origin=${SITE})` +
-      (MCP_AVAILABLE ? ", .well-known/mcp.json" : " - no MCP manifest (deploy target has no Functions)"),
+      (HAS_FUNCTIONS ? ", .well-known/mcp.json" : " - no MCP manifest (deploy target has no Functions)"),
   );
 }
 
 // Still runnable on its own; scripts/emit-artifacts.ts imports it instead
-// so the build pays tsx's ~1.6s startup once rather than per emitter.
+// so the pair runs in one process, in the order known-paths.json needs.
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
   emitSeoArtifacts();
 }

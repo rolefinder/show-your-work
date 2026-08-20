@@ -5,7 +5,7 @@
 
 ## Context
 
-Harrison wants a recruiter-facing tool: paste or upload a job description,
+The owner wants a recruiter-facing tool: paste or upload a job description,
 receive a structured fit brief with links into published `/work` and
 `/writing` evidence. Earlier exploration considered training a micro/nano
 LLM on site text (nanoGPT-style or a hosted “nano-gpt” API). The live site

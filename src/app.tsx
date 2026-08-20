@@ -1,6 +1,6 @@
 import type { WorkItem } from "./types";
 import { linkLabel } from "./profile-links";
-import { BLOG, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { BLOG, EDUCATION, EXPERIENCE, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { Body } from "./content/Body";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
@@ -24,6 +24,7 @@ type View =
   | { name: "workDetail"; slug: string }
   | { name: "blog" }
   | { name: "blogDetail"; slug: string }
+  | { name: "experience" }
   | { name: "fit" }
   | { name: "graph" }
   | { name: "notfound"; path: string };
@@ -32,6 +33,7 @@ function viewFor(path: string): View {
   const seg = path.split("/").filter(Boolean);
   if (!seg.length) return { name: "home" };
   if (seg[0] === "about") return { name: "about" };
+  if (seg[0] === "experience") return { name: "experience" };
   if (seg[0] === "fit") return { name: "fit" };
   if (seg[0] === "graph") return { name: "graph" };
   if (seg[0] === "work" && seg[1]) return { name: "workDetail", slug: seg[1] };
@@ -43,6 +45,7 @@ function viewFor(path: string): View {
 
 function routeFor(view: View): string {
   if (view.name === "about") return "/about";
+  if (view.name === "experience") return "/experience";
   if (view.name === "fit") return "/fit";
   if (view.name === "graph") return "/graph";
   if (view.name === "work") return "/work";
@@ -53,6 +56,26 @@ function routeFor(view: View): string {
   return "/";
 }
 
+/**
+ * Scroll to a fragment target, or to the top when there is none.
+ *
+ * Deferred a frame: the destination view renders in the same React commit this
+ * runs after, so the element does not exist yet at call time. Falls back to the
+ * top when the id is absent — a stale anchor should land somewhere sensible
+ * rather than leave the reader wherever they happened to be.
+ */
+function scrollToHash(hash: string): void {
+  if (!hash || hash === "#") {
+    window.scrollTo(0, 0);
+    return;
+  }
+  requestAnimationFrame(() => {
+    const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (target) target.scrollIntoView({ block: "start" });
+    else window.scrollTo(0, 0);
+  });
+}
+
 /** "<page> — <titleSuffix>", or just the page name if no suffix is configured. */
 export function withSuffix(pageName: string): string {
   const suffix = SITE_CONFIG.titleSuffix.trim();
@@ -61,6 +84,7 @@ export function withSuffix(pageName: string): string {
 
 function titleFor(view: View): string {
   if (view.name === "about") return withSuffix("About");
+  if (view.name === "experience") return withSuffix("Experience");
   if (view.name === "work") return withSuffix("Work");
   if (view.name === "workDetail") {
     const w = WORK.find((x) => x.slug === view.slug);
@@ -208,6 +232,7 @@ function ContactRow() {
 /** Top-level nav, shared by the header bar and the mobile drawer. */
 const NAV_ITEMS: [label: string, view: View][] = [
   ["About", { name: "about" }],
+  ["Experience", { name: "experience" }],
   ["Work", { name: "work" }],
   ["Blog", { name: "blog" }],
   ["Graph", { name: "graph" }],
@@ -232,7 +257,7 @@ function App() {
   const visibleWork = WORK.filter((w) => w.visible !== false);
   const visibleBlog = BLOG.filter((b) => b.visible !== false);
   const docs = React.useMemo(
-    () => buildEvidencePack(SITE_PROFILE, WORK, BLOG),
+    () => buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE),
     [],
   );
   const kg = React.useMemo(
@@ -253,9 +278,32 @@ function App() {
     const onPop = () => {
       setPath(window.location.pathname || "/");
       setSearch(window.location.search || "");
+      // The fragment matters on the way back too: without this, going back to
+      // a Fit citation restores /experience#<slug> in the address bar and
+      // leaves the reader at the top of the page.
+      //
+      // Only when there IS one. scrollToHash sends an empty hash to the top,
+      // and back/forward to an ordinary page must leave scroll alone so the
+      // browser can restore where the reader was — which is what it did before
+      // this handler learned about fragments at all.
+      if (window.location.hash) scrollToHash(window.location.hash);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  /*
+   * Third path to the same target, and the one an outside agent uses: a cold
+   * load of /experience#<slug>, which is what /api/mcp hands back as a
+   * citation URL. The browser does scroll to the prerendered anchor while
+   * parsing — and then ReactDOM.render replaces #root, rebuilding that element
+   * and losing the position. Re-aims once after the first render.
+   *
+   * Only when a fragment is present: with no hash this must not run, or it
+   * would fight the browser's own scroll restoration on a refresh.
+   */
+  React.useEffect(() => {
+    if (window.location.hash) scrollToHash(window.location.hash);
   }, []);
 
   // Below --bp-md the nav collapses behind a menu button; widening the
@@ -325,16 +373,23 @@ function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  /*
+   * Carries the fragment. A Fit citation to a role is `/experience#<slug>`, and
+   * dropping the hash here sent every one of them to the top of the page — a
+   * citation that does not land on the thing it cites, which is the one promise
+   * this project makes.
+   */
   function navigate(next: string) {
     const url = new URL(next, window.location.origin);
-    const full = url.pathname + url.search;
-    if (window.location.pathname + window.location.search !== full) {
+    const full = url.pathname + url.search + url.hash;
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    if (here !== full) {
       window.history.pushState(null, "", full);
     }
     setPath(url.pathname);
     setSearch(url.search);
     setNavOpen(false);
-    window.scrollTo(0, 0);
+    scrollToHash(url.hash);
   }
 
   function Link(props: {
@@ -407,7 +462,7 @@ function App() {
       "section",
       { className: "page page--home" },
       SITE_CONFIG.demo
-        ? React.createElement("p", { className: "eyebrow" }, "recruit-me demo")
+        ? React.createElement("p", { className: "eyebrow" }, "show-your-work demo")
         : null,
       React.createElement("h1", null, SITE_PROFILE.name),
       React.createElement("p", { className: "lede" }, SITE_PROFILE.tagline),
@@ -483,6 +538,119 @@ function App() {
           ),
         ),
       ),
+    );
+  } else if (view.name === "experience") {
+    const roles = EXPERIENCE.filter((e) => e.visible !== false);
+    const credentials = EDUCATION.filter((e) => e.visible !== false);
+    body = React.createElement(
+      "section",
+      { className: "page" },
+      React.createElement("p", { className: "eyebrow" }, "Career"),
+      React.createElement("h1", null, "Experience"),
+      roles.length
+        ? React.createElement(
+            "ol",
+            { className: "card-list" },
+            roles.map((e) =>
+              React.createElement(
+                "li",
+                // id, not just key: /experience#<slug> is the citation target in the
+                  // evidence pack and in the ItemList JSON-LD. React's key is a
+                  // reconciliation hint and never reaches the DOM.
+                  { key: e.slug, id: e.slug, className: "card" },
+                React.createElement("h2", null, e.role),
+                React.createElement(
+                  "p",
+                  { className: "muted" },
+                  // "Present" is derived from an absent end date rather than
+                  // authored, so a role cannot be left saying it ended when it
+                  // did not, or vice versa.
+                  [e.organization, `${e.start} – ${e.end || "Present"}`, e.location]
+                    .filter(Boolean)
+                    .join(" · "),
+                ),
+                React.createElement("p", { className: "prose" }, richText(e.summary, navigate)),
+                e.highlights.length
+                  ? React.createElement(
+                      "ul",
+                      { className: "prose" },
+                      e.highlights.map((h, i) =>
+                        React.createElement("li", { key: i }, richText(h, navigate)),
+                      ),
+                    )
+                  : null,
+                // Curated, not date-inferred (ADR 027). Only links to work that
+                // is actually published, so an unpublished draft cannot leak a
+                // dangling link onto the career page.
+                (() => {
+                  const linked = e.projects
+                    .map((slug) => WORK.find((w) => w.slug === slug && w.visible !== false))
+                    .filter(Boolean) as WorkItem[];
+                  return linked.length
+                    ? React.createElement(
+                        "p",
+                        { className: "muted" },
+                        "Built here: ",
+                        linked.map((w, i) =>
+                          React.createElement(
+                            React.Fragment,
+                            { key: w.slug },
+                            i ? ", " : null,
+                            React.createElement(Link, { href: "/work/" + w.slug }, w.title),
+                          ),
+                        ),
+                      )
+                    : null;
+                })(),
+                e.skills.length
+                  ? React.createElement(
+                      "ul",
+                      { className: "tags" },
+                      e.skills.map((s) =>
+                        React.createElement(
+                          "li",
+                          { key: s },
+                          React.createElement("span", { className: "tag" }, s),
+                        ),
+                      ),
+                    )
+                  : null,
+              ),
+            ),
+          )
+        : React.createElement("p", { className: "muted" }, "No roles published yet."),
+      credentials.length
+        ? React.createElement(
+            React.Fragment,
+            null,
+            React.createElement("h2", null, "Education"),
+            React.createElement(
+              "ul",
+              { className: "card-list" },
+              credentials.map((e) =>
+                React.createElement(
+                  "li",
+                  { key: e.slug, id: e.slug, className: "card" },
+                  React.createElement("h3", null, e.credential),
+                  React.createElement(
+                    "p",
+                    { className: "muted" },
+                    [e.institution, e.date, e.honors].filter(Boolean).join(" · "),
+                  ),
+                  e.achievements.length
+                    ? React.createElement(
+                        "ul",
+                        { className: "prose" },
+                        e.achievements.map((a, i) =>
+                          React.createElement("li", { key: i }, richText(a, navigate)),
+                        ),
+                      )
+                    : null,
+                ),
+              ),
+            ),
+          )
+        : null,
     );
   } else if (view.name === "work") {
     body = React.createElement(

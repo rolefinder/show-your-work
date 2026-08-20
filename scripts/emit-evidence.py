@@ -113,6 +113,36 @@ def main() -> int:
             }
         )
 
+    # Mirrors the experience block in src/fit/evidence.ts — same order (last),
+    # same id/title/url shape, same claim normalization. fit-smoke compares the
+    # two packs, so a change here needs the matching change there.
+    for path in corpus_files("experience"):
+        e = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if e.get("visible") is False:
+            continue
+        claims = [normalize(h) for h in (e.get("highlights") or []) if normalize(h)]
+        docs.append(
+            {
+                "id": f"experience:{e['slug']}",
+                "kind": "experience",
+                "title": f"{str(e.get('role') or '').strip()} — {str(e.get('organization') or '').strip()}",
+                "url": f"/experience#{e['slug']}",
+                "text": " ".join(
+                    part
+                    for part in [
+                        str(e.get("role") or "").strip(),
+                        str(e.get("organization") or "").strip(),
+                        str(e.get("summary") or "").strip(),
+                        *claims,
+                        " ".join(e.get("skills") or []),
+                    ]
+                    if part
+                ),
+                "skills": list(e.get("skills") or []),
+                "claims": claims,
+            }
+        )
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({"version": 1, "docs": docs}, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)} ({len(docs)} docs)")

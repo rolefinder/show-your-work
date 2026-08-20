@@ -6,10 +6,10 @@ Every color on the site derives from four variables, declared with the shipped
 defaults at the top of [`tokens/colors.css`](../../tokens/colors.css):
 
 ```css
---rm-brand: #0f5c4c;      /* accent — links, focus ring, active state */
---rm-brand-deep: #083d33; /* pressed / heavier accent */
---rm-bg: #f7f4ef;         /* page background (light) */
---rm-fg: #1c1a17;         /* primary ink (light) */
+--syw-brand: #0f5c4c;      /* accent — links, focus ring, active state */
+--syw-brand-deep: #083d33; /* pressed / heavier accent */
+--syw-bg: #f7f4ef;         /* page background (light) */
+--syw-fg: #1c1a17;         /* primary ink (light) */
 ```
 
 **You do not edit that file.** Override them from your config instead:
@@ -24,7 +24,7 @@ theme:
 ```
 
 The build writes those into `dist/tokens/adopter.css`, which `tokens.css`
-imports **last**, so they win. `npm run init` fills in `accent` for you if you
+imports **last**, so they win. `bun run init` fills in `accent` for you if you
 answer the accent prompt.
 
 Config rather than CSS because a palette edit inside `tokens/colors.css` is a
@@ -58,13 +58,13 @@ styles.css              components: semantic aliases only
 Components read `--surface`, `--fg-muted`, `--space-4` — never `#f7f4ef`, and
 never `--ink-60` directly.
 
-That indirection is what makes the four variables work. Change `--rm-bg` and
+That indirection is what makes the four variables work. Change `--syw-bg` and
 every surface, border and muted text value moves with it, because they are all
 alpha ramps over the same ink rather than independently chosen hexes.
 
 ## The rule
 
-**No raw color in `styles.css`.** `npm run style:check` fails on it, and on two
+**No raw color in `styles.css`.** `bun run style:check` fails on it, and on two
 subtler things:
 
 - **A `var(--x)` that resolves to nothing.** This catches the silent-fallback
@@ -80,7 +80,7 @@ move, not a workaround.
 ## Contrast is measured, not assumed
 
 Every shipped text/background pair clears WCAG AA (4.5:1) in both schemes, and
-`npm run ux:check` re-measures it on every build — 9 routes × light/dark ×
+`bun run ux:check` re-measures it on every build — 9 routes × light/dark ×
 375/1280px, against the **real composited background**.
 
 That last part is load-bearing here. This palette is built almost entirely from

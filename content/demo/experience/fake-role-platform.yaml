@@ -1,0 +1,28 @@
+slug: fake-role-platform
+organization: Fake Platform Co
+role: Fake Platform Engineer
+start: "2024-02"
+location: Remote
+summary: >
+  Owned the delivery pipeline and the content build for a fictional
+  documentation platform.
+highlights:
+  - >
+    Moved delivery onto merge gates, so a green local build stopped being
+    evidence that the deployed site matched the source it came from.
+  - >
+    Replaced hand-maintained page copy with a YAML corpus the build owns, which
+    removed the class of outage where a copy change broke the application.
+  - >
+    Cut the feedback loop for content authors from a full rebuild to about two
+    seconds by rebuilding only what changed.
+skills:
+  - CI/CD
+  - GitHub Actions
+  - pipelines
+  - TypeScript
+  - YAML
+projects:
+  - fake-project-merge-gate
+  - fake-project-content-emit
+visible: true

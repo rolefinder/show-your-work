@@ -4,7 +4,7 @@
  * cannot drift apart — and it is built from the same generated content module
  * that drives the client router in src/app.tsx.
  */
-import { BLOG, SITE_CONFIG, SITE_PROFILE, WORK } from "../../src/generated/content";
+import { BLOG, EDUCATION, EXPERIENCE, SITE_CONFIG, SITE_PROFILE, WORK } from "../../src/generated/content";
 import { clamp, SITE, type RouteMeta } from "./site-meta";
 
 const suffix = SITE_CONFIG.titleSuffix.trim();
@@ -12,6 +12,8 @@ const withSuffix = (name: string) => (suffix ? `${name} — ${suffix}` : name);
 
 export const visibleWork = WORK.filter((w) => w.visible !== false);
 export const visibleBlog = BLOG.filter((b) => b.visible !== false);
+export const visibleExperience = EXPERIENCE.filter((e) => e.visible !== false);
+export const visibleEducation = EDUCATION.filter((e) => e.visible !== false);
 
 export function buildRoutes(): RouteMeta[] {
   const workItems = visibleWork.map((w) => ({ name: w.title, url: `${SITE}/work/${w.slug}` }));
@@ -36,6 +38,23 @@ export function buildRoutes(): RouteMeta[] {
       card: "About",
       eyebrow,
       kind: "profile",
+    },
+    {
+      path: "/experience",
+      key: "experience",
+      title: withSuffix("Experience"),
+      desc: clamp(
+        visibleExperience.length
+          ? `Roles held by ${SITE_PROFILE.name}: ${visibleExperience.map((e) => `${e.role} at ${e.organization}`).join(", ")}.`
+          : `Career history for ${SITE_PROFILE.name}.`,
+      ),
+      card: "Experience",
+      eyebrow,
+      kind: "collection",
+      items: visibleExperience.map((e) => ({
+        name: `${e.role} — ${e.organization}`,
+        url: `${SITE}/experience#${e.slug}`,
+      })),
     },
     {
       path: "/work",

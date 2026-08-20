@@ -1,6 +1,6 @@
 ---
 name: sanitize
-description: Find employer-internal detail in a recruit-me site before it is published — codenames, client names, internal hostnames, ticket prefixes, team structure — and set up a guard so it cannot reappear. Use when the user runs /sanitize, or asks to "check what I'm about to publish", "did I leak anything", "review this for confidential info", or before making a portfolio public.
+description: Find employer-internal detail in a show-your-work site before it is published — codenames, client names, internal hostnames, ticket prefixes, team structure — and set up a guard so it cannot reappear. Use when the user runs /sanitize, or asks to "check what I'm about to publish", "did I leak anything", "review this for confidential info", or before making a portfolio public.
 ---
 
 # /sanitize
@@ -18,7 +18,7 @@ from an internal codename. You can, by asking one question per candidate:
 ## 1. Work out who you worked for
 
 ```bash
-npm run guard:suggest
+bun run guard:suggest
 ```
 
 Reads the sources this site is already built from — the resume and GitHub
@@ -41,7 +41,7 @@ the boundary.
 ## 2. What actually ships
 
 ```bash
-npm run build
+bun run build
 ```
 
 Scan `dist/`, not just `content/` — `dist/` is the published artifact, and it
@@ -87,11 +87,11 @@ If a number itself was never public, replace it with a shape you can defend:
 ## 5. Make it un-repeatable
 
 ```bash
-npm run publication:check
+bun run publication:check
 ```
 
 Fails if anything on your guarded list appears in `content/` or `dist/`.
-Wire it into your own habits — it is already in `npm test`.
+Wire it into your own habits — it is already in `bun run test`.
 
 Three places to declare a term, and **the choice matters**:
 
@@ -110,8 +110,8 @@ Three places to declare a term, and **the choice matters**:
 ## 6. Verify against the artifact
 
 ```bash
-npm run build && npm run publication:check
-npm test
+bun run build && bun run publication:check
+bun run test
 ```
 
 Then paste a real job description at `/fit` and read the brief. Fit quotes

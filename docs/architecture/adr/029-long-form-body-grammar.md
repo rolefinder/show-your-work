@@ -1,4 +1,4 @@
-# ADR 023: Long-form body grammar
+# ADR 029: Long-form body grammar
 
 **Status:** Accepted
 **Date:** 2026-08-15

@@ -1,5 +1,5 @@
 /**
- * `npm run skills` — show the skill vocabulary actually in use.
+ * `bun run skills` — show the skill vocabulary actually in use.
  *
  * Platform review U5: skills are free text with no way to see what already
  * exists while authoring, which is how `TypeScript` becomes `Typescript`. This

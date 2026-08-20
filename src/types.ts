@@ -36,7 +36,7 @@ export type SiteConfig = {
   /* Which classes of AI crawler robots.txt invites. A single `User-agent: *`
      cannot express this: the bots do three different jobs, and for a portfolio
      the search-index ones are the whole point — they are how an assistant asked
-     about you cites a real page instead of guessing. See ADR 025. */
+     about you cites a real page instead of guessing. See ADR 031. */
   aiCrawlers: { search: boolean; training: boolean };
 };
 
@@ -91,6 +91,41 @@ export type BlogPost = {
   date?: string;
 };
 
+/** One role. `content/experience/<slug>.yaml`. */
+export type ExperienceItem = {
+  slug: string;
+  /** Employer or client. Shown as the heading; also the JSON-LD organization. */
+  organization: string;
+  /** Your title in the role. */
+  role: string;
+  /** Free text, e.g. "2023-04" or "2023". Rendered verbatim — the template
+      never parses or reformats a date it did not generate. */
+  start: string;
+  /** Absent means current, which renders as "Present". */
+  end?: string;
+  location?: string;
+  summary: string;
+  /** What you did, one statement per entry. Quoted by Fit as whole claims. */
+  highlights: string[];
+  skills: string[];
+  /** Curated work slugs built during this role. Explicit, never date-inferred:
+      a personal project can run alongside a job and a project can straddle a
+      role change, so a date range gets both cases wrong. */
+  projects: string[];
+  visible: boolean;
+};
+
+/** One credential. `content/education/<slug>.yaml`. */
+export type EducationItem = {
+  slug: string;
+  institution: string;
+  credential: string;
+  date: string;
+  honors?: string;
+  achievements: string[];
+  visible: boolean;
+};
+
 export type FitStatus =
   | "aligned"
   | "partial"
@@ -123,7 +158,7 @@ export type FitBrief = {
 
 export type EvidenceDoc = {
   id: string;
-  kind: "about" | "work" | "blog";
+  kind: "about" | "work" | "blog" | "experience";
   title: string;
   url: string;
   text: string;

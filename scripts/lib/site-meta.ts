@@ -16,6 +16,20 @@ export function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * Serialize for embedding inside `<script type="application/ld+json">`.
+ *
+ * JSON.stringify does not escape `<`, so a title containing the literal
+ * `</script>` would close the block early and turn everything after it into
+ * live markup on every prerendered route. `<` is valid JSON and parses
+ * back to `<`, so consumers see identical data — this changes the encoding,
+ * never the value. Every other value in this file goes through esc(); this is
+ * the same rule for the one context where HTML entities would be wrong.
+ */
+export function ldJson(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 /** Trim to a meta-description length on a word boundary. */
 export function clamp(s: string, n = 155): string {
   const t = String(s ?? "").replace(/\s+/g, " ").trim();
@@ -226,10 +240,10 @@ export function applyRouteHead(html: string, route: RouteMeta): string {
     doc = swapTag(doc, /<meta name="robots"[^>]*>/, `<meta name="robots" content="noindex" />`, "robots");
   }
 
-  const ld = `<script type="application/ld+json">${JSON.stringify(routeEntityGraph(route))}</script>`;
+  const ld = `<script type="application/ld+json">${ldJson(routeEntityGraph(route))}</script>`;
   const crumb = route.noindex || route.path === "/"
     ? ""
-    : `<script type="application/ld+json">${JSON.stringify(breadcrumbFor(route))}</script>`;
+    : `<script type="application/ld+json">${ldJson(breadcrumbFor(route))}</script>`;
   doc = swapTag(doc, /<script type="application\/ld\+json">[\s\S]*?<\/script>/, ld + crumb, "ld+json");
   return doc;
 }

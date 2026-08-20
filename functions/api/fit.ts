@@ -3,9 +3,9 @@
  * Deterministic matcher over dist/evidence.json. KV FIT_QUOTA stub (2/day).
  * Placeholders only — no real account IDs.
  */
-type Env = {
-  FIT_QUOTA?: KVNamespace;
-};
+import { charge, type QuotaEnv } from "../_shared/quota";
+
+type Env = QuotaEnv;
 
 type EvidencePack = {
   version: number;
@@ -35,14 +35,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!jd) return json({ error: "empty_jd" }, 400);
   if (jd.length > MAX_CHARS) return json({ error: "jd_too_large" }, 413);
 
-  if (env.FIT_QUOTA) {
-    const key = `day:${body.clientId || "anon"}:${new Date().toISOString().slice(0, 10)}`;
-    const used = Number((await env.FIT_QUOTA.get(key)) || "0");
-    if (used >= 2) return json({ error: "quota_exceeded", remaining: 0 }, 429);
-    await env.FIT_QUOTA.put(key, String(used + 1), { expirationTtl: 60 * 60 * 48 });
-  }
+  /* Shared with /api/mcp's fit_brief, same module and same key — the budget is
+     per caller, not per endpoint. `clientId` is ignored for accounting; it
+     stays in the request shape only so existing callers do not break. */
+  const quota = await charge(request, env);
+  if (!quota.allowed) return json({ error: "quota_exceeded", remaining: 0 }, 429);
 
-  // Dynamic import of bundled engine (built by npm run build:fit-worker)
+  // Dynamic import of bundled engine (built by bun run build:fit-worker)
   const { matchFit } = await import("../_lib/fit-engine.js");
   const packUrl = new URL("/evidence.json", request.url);
   const packRes = await fetch(packUrl);

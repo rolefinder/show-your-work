@@ -2,27 +2,26 @@
 
 **Status:** Draft  
 **Date:** 2026-07-09  
-**Owner:** Harrison Halperin  
-**Site:** harrisonhalperin.com (static SPA, Cloudflare Pages, strict CSP)
+**Reference deployment:** a static SPA on Cloudflare Pages under a strict CSP
 
-**Umbrella product:** [`recruit-me-prd.md`](./recruit-me-prd.md) (MIT
-open-source site template + toolkit; repo `<owner>/recruit-me`). Fit is a
-**module** inside recruit-me. Dogfood on **private** harrison-site; public
-recruit-me ships demo corpus only. Security:
-[`recruit-me-security.md`](./recruit-me-security.md).
+**Umbrella product:** [`show-your-work-prd.md`](./show-your-work-prd.md) (MIT
+open-source site template + toolkit; repo `<owner>/show-your-work`). Fit is a
+**module** inside show-your-work. Dogfood on **private** the dogfood site; public
+show-your-work ships demo corpus only. Security:
+[`show-your-work-security.md`](./show-your-work-security.md).
 
 On the **template**, evidence URLs are `/work/<slug>` and `/blog/<slug>`.
-harrison-site may keep `/writing` until it chooses to align.
+The maintainer's private site may keep `/writing` until it chooses to align.
 
-Related decisions: [ADR 010](../architecture/adr/010-recruiter-fit-architecture.md) (architecture), [ADR 011](../architecture/adr/011-recruiter-fit-quota.md) (quota + request-more), [ADR 012](../architecture/adr/012-recruiter-fit-security-data.md) (inputs, security, retention). Packaging: [`recruiter-fit-oss-plan.md`](../history/recruiter-fit-oss-plan.md).
+Related decisions: [ADR 010](../architecture/adr/010-recruiter-fit-architecture.md) (architecture), [ADR 011](../architecture/adr/011-recruiter-fit-quota.md) (quota + request-more), [ADR 012](../architecture/adr/012-recruiter-fit-security-data.md) (inputs, security, retention).
 
 ---
 
 ## 1. Problem
 
 Recruiters and hiring managers who land on the portfolio cannot quickly map a
-specific job description (JD) to Harrison’s published evidence. They skim Work
-and Writing, miss the best matches, or over-weight the wrong projects. Harrison
+specific job description (JD) to the maintainer’s published evidence. They skim Work
+and Writing, miss the best matches, or over-weight the wrong projects. the maintainer
 wants a cheap, trustworthy tool that answers: “Given this role, what on this
 site shows fit, and what is missing?”
 
@@ -30,7 +29,7 @@ site shows fit, and what is missing?”
 
 Primary: a recruiter or hiring manager with a JD in hand (paste or file).
 
-Secondary: Harrison, reviewing stored briefs and tuning evidence quality.
+Secondary: the maintainer, reviewing stored briefs and tuning evidence quality.
 
 Non-user: anonymous scrapers using the endpoint as a free JD summarizer.
 Quota and abuse controls exist for them (ADR 011, ADR 012).
@@ -45,13 +44,13 @@ with links. No invented employers, years, or stack depth.
 
 | Metric | Target (v1) |
 |--------|-------------|
-| Unevidenced `aligned` claims | **Zero** on a 10-JD fixture set reviewed by Harrison |
+| Unevidenced `aligned` claims | **Zero** on a 10-JD fixture set reviewed by the maintainer |
 | Latency (p50, text JD ≤12k chars) | ≤ 8s end-to-end on Workers AI path |
 | Cost per successful brief | ≪ $0.01 on Workers AI free/low tier; stay inside free quotas at expected traffic |
 | Quota clarity | Recruiter sees remaining daily + weekly allowance before submit |
 | Abuse | Unauthenticated burst cannot burn the Workers AI budget (see ADR 011) |
 
-Qualitative: Harrison would send the `/fit` link to a recruiter without a
+Qualitative: the maintainer would send the `/fit` link to a recruiter without a
 disclaimer that the bot “makes things up.”
 
 ## 5. UX
@@ -141,7 +140,7 @@ equivalent versioned schema).
 
 See ADR 012. Short version: store request id, quota identity, truncated JD
 text or hash+R2 object key, model ids, full structured response, timestamps,
-request-more decisions. Default retention 90 days unless Harrison shortens it.
+request-more decisions. Default retention 90 days unless the maintainer shortens it.
 No training on JD text for third parties.
 
 ## 12. Dependencies
@@ -161,29 +160,29 @@ No training on JD text for third parties.
 - Full resume / employment-history dossier (unless a later public
   `content/resume.yaml` is explicitly added).
 - Chat-style multi-turn coaching.
-- Applying to jobs or contacting employers on Harrison’s behalf.
+- Applying to jobs or contacting employers on the maintainer’s behalf.
 - Accepting arbitrary URLs as JD input (v1).
 - Guaranteeing a job offer (Request-more only estimates whether more
   analysis is useful, not offer probability as a promise).
-- Publishing Harrison’s personal corpus, stored JDs, or Cloudflare secrets
+- Publishing the maintainer’s personal corpus, stored JDs, or Cloudflare secrets
   as part of the open-source kit (see OSS plan). The **Fit kit** is OSS;
   the live evidence index and retention store are not the kit’s default
   dataset.
 
 ## 14. Open questions
 
-1. Public `/fit` vs soft-gated link Harrison sends to recruiters?
+1. Public `/fit` vs soft-gated link the maintainer sends to recruiters?
 2. Retention window: 90 days OK, or shorter?
 3. Is Workers AI alone enough, or Worker-proxied external API as fallback?
 4. Should a public structured resume file be authored to reduce `missing` rows?
 5. Turnstile on submit in v1, or only after abuse appears?
 6. Exact Request-more grant size (e.g. +2 queries) and cooldown (e.g. 7 days)?
-7. License for recruit-me: **MIT** (Apache-2.0 until 2026-08-11) — Fit inherits
+7. License for show-your-work: **MIT** (Apache-2.0 until 2026-08-11) — Fit inherits
    the umbrella license when packaged. See
-   [`recruit-me-prd.md`](./recruit-me-prd.md) §9 and
+   [`show-your-work-prd.md`](./show-your-work-prd.md) §9 and
    [ADR 022](../architecture/adr/022-mit-license-and-third-party-notices.md).
 8. Single-shot Fit panel only, or a thin multi-turn shell that still returns
-   the §10 contract each turn? (**Still open** per Harrison.)
+   the §10 contract each turn? (**Still open** per the maintainer.)
 
 ## 15. Suggested delivery slices
 

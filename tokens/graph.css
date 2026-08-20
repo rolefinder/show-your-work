@@ -1,5 +1,5 @@
 /* ============================================================
-   recruit-me — Portfolio graph theme (pg-*)
+   show-your-work — Portfolio graph theme (pg-*)
    Scoped to the graph surfaces rather than :root so the dark
    canvas palette never leaks into page chrome. graph/theme.mjs
    reads these through getComputedStyle on the nearest .pg-page /

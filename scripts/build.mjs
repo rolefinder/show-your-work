@@ -9,7 +9,7 @@ const dist = join(root, "dist");
 // Wipe first: prerendered route docs and social cards are named after content
 // slugs, so deleting a project would otherwise leave its page and card behind
 // in dist/, served for a path no longer in the sitemap. This is the first step
-// in `npm run build` that writes to dist/, so nothing downstream is lost.
+// in `bun run build` that writes to dist/, so nothing downstream is lost.
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 

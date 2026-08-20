@@ -18,7 +18,7 @@ one authorization before anything goes public, and hands back a live URL.
 
 Standing up your own site is an edit to `content/`. Not a fork with code
 changes — an edit to YAML. The build reads it and writes everything else, and
-`npm run config:check` fails if your name, email or title suffix appears
+`bun run config:check` fails if your name, email or title suffix appears
 anywhere under `src/`, `functions/`, `graph/` or `public/`.
 
 That constraint is the product. It is what makes it possible to pull upstream
@@ -26,7 +26,7 @@ changes into a site you have been running for a year.
 
 ## When something fails
 
-Every gate in `npm test` exists because it already caught something real, and
+Every gate in `bun run test` exists because it already caught something real, and
 each prints what it found rather than just a status. Start with the message.
 
 | It says | Read |

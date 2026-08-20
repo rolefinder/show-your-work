@@ -1,7 +1,7 @@
 # Build and publish to GitHub Pages.
 #
 # Enabled by setting Pages' build source to "GitHub Actions" — which
-# `npm run pages:setup` does over the API, so no dashboard visit is required.
+# `bun run pages:setup` does over the API, so no dashboard visit is required.
 #
 # This deliberately does NOT reuse ci.yml's artifact. A deploy must be built
 # from the commit being deployed, with PRERENDER_REQUIRED set, so a missing
@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   # The template repository must not deploy itself. It has Pages disabled, is
-  # named recruit-me rather than <owner>.github.io, and correctly carries
+  # named show-your-work rather than <owner>.github.io, and correctly carries
   # origin: https://example.com — so a deploy here would fail at the last step
   # and leave a permanently red workflow on main. "Has anyone added
   # content/about/profile.yaml?" is exactly the "this is still the template"
@@ -38,7 +38,7 @@ jobs:
     outputs:
       deploy: ${{ steps.check.outputs.deploy }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Asks the checker rather than re-deciding in bash. An earlier version
       # grepped content/config/site.yaml for a demo flag, which diverged from
       # the checker on quoted, capitalised and comment-trailed values — and
@@ -53,20 +53,22 @@ jobs:
     if: needs.decide.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: npm
-      - uses: actions/setup-python@v5
+          node-version-file: .nvmrc
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install pyyaml
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
 
       - name: Build
-        run: npm run build
+        run: bun run build
         env:
           PRERENDER_REQUIRED: "1"
 
@@ -76,9 +78,9 @@ jobs:
       - name: Verify
         run: |
           set -e
-          npm run config:check
-          npm run seo:smoke
-          npm run fit:smoke
+          bun run config:check
+          bun run seo:smoke
+          bun run fit:smoke
 
       # Root-path only: every asset href in the document is absolute, so a
       # project site served under /<repo>/ would 404 on all of them. Checked
@@ -87,7 +89,7 @@ jobs:
       - name: Confirm the site will serve at the root
         run: node scripts/check-pages-target.mjs
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
 
@@ -100,4 +102,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

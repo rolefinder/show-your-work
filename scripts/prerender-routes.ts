@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 // Build-time prerender: snapshot every route of the built SPA into its own
 // dist/<route>.html with per-route title/description/canonical/OG tags,
 // route-appropriate JSON-LD, and a generated 1200x630 social card, using
@@ -27,7 +27,7 @@ const PORT = Number(process.env.PRERENDER_PORT || 4178);
 /**
  * The card renders against the site's REAL tokens.
  *
- * This used to regex `--rm-brand` out of tokens/colors.css — the file
+ * This used to regex `--syw-brand` out of tokens/colors.css — the file
  * docs/guide/theming.md tells adopters never to edit. Adopter overrides land in
  * dist/tokens/adopter.css, which that never read, so setting theme.accent
  * turned the whole site purple and left every social card in the template's

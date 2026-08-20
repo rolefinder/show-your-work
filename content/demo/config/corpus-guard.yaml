@@ -1,6 +1,6 @@
 # Extra strings that must never appear in the demo corpus.
 #
-# `npm run corpus:check` scans content/demo/ and fails if it finds any of
+# `bun run corpus:check` scans content/demo/ and fails if it finds any of
 # these. It exists because this template was extracted from a private site,
 # and the failure mode it prevents is pasting real portfolio YAML into the
 # shipped demo — which would publish a real employer, or a real person, to
@@ -32,7 +32,7 @@ allowed_email_domains:
 
 # Terms that must never appear in YOUR OWN content or in dist/ — an employer's
 # codename, a client, an internal hostname, a ticket prefix. Enforced by
-# `npm run publication:check`. Run /sanitize to work out what belongs here.
+# `bun run publication:check`. Run /sanitize to work out what belongs here.
 #
 # This file is COMMITTED, so anything listed here is published. Put genuinely
 # sensitive terms in content/config/corpus-guard.local.yaml (gitignored) or in

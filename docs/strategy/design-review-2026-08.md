@@ -32,7 +32,7 @@ system fonts (no shipped webfont) and dark mode via `prefers-color-scheme` only.
 `check-style-tokens.mjs` grew the reverse pass that makes both regressions
 impossible to reintroduce.
 
-**D4 is fixed** in ADR 023: a body is now a list of blocks (headings, lists,
+**D4 is fixed** in ADR 029: a body is now a list of blocks (headings, lists,
 quotes, code, callouts), a plain string still means one paragraph, and code
 blocks are deliberately excluded from the Fit corpus so a citation can never be
 a fragment of shell. `image` and `figure` are designed for and wait on D6 and D5.

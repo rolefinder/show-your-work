@@ -13,7 +13,7 @@ single-key block:
       - quote: Someone else's sentence.
         cite: Who said it
       - code: |
-          npm run build
+          bun run build
         lang: bash
       - note: An aside the reader can skip.
 

@@ -54,6 +54,8 @@
  * stays static and public on both targets.
  */
 
+import { charge, DAILY_LIMIT, type QuotaEnv } from "../_shared/quota";
+
 /** Newest first. The tail is reachable only through the legacy handshake. */
 const PROTOCOL_VERSIONS = [
   "2026-07-28",
@@ -222,7 +224,12 @@ const toolError = (message: string) => ({
   isError: true,
 });
 
-async function callTool(name: string, args: Record<string, unknown>, request: Request) {
+async function callTool(
+  name: string,
+  args: Record<string, unknown>,
+  request: Request,
+  env: QuotaEnv,
+) {
   if (name === "list_pages") {
     const kind = args.kind;
     if (kind !== undefined && !KINDS.includes(kind as (typeof KINDS)[number])) {
@@ -249,9 +256,17 @@ async function callTool(name: string, args: Record<string, unknown>, request: Re
     const jd = String(args.job_description || "").trim();
     if (!jd) return toolError("job_description is required.");
     if (jd.length > MAX_JD) return toolError(`job_description too large (max ${MAX_JD} characters).`);
+    /* The only tool here that runs the matcher, so the only one charged —
+       list_pages and get_page are reads of a static file. Same module and same
+       key as POST /api/fit, so an agent cannot get a bigger budget by coming
+       through MCP instead (ADR 024). */
+    const quota = await charge(request, env);
+    if (!quota.allowed) {
+      return toolError(`Daily limit reached (${DAILY_LIMIT} briefs). list_pages and get_page still work.`);
+    }
     const [docs, cfg] = await Promise.all([loadDocs(request), loadFitConfig(request)]);
     // Same bundled engine and same config /api/fit uses, so both entry points
-    // answer a given JD identically. Built by `npm run build:fit-worker`.
+    // answer a given JD identically. Built by `bun run build:fit-worker`.
     const { matchFit } = await import("../_lib/fit-engine.js");
     return asText(matchFit(jd, docs, cfg));
   }
@@ -353,7 +368,7 @@ export const onRequestGet = async () =>
   );
 export const onRequestDelete = onRequestGet;
 
-export const onRequestPost: PagesFunction = async ({ request }) => {
+export const onRequestPost: PagesFunction<QuotaEnv> = async ({ request, env }) => {
   /* Origin validation is required. The corpus is the published site and CORS is
      deliberately wildcard, so every origin is valid here — stated explicitly
      because "we have no policy" and "our policy is to allow all" look identical
@@ -474,6 +489,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
         params.name,
         (params.arguments as Record<string, unknown>) || {},
         request,
+        env,
       );
       if (!result) return rpcError(id, E_INVALID_PARAMS, `Unknown tool: ${params.name}`);
       return json(200, { jsonrpc: "2.0", id, result: makeResult(result, info) });

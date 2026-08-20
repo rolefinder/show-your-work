@@ -3,7 +3,7 @@
 Copy to `wrangler.toml` locally. Never commit real account IDs, tokens, or PII.
 
 ```toml
-name = "recruit-me-demo"
+name = "show-your-work-demo"
 compatibility_date = "2026-07-01"
 pages_build_output_dir = "dist"
 

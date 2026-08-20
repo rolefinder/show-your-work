@@ -1,5 +1,5 @@
 /**
- * The recruit-me wordmark.
+ * The show-your-work wordmark.
  *
  * Self-contained fonts rather than a figlet dependency, so it renders
  * identically everywhere and adds nothing to install.
@@ -34,6 +34,12 @@ const SHADOW = {
   I: ["██╗", "██║", "██║", "██║", "██║", "╚═╝"],
   T: ["████████╗", "╚══██╔══╝", "   ██║   ", "   ██║   ", "   ██║   ", "   ╚═╝   "],
   M: ["███╗   ███╗", "████╗ ████║", "██╔████╔██║", "██║╚██╔╝██║", "██║ ╚═╝ ██║", "╚═╝     ╚═╝"],
+  S: ["███████╗", "██╔════╝", "███████╗", "╚════██║", "███████║", "╚══════╝"],
+  H: ["██╗  ██╗", "██║  ██║", "███████║", "██╔══██║", "██║  ██║", "╚═╝  ╚═╝"],
+  O: [" ██████╗ ", "██╔═══██╗", "██║   ██║", "██║   ██║", "╚██████╔╝", " ╚═════╝ "],
+  W: ["██╗    ██╗", "██║    ██║", "██║ █╗ ██║", "██║███╗██║", "╚███╔███╔╝", " ╚══╝╚══╝ "],
+  Y: ["██╗   ██╗", "╚██╗ ██╔╝", " ╚████╔╝ ", "  ╚██╔╝  ", "   ██║   ", "   ╚═╝   "],
+  K: ["██╗  ██╗", "██║ ██╔╝", "█████╔╝ ", "██╔═██╗ ", "██║  ██╗", "╚═╝  ╚═╝"],
   "-": ["      ", "      ", "█████╗", "╚════╝", "      ", "      "],
   " ": ["   ", "   ", "   ", "   ", "   ", "   "],
 };
@@ -47,6 +53,12 @@ const OUTLINE = {
   I: [" ___ ", "|_ _|", " | | ", " | | ", "|___|"],
   T: [" _____ ", "|_   _|", "  | |  ", "  | |  ", "  |_|  "],
   M: [" __  __ ", "|  \\/  |", "| |\\/| |", "| |  | |", "|_|  |_|"],
+  S: [" ____  ", "/ ___| ", "\\___ \\ ", " ___) |", "|____/ "],
+  H: [" _   _ ", "| | | |", "| |_| |", "|  _  |", "|_| |_|"],
+  O: ["  ___  ", " / _ \\ ", "| | | |", "| |_| |", " \\___/ "],
+  W: [" _    _ ", "| |  | |", "| |  | |", "| |/\\| |", "|__/\\__|"],
+  Y: ["__   __", "\\ \\ / /", " \\ V / ", "  | |  ", "  |_|  "],
+  K: [" _  __ ", "| |/ / ", "| ' /  ", "| . \\  ", "|_|\\_\\ "],
   "-": ["      ", "      ", " ____ ", "      ", "      "],
   " ": ["   ", "   ", "   ", "   ", "   "],
 };
@@ -63,14 +75,22 @@ function compose(text, font) {
   ).join("\n");
 }
 
-export function wordmark(text = "RECRUIT-ME", { ascii = false } = {}) {
-  return compose(text, ascii ? OUTLINE : SHADOW);
+/* Stacked, because the name on one line is 111 cells wide — it wraps in a
+   README fence and in most terminals, and a wrapped block font is unreadable
+   rather than merely wide. Two lines come to 73, about what the old ten-letter
+   mark measured. */
+const WORDMARK_LINES = ["SHOW YOUR", "WORK"];
+
+export function wordmark(text, { ascii = false } = {}) {
+  const font = ascii ? OUTLINE : SHADOW;
+  const lines = text === undefined ? WORDMARK_LINES : [text];
+  return lines.map((line) => compose(line, font)).join("\n");
 }
 
 export const TAGLINE = "paste a JD -> a brief where every claim cites a published page";
 
 export function banner(opts = {}) {
-  return `${wordmark("RECRUIT-ME", opts)}\n\n  ${TAGLINE}\n`;
+  return `${wordmark(undefined, opts)}\n\n  ${TAGLINE}\n`;
 }
 
 // Printed only when run directly, so importing it stays silent.

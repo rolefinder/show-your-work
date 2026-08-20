@@ -1,4 +1,4 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 // Build-time identity injection for the base document.
 //
 // index.html, 404.html and manifest.json ship as templates carrying visible
@@ -11,7 +11,7 @@
 // is not, what this writes is what ships, so the home document must be
 // complete on its own.
 //
-// Usage: npx tsx scripts/emit-html.ts
+// Usage: bun scripts/emit-html.ts
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -96,7 +96,7 @@ function emitIndex(): void {
  * Adopter palette overrides -> dist/tokens/adopter.css.
  *
  * tokens/adopter.css ships empty and is @imported last, so writing the four
- * --rm-* variables here beats the shipped palette without touching
+ * --syw-* variables here beats the shipped palette without touching
  * tokens/colors.css. That is the difference between "add a theme: block to
  * your config" and "edit a file the template owns and then fight a merge
  * conflict on every update".
@@ -105,10 +105,10 @@ function emitThemeTokens(): void {
   const entries = Object.entries(SITE_CONFIG.theme ?? {}).filter(([, v]) => v);
   if (!entries.length) return;
   const vars: Record<string, string> = {
-    accent: "--rm-brand",
-    accentDeep: "--rm-brand-deep",
-    bg: "--rm-bg",
-    fg: "--rm-fg",
+    accent: "--syw-brand",
+    accentDeep: "--syw-brand-deep",
+    bg: "--syw-bg",
+    fg: "--syw-fg",
   };
   const body = entries.map(([k, v]) => `  ${vars[k]}: ${v};`).join("\n");
   writeFileSync(
@@ -179,7 +179,7 @@ export function emitHtml(): void {
 }
 
 // Still runnable on its own; scripts/emit-artifacts.ts imports it instead
-// so the build pays tsx's ~1.6s startup once rather than per emitter.
+// so the pair runs in one process, in the order known-paths.json needs.
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
   emitHtml();
 }

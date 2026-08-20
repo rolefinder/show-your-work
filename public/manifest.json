@@ -1,6 +1,6 @@
 {
-  "name": "recruit-me",
-  "short_name": "recruit-me",
+  "name": "show-your-work",
+  "short_name": "show-your-work",
   "description": "Open-source personal portfolio template + recruiter Fit tool.",
   "start_url": "/",
   "display": "browser",

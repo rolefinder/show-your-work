@@ -1,14 +1,14 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env bun
 /**
- * Runs every tsx-hosted emitter in ONE process.
+ * Runs both TypeScript emitters in ONE process.
  *
- * `tsx` costs ~1.6s of startup per invocation. The build used to pay that
- * twice — once for emit-html, once for emit-seo-artifacts — for maybe 0.3s of
- * actual work. Both are still runnable standalone; this is just the entry the
- * build uses.
+ * This began as a startup optimisation: under `tsx` each invocation cost ~1.6s,
+ * and the build paid it twice for maybe 0.3s of actual work. Under bun that
+ * argument is gone — two processes cost ~36ms more than one.
  *
- * Order matters: emit-html writes dist/index.html, and emit-seo reads the same
- * route table to produce known-paths.json, which the 404 middleware trusts.
+ * What keeps this entry point is ORDER: emit-html writes dist/index.html, and
+ * emit-seo reads the same route table to produce known-paths.json, which the
+ * 404 middleware trusts. Both are still runnable standalone.
  */
 import { emitHtml } from "./emit-html";
 import { emitSeoArtifacts } from "./emit-seo-artifacts";

@@ -1,11 +1,11 @@
 /**
- * `npm run guard:suggest` — who have you worked for, according to your own sources?
+ * `bun run guard:suggest` — who have you worked for, according to your own sources?
  *
  * The publication guard needs to know your employers. Hardcoding them would be
  * wrong twice over: it is adopter-specific data in a template, and it would be
  * *someone else's* employer list in your fork. So they are discovered from the
  * same sources the site is built from — content/config/sources.yaml names a
- * resume and a GitHub handle, and `/build-recruit-me` already drafts content
+ * resume and a GitHub handle, and `/build-show-your-work` already drafts content
  * out of them. Anything an employer's name can reach, this can see first.
  *
  * CANDIDATES, NOT DECISIONS. Every line printed is a guess. Half of them will
@@ -138,5 +138,5 @@ console.log(
   "\nFor each one you keep, decide WHERE it goes:\n" +
     "  content/config/corpus-guard.yaml        committed - fine for a public company name\n" +
     "  content/config/corpus-guard.local.yaml  gitignored - anything you would not publish\n" +
-    "Then: npm run publication:check\n",
+    "Then: bun run publication:check\n",
 );

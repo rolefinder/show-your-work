@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        The [ADRs](https://github.com/rolefinder/recruit-me/blob/main/docs/README.md#decision-records)
+        The [ADRs](https://github.com/rolefinder/show-your-work/blob/main/docs/README.md#decision-records)
         record what was deliberately **not** built and why. Worth a look — if
         your idea is in there, arguing against the recorded reasoning is a much
         stronger issue than proposing it fresh.

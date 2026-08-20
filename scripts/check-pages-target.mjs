@@ -1,5 +1,5 @@
 /**
- * `npm run pages:check` — will this actually serve at the root on GitHub Pages?
+ * `bun run pages:check` — will this actually serve at the root on GitHub Pages?
  *
  * Every asset in the document is referenced absolutely (`/app.js`,
  * `/styles.css`, `/assets/...`) and the client router reads
@@ -7,7 +7,7 @@
  * `<owner>.github.io/<repo>/` therefore 404s on every stylesheet and script,
  * and the router never matches a route. The page loads; it is blank.
  *
- * recruit-me supports the root path only, which is also the right shape for a
+ * show-your-work supports the root path only, which is also the right shape for a
  * portfolio. That means one of:
  *
  *   - the repository is named `<owner>.github.io`, or
@@ -52,7 +52,7 @@ const siteYaml = readFileSync(sitePath, "utf8");
 const target = yNested(siteYaml, "deploy", "target") || "github-pages";
 
 /* While this is still the template it is not somebody's site: the repo is
-   named recruit-me and origin is example.com, both correctly. Enforcing the
+   named show-your-work and origin is example.com, both correctly. Enforcing the
    root-path rule here would fail the template's own test run forever. Adding
    content/about/profile.yaml is exactly the moment the rule starts to matter
    (ADR 021). */
@@ -136,7 +136,7 @@ if (customDomain) {
   if (repo.toLowerCase() !== userSite) {
     errors.push(
       `${slug} would publish to https://${owner.toLowerCase()}.github.io/${repo}/, a subpath. ` +
-        "recruit-me serves at the root only: every asset href is absolute, so the deployed page " +
+        "show-your-work serves at the root only: every asset href is absolute, so the deployed page " +
         "would load blank.\n" +
         `      Fix it either way:\n` +
         `        - rename the repository to ${userSite} (Settings -> General -> Repository name), or\n` +
