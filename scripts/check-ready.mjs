@@ -191,13 +191,21 @@ if (spawnSync("bun --version", { shell: true, stdio: "ignore" }).status !== 0) {
   missingDeps.push("node_modules missing — run: bun install --frozen-lockfile");
 }
 
+/* A TOOLING warning is a different kind from the content warnings above: it
+   says the build will run and still not verify what it claims to. A caller
+   wants that separately from "you have not written a blog post yet", so it is
+   also collected on its own and exposed in --json. Still pushed to `warnings`,
+   so the human-readable report is unchanged. */
+const toolingWarnings = [];
+
 const pw = spawnSync("bunx playwright --version", { shell: true, stdio: "ignore" });
 if (pw.status !== 0) {
-  warnings.push(
+  toolingWarnings.push(
     "playwright unavailable — the build will produce an SPA-only dist, so per-route " +
       "metadata will be invisible to crawlers. Run: bunx playwright install chromium",
   );
 }
+warnings.push(...toolingWarnings);
 
 // ---------- report ----------
 /* --json exists so an agent driving the setup flow branches on structure
@@ -213,6 +221,7 @@ if (process.argv.includes("--json")) {
         blockers,
         missingDependencies: missingDeps,
         warnings,
+        toolingWarnings,
         profile: { name, email, origin },
         corpus: { work: work.length, blog: blog.length, workDrafts },
       },

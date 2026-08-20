@@ -91,6 +91,34 @@ Do not hand-edit these; edit their source and rebuild.
 | `assets/graph-engine.js` | `graph/*.mjs`, via `build-graph-vendor.mjs` |
 | `public/*` **in `dist/`** | the templates in `public/`, with identity injected |
 
+## What the hooks enforce
+
+`.claude/settings.json` wires three hooks in `.claude/hooks/`. They exist
+because this repo's rule is that a gate beats an intention, and each one
+turns something already written down into something that cannot be done.
+
+| Hook | Event | Refuses |
+|---|---|---|
+| `bun-run-test.mjs` | `PreToolUse(Bash)` | bare `bun test`, which runs bun's own test runner, matches nothing here and **exits 0** |
+| `no-edit-generated.mjs` | `PreToolUse(Edit\|Write)` | editing a generated artifact, which the next build silently overwrites |
+| `session-start.mjs` | `SessionStart` | nothing — it installs, then reports whether this machine can actually verify a build |
+
+`no-edit-generated.mjs` **reads the table above** in
+[Things that are generated](#things-that-are-generated) rather than carrying
+its own copy, so adding a row there protects the new artifact automatically.
+It skips rows whose path cell is qualified — `public/*` **in `dist/`** means
+the copies inside `dist/`, and the templates in `public/` stay editable. If
+the table ever stops parsing, the hook exits `1`: the edit proceeds and the
+breakage is loud, rather than the hook quietly guarding nothing.
+
+`session-start.mjs` asks `check-ready --json` instead of probing for bun,
+python, PyYAML or a browser itself. It deliberately reports only missing
+dependencies and tooling warnings — content blockers are the normal state of
+an unadopted fork, and `bun run ready` is where a person asks that question.
+
+The `lint` job runs `node --check` over `.claude/hooks/*.mjs` for the same
+reason it does over `scripts/`: a hook that does not parse fails open.
+
 ## What CI runs
 
 `bun run test` — eighteen gates around one full build, in this order:
