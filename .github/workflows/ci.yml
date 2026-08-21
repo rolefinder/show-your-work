@@ -21,7 +21,7 @@ jobs:
       # bun installs and runs the TypeScript steps; the .mjs gates and
       # `node --check` below are still Node programs, so both runtimes are set
       # up deliberately rather than leaning on whatever the runner ships.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
       - uses: actions/setup-python@v7
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
       - uses: actions/setup-python@v7
