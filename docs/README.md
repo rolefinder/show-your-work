@@ -65,6 +65,10 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
   standardization and adopter-UX findings, each with a repro
 - [Design review, 2026-08](strategy/design-review-2026-08.md) — where the visual
   and editorial layer falls short of the dogfood site, each with a repro
+- [Candidate legibility, 2026-08](strategy/candidate-legibility-2026-08.md) —
+  eight defects found in this tree, each with a repro, and the mechanisms
+  proposed to close them: curriculum-derived skills, certifications, the
+  evidence gate, profile draft export, self-audit and freshness
 
 ## There is no project-history section
 
