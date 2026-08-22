@@ -90,8 +90,8 @@ synonym layer is the highest-leverage under-invested surface in the matcher.
 **Verdict: already how we think. Worth recording as independent convergence.**
 
 The best thinking in the document is a pivot away from the client's original ask.
-Dr. Shin wanted employers given "access to a database with a robust search
-function." After stakeholder interviews the team concluded:
+The client — the department chair — wanted employers given "access to a database
+with a robust search function." After stakeholder interviews the team concluded:
 
 > "the problem is less about employers searching for students and more about
 > **making students accessible for employers to find**."

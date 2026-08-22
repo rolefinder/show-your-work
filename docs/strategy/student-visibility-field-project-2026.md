@@ -767,7 +767,9 @@ Halperin, H. *Review — an internship-system redesign, and what transfers.*
 2026 — recomputation of the 2022 study's figures and the constraint analysis
 underlying §4.4 and §5.4.
 
-Halperin, H., Sales, M. J., Soalt, S., Sanchez, K., Mendoza, J. *MIS 306 Field
-Project: Management Information Systems Department Student Internship System
-Redesign.* San Diego State University, Fall 2022 — source of the 2022 baseline
-figures in §2.3 and the diagnosis quoted in the executive summary.
+*Student Internship System Redesign*, an unpublished undergraduate
+systems-analysis field project, Fall 2022 — source of the 2022 baseline figures
+in §2.3 and the diagnosis quoted in the executive summary. The author was one of
+its contributors; his co-authors are not named here, and the critique of that
+document's business case in the companion review addresses the analysis rather
+than any individual.
