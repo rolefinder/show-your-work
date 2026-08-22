@@ -65,12 +65,10 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
   standardization and adopter-UX findings, each with a repro
 - [Design review, 2026-08](strategy/design-review-2026-08.md) — where the visual
   and editorial layer falls short of the dogfood site, each with a repro
-- [Internship-system review, 2026-08](strategy/internship-system-review-2026-08.md) —
-  an outside proposal for the same problem, what transfers, and the defects
-  mapping it onto this tree surfaced
-- [Making a candidate legible, 2026](strategy/student-visibility-field-project-2026.md) —
-  the case for this approach as a field project, and the two mechanisms it
-  proposes: syllabus-derived skills and profile draft export
+- [Candidate legibility, 2026-08](strategy/candidate-legibility-2026-08.md) —
+  eight defects found in this tree, each with a repro, and the mechanisms
+  proposed to close them: curriculum-derived skills, certifications, the
+  evidence gate, profile draft export, self-audit and freshness
 
 ## There is no project-history section
 
