@@ -118,25 +118,44 @@ for (const r of cicdAligned) {
  * F1: a bare skill label is not a citation.
  *
  * `bun run init` scaffolds `skill_notes: {}`, so the default new-adopter state
- * is a corpus whose skills carry no authored sentence. Two skill hits score 28
- * against alignedMin 20, which used to be enough to show a recruiter the word
- * "TypeScript" as the evidence for a TypeScript requirement — the requirement
- * restated, not answered. Such a row must land `partial` instead: the skill is
- * genuinely tagged, and nothing published says anything about it.
+ * is a corpus whose skills carry no authored sentence. Such a row must land
+ * `partial`, not `aligned`: the skill is genuinely tagged, and nothing
+ * published says anything about it.
+ *
+ * Built through buildEvidencePack rather than by hand, deliberately. A
+ * hand-written EvidenceDoc can omit things the real builder always does, and
+ * the first version of this check did exactly that — it left skills out of
+ * `text`, so it passed while production still returned `aligned` by quoting
+ * the skill list back through snippetAround. Test the shape that ships.
  */
-const bareLabelDocs: EvidenceDoc[] = [
+const bareWork = [
   {
-    id: "work:bare",
-    kind: "work",
+    slug: "bare-label",
     title: "Untitled",
-    url: "/work/bare",
-    text: "Untitled a short summary about unrelated matters",
+    summary: "A short summary about unrelated matters.",
+    body: "Nothing here mentions those skills by name.",
     skills: ["TypeScript", "Kubernetes"],
+    skillNotes: {},
+    visible: true,
   },
-];
+] as unknown as typeof WORK;
+const bareDocs = buildEvidencePack(
+  { ...SITE_PROFILE, skills: [], summary: "", tagline: "" },
+  bareWork,
+  [],
+  [],
+);
+for (const d of bareDocs) {
+  for (const skill of d.skills) {
+    assert(
+      !d.text.toLowerCase().includes(skill.toLowerCase()),
+      `skills must stay out of doc.text, or a skill match manufactures a snippet citation: ${d.id} / ${skill}`,
+    );
+  }
+}
 const bareLabel = matchFit(
   "Requirements:\n- Strong TypeScript and Kubernetes experience\n",
-  bareLabelDocs,
+  bareDocs,
   { ...fitCfg, showGaps: true },
 );
 for (const r of bareLabel.requirements) {

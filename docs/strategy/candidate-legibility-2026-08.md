@@ -102,9 +102,29 @@ about it. The bare label also dropped below a text snippet in the quote
 preference, since a truncated piece of real prose is more of a citation than
 the tag echoed back.
 
-`fit:smoke` asserts it on a synthetic corpus shaped like a fresh `init` —
-skills tagged, `skill_notes` empty — so the regression cannot return quietly.
-Measured before and after on that corpus: `aligned` → `partial`.
+The first attempt at this fix was incomplete, and the way it failed is worth
+recording. `buildEvidencePack` joined each doc's `skills` into its `text`, so a
+skill match also set a *snippet* — a window cut out of the skill list — which
+counted as a citation and sailed past the new gate. It also meant one tagged
+skill scored `skill + corpus = 20`, reaching `alignedMin` on its own rather
+than needing two.
+
+So skills left the corpus text entirely, in both implementations. They already
+have a heavier, dedicated match path; including them again double-counted the
+score and let `snippetAround` quote the tag back as though it were prose.
+`text` is what can be *quoted* as well as what scores, so it holds prose only.
+
+`fit:smoke` asserts the outcome **through `buildEvidencePack`**, not on a
+hand-written doc. That distinction is the whole lesson: the first check
+constructed its own `EvidenceDoc` and omitted the skills-in-text that
+production always adds, so it passed green while the shipping path still
+returned `aligned`. It now also asserts directly that no doc's `text` contains
+its own skill labels.
+
+Measured through the real builder: one skill term scored 20 and returned
+`aligned` before; it scores 14 and returns `partial` after. The demo corpus
+drops from three aligned rows to two — the third was aligned only because of
+the double-count.
 
 ### F2. The matcher computes the author's to-do list, then discards it — FIXED
 

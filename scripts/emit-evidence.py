@@ -45,7 +45,6 @@ def main() -> int:
                 [
                     str(profile.get("summary") or "").strip(),
                     str(profile.get("tagline") or "").strip(),
-                    " ".join(profile.get("skills") or []),
                 ]
             ),
             "skills": list(profile.get("skills") or []),
@@ -81,7 +80,6 @@ def main() -> int:
                         body_text(w.get("body")),
                         str(w.get("problem") or "").strip(),
                         *claims,
-                        " ".join(w.get("skills") or []),
                     ]
                     if part
                 ),
@@ -110,7 +108,6 @@ def main() -> int:
                         str(b.get("title") or ""),
                         str(b.get("summary") or "").strip(),
                         body_text(b.get("body")),
-                        " ".join(b.get("skills") or []),
                     ]
                 ),
                 "skills": list(b.get("skills") or []),
@@ -138,7 +135,6 @@ def main() -> int:
                         str(e.get("organization") or "").strip(),
                         str(e.get("summary") or "").strip(),
                         *claims,
-                        " ".join(e.get("skills") or []),
                     ]
                     if part
                 ),

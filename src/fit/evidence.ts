@@ -1,6 +1,20 @@
 import type { BlogPost, EvidenceDoc, ExperienceItem, SiteProfile, WorkItem } from "../types";
 import { bodyText } from "../content/bodyText";
 
+/*
+ * Skills are deliberately NOT joined into `text`.
+ *
+ * They already have their own, heavier match path (weights.skill), so putting
+ * them in the corpus text too counted them twice: one tagged skill scored
+ * skill + corpus = 20, which alone reached alignedMin. Worse, the corpus hit
+ * manufactured a citation — `snippetAround` would return a window into the
+ * skill list itself, so a requirement could come back `aligned` quoting
+ * "…TypeScript Kubernetes". That is the F1 defect wearing a different hat: the
+ * tag echoed back, dressed as prose.
+ *
+ * `text` is what can be QUOTED as well as what scores, so it holds prose only.
+ */
+
 /** Build a flat evidence pack from site content (visible only). */
 export function buildEvidencePack(
   profile: SiteProfile,
@@ -14,7 +28,7 @@ export function buildEvidencePack(
       kind: "about",
       title: `${profile.name} — About`,
       url: "/about",
-      text: [profile.summary, profile.tagline, profile.skills.join(" ")].join(" "),
+      text: [profile.summary, profile.tagline].join(" "),
       skills: profile.skills.slice(),
     },
   ];
@@ -35,7 +49,7 @@ export function buildEvidencePack(
       kind: "work",
       title: w.title,
       url: `/work/${w.slug}`,
-      text: [w.title, w.summary, bodyText(w.body), w.problem, ...claims, w.skills.join(" ")]
+      text: [w.title, w.summary, bodyText(w.body), w.problem, ...claims]
         .filter(Boolean)
         .join(" "),
       skills: w.skills.slice(),
@@ -51,7 +65,7 @@ export function buildEvidencePack(
       kind: "blog",
       title: b.title,
       url: `/blog/${b.slug}`,
-      text: [b.title, b.summary, bodyText(b.body), b.skills.join(" ")].join(" "),
+      text: [b.title, b.summary, bodyText(b.body)].join(" "),
       skills: b.skills.slice(),
     });
   }
@@ -70,7 +84,7 @@ export function buildEvidencePack(
       kind: "experience",
       title: `${e.role} — ${e.organization}`,
       url: `/experience#${e.slug}`,
-      text: [e.role, e.organization, e.summary, ...claims, e.skills.join(" ")]
+      text: [e.role, e.organization, e.summary, ...claims]
         .filter(Boolean)
         .join(" "),
       skills: e.skills.slice(),
