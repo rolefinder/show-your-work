@@ -100,6 +100,39 @@ surrounding paragraph. That is the whole trick.
 `bun run ready` warns — it does not block — on a project with no `outcome` or
 `evidence`, and tells you Fit will quote fragments there.
 
+Two more things are worth knowing about what becomes a citation. A `decisions`
+bullet is quotable in exactly the same way an `evidence` bullet is, so the
+sentence explaining *why* you built it that way can be the one a recruiter
+sees. And a bare skill tag is **not** a citation: if a requirement matches only
+because the label is in your `skills` list, with no `skill_notes` entry and
+nothing on the page saying anything about it, that row is reported as `partial`
+rather than `aligned`. Writing a one-line `skill_notes` entry is what turns it
+into a claim the brief can stand behind.
+
+## What your work does not yet answer
+
+```bash
+bun run fit:audit path/to/a-job-description.txt
+```
+
+The matcher already works out which requirements nothing you published covers.
+Every display path throws that away — the brief you hand a recruiter is a
+highlight, not an audit — so this points the same computation back at you:
+
+```
+6 requirements · 3 aligned · 0 partial · 3 uncited
+nothing published covers:
+  - Deep knowledge of Kubernetes and service mesh operations
+  - On-call incident response and postmortem ownership
+```
+
+That is a writing queue drawn from real postings rather than guesswork. Save a
+few roles you actually want under `./jds/` and run it with no arguments.
+
+It is entirely local — it reads files already on your machine and prints to
+your terminal, with no network and nothing stored. `./jds/` is gitignored,
+because a job description is someone else's document and your repo is public.
+
 ## Long-form bodies
 
 A `body` can stay a single string — that is one paragraph, and it is still the

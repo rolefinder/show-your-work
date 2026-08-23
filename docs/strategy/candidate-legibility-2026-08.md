@@ -106,7 +106,7 @@ the tag echoed back.
 skills tagged, `skill_notes` empty — so the regression cannot return quietly.
 Measured before and after on that corpus: `aligned` → `partial`.
 
-### F2. The matcher computes the author's to-do list, then discards it
+### F2. The matcher computes the author's to-do list, then discards it — FIXED
 
 **Severity: high** — highest-value opportunity here.
 
@@ -121,7 +121,12 @@ three paths then destroy it:
 - `/api/fit` stores nothing.
 
 Generated on every run, and **no file in the repo turns it toward the author.**
-See M5.
+
+**Fixed** by `bun run fit:audit` (M5), which runs the same matcher over local
+job-description files with `showGaps: true` and reports coverage per file plus
+the uncited list. Entirely local — no network, no storage, no visitor — so the
+privacy posture is untouched. `./jds/` is gitignored, because a saved posting
+is a third party's document and an adopter's repo is public.
 
 ### F3. Education is structurally uncitable
 
@@ -384,7 +389,7 @@ The candidate reads it, edits it, pastes what they want. **The flow stops at the
 clipboard, not the credential** — and that boundary is the feature. See Part 3
 for why the write path is excluded rather than merely unbuilt.
 
-### M5. Self-audit and freshness
+### M5. Self-audit and freshness — AUDIT SHIPPED
 
 Closes F2 and F8, and neither needs new matching logic or a change to the privacy
 posture, because neither involves a visitor.
