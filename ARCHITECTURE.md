@@ -82,14 +82,17 @@ show-your-work/
 │   ├── work/<slug>.yaml           ← you add: one project each (slug MUST equal filename)
 │   ├── blog/<slug>.yaml           ← you add: one post each
 │   ├── experience/<slug>.yaml     ← you add: one role each (Fit evidence)
-│   ├── education/<slug>.yaml      ← you add: one credential each
+│   ├── education/<slug>.yaml      ← you add: one degree each (achievements are Fit evidence)
+│   ├── courses/<slug>.yaml        ← you add: syllabus outcomes + `taught:` (gated, ADR 032)
+│   ├── certifications/<slug>.yaml ← you add: a verifiable credential + `taught:` (gated)
 │   ├── config/
 │   │   ├── site.yaml              ← you add: origin · title_suffix · deploy · theme
 │   │   ├── skills.yaml            ← you add: category order/map + descriptions
 │   │   ├── fit.yaml               ← you add: extra_stops · synonyms · weights · show_gaps
 │   │   └── sources.yaml           ← you add: GitHub user / resume for drafting
 │   └── demo/                    ▒ SHIPPED — never edited, never deleted
-│       └── {about,work,blog,experience,education,config}/  used for what you have not added
+│       └── {about,work,blog,experience,education,courses,certifications,config}/
+│                                   used for whatever you have not added
 │
 ├── src/                         ▓ CODE — contains no identity
 │   ├── app.tsx                    view union, router, page bodies, chrome
@@ -145,11 +148,14 @@ show-your-work/
 │   ├── banner.mjs                 the wordmark
 │   ├── check-{ready,adopter-config,style-tokens,layout,copy}.mjs
 │   ├── check-{fictional-corpus,secrets}.py
+│   ├── skills{,-gap}.{mjs,py}     the vocabulary in use, and what it cannot cite
 │   └── {fit,mcp,graph,seo}-smoke.*  behavioural tests
 │
 ├── packages/
-│   ├── content/emit_site.py       the YAML → TypeScript emitter
-│   └── ingest/                    resume / GitHub → draft YAML for review
+│   ├── content/emit_site.py       the YAML → TypeScript emitter, and the
+│   │                              evidence gate that drops an unevidenced
+│   │                              `taught:` label before it reaches the bundle
+│   └── ingest/                    resume / GitHub / syllabus → draft YAML for review
 │
 ├── graph/                       ▓ WebGL engine, bundled to a self-hosted file
 │   ├── index.mjs                  attaches window.SYWPortfolioGraph
@@ -298,20 +304,25 @@ flowchart TD
     B["content/work/*.yaml"] --> E
     C["content/blog/*.yaml"] --> E
     D["content/config/{site,skills}.yaml"] --> E
+    K["content/{courses,certifications}/*.yaml<br/>taught: — candidate labels"] --> E
 
     E["packages/content/emit_site.py"]
     E --> V{"slug == filename?"}
     V -->|no| X["exit 1<br/>build stops"]
-    V -->|yes| M["src/generated/content.ts"]
+    V -->|yes| G{"evidence gate:<br/>does a linked project<br/>claim this label?"}
+    G -->|no| DROP["dropped — never<br/>reaches the bundle<br/>(bun run skills:gap)"]
+    G -->|yes| M["src/generated/content.ts"]
 
     M --> M1["SITE_ORIGIN"]
     M --> M2["SITE_CONFIG"]
     M --> M3["SITE_PROFILE"]
     M --> M4["WORK[]"]
     M --> M5["BLOG[]"]
+    M --> M7["COURSES[] · CERTIFICATIONS[]<br/>skills: the gated subset"]
     M --> M6["SKILL_CATEGORIES"]
 
     style X fill:#f7e8e8,stroke:#8b2e2e,color:#4a1414
+    style DROP fill:#f7f1e4,stroke:#8a6d2f,color:#3d2f11
     style M fill:#eef2f7,stroke:#334155,color:#1e293b
 ```
 
@@ -492,9 +503,12 @@ the site still works — just without crawler-visible per-route metadata.
 ```mermaid
 flowchart TD
     W["content/work/*.yaml<br/>outcome · evidence · skill_notes"]
+    ED["content/education/*.yaml<br/>achievements only — the<br/>credential is not matchable"]
 
     W -->|emit-content.py| GEN["src/generated/content.ts"]
     W -->|emit-evidence.py| EJ["dist/evidence.json"]
+    ED -->|emit-content.py| GEN
+    ED -->|emit-evidence.py| EJ
 
     GEN -->|"buildEvidencePack()"| P1["browser pack"]
     EJ --> P2["Worker pack"]
@@ -716,23 +730,31 @@ flowchart LR
 
 | Gate | Fails on |
 |---|---|
-| `parity:check` | The Python and Node content resolvers disagreeing, on any of 15 questions across 7 adopter states. Where one fact must have two readers, this is what keeps them honest |
+| `parity:check` | The Python and Node content resolvers disagreeing, on any of 23 questions across 9 adopter states. Where one fact must have two readers, this is what keeps them honest |
 | `publication:check` | A guarded term appearing in your content or in `dist/`. Terms come from `corpus-guard.yaml` (committed), `corpus-guard.local.yaml` (gitignored) or `$RM_GUARD_TERMS` (CI) |
 | `additive:check` | A file committed at an adopter path (it would have to be edited, and every template update would conflict); a missing demo fallback; `tokens/adopter.css` not imported last |
-| `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a missing required field; a bad date; one skill spelled two ways. Warns on skills missing from `skills.yaml` |
+| `content:check` | A cross-link to a slug that doesn't exist (publishes a 404); a `projects:` slug that doesn't; a missing required field; a bad date; one skill spelled two ways — `taught:` labels included; a visible course or credential with no published work attached; a `verify_url` that isn't https. Warns on skills missing from `skills.yaml`, and on an entry whose `taught:` labels publish nothing |
 | `corpus:check` | Real-person fingerprints in `content/demo/`; a persona name that isn't self-evidently fake; a non-`fake-` slug. Scoped by directory, so it needs no flag and never switches off |
 | `secrets:check` | Private keys, `ghp_`/`gh[ours]_` tokens, `AKIA…`, Slack `xox…`, `sk-…`, Cloudflare tokens, and generic `api_key=`/`secret_key=` assignments |
 | `style:check` | A raw color in `styles.css`, or a `var(--x)` no token defines |
 | `config:check` | Your identity appearing anywhere under `src/`, `functions/`, `graph/`, or `public/` |
 | `pages:check` | A GitHub Pages deploy that would land on a subpath and load blank; an `origin` that disagrees with where the site is actually served. Skipped while `demo: true` |
-| `fit:smoke` | An `aligned` requirement with no citation; the two evidence packs disagreeing; a dequalifying status leaking into highlight mode; the non-exhaustive caveat going missing; audit mode losing the ability to report gaps |
+| `fit:smoke` | An `aligned` requirement with no citation; a bare skill label passing as one; a degree name retrieving its own education doc; a course or credential becoming a citable document, or publishing a skill no linked project claims; a duration requirement answered as though the duration were checked; the two evidence packs disagreeing; a dequalifying status leaking into highlight mode; the non-exhaustive caveat going missing; audit mode losing the ability to report gaps |
 | `graph:smoke` | A missing bundle; a bundle without `SYWPortfolioGraph`/`create`; a regression to the retired `window.HHPG_FORCES` global; `resolveForces` ignoring `opts.forces`, the compact preset, or the defaults |
 | `seo:smoke` | Sitemap/known-paths count mismatch; a 404 without `noindex`; an indexable route without its own document, canonical, or JSON-LD |
 | `csp:smoke` | Anything the page does that its own Content-Security-Policy forbids, with the policy enforced; a meta CSP that is missing, wrongly present, or placed after the first stylesheet or script |
 | `ux:check` | Text below WCAG AA against its real composited background; horizontal overflow; an undersized touch target that also fails the 2.5.8 spacing rule; no keyboard focus ring; a route without exactly one `h1`, a `lang`, or a title. 9 routes x light/dark x 375/1280px |
 | `docs:check` | A number quoted in the docs that no longer matches source |
 | `docs:links` | A relative doc link or in-page anchor that does not resolve |
-| `check-ready` | Placeholder identity, an unreviewed draft, a published `TODO` → exit 1. Missing Python/PyYAML/`node_modules` → exit 2 |
+| `check-ready` | Placeholder identity, an unreviewed draft, a published `TODO` → exit 1. Missing Python/PyYAML/`node_modules` → exit 2. Warns on stale work (opt-in, `freshness.stale_after_days`) and on an expired certification (always) |
+
+Two more read the corpus and report rather than gate. Both are local-only, both
+exit 0 whatever they find, and neither is in `bun run test`:
+
+| Report | Tells you |
+|---|---|
+| `fit:audit` | How much of each job description in `./jds/` your published work can cite, and which requirements nothing covers. `./jds/` is gitignored — a posting is somebody else's document and a portfolio repo is public |
+| `skills:gap` | What a course or credential taught that nothing published demonstrates, with the syllabus's own sentences to write from. The evidence gate drops these labels at emit; this is the only place they are visible |
 
 Every one of these exists because it caught something real, not speculatively.
 

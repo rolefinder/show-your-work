@@ -170,7 +170,7 @@ the uncited list. Entirely local — no network, no storage, no visitor — so t
 privacy posture is untouched. `./jds/` is gitignored, because a saved posting
 is a third party's document and an adopter's repo is public.
 
-### F3. Education is structurally uncitable
+### F3. Education is structurally uncitable — FIXED
 
 **Severity: high** for anyone whose evidence is coursework.
 
@@ -201,6 +201,13 @@ That is structurally identical to a `work.evidence` bullet, carries none of the
 collision property the ADR objects to, renders on `/experience`, and is citable
 by nothing.
 
+**Fixed**, and narrowly. Education enters the pack as `kind: "education"` with
+`achievements[]` as `claims` — nothing else. The credential names its own
+citation and matches nothing, through a new `titleText: ""` on the evidence doc,
+so ADR 027's degree-name objection is upheld rather than revisited. `fit:smoke`
+gates both directions: a degree name must not retrieve its own doc, and an
+achievement must cite as a whole claim.
+
 ### F4. `decisions` scores but cannot be quoted — FIXED
 
 **Severity: medium** · cheap fix
@@ -215,7 +222,7 @@ project's best-reasoned sentences are matchable but only citable as a 160-char
 either alone. `decisions` also left the flattened `text`, since claims are
 already spread into it and a duplicate would double-count in scoring.
 
-### F5. The matcher cannot represent duration
+### F5. The matcher cannot represent duration — FIXED (by saying so)
 
 **Severity: medium** — a hole in the trust story, not only an authoring one.
 
@@ -228,6 +235,15 @@ candidate may not meet.
 ADR 027 added the `experience` corpus partly because such requirements were being
 matched against project pages. That gave the matcher better documents to cite. It
 did not give it the ability to represent time.
+
+**Fixed, and not in the obvious way.** The matcher still cannot read time and
+this does not pretend it can. `statesDuration()` detects the phrase, the row's
+`why` says *"Matched on substance only — \"5+ years\" is a length of time, which
+this matcher does not evaluate"*, and the brief carries one caveat saying the
+same. The status is deliberately **not** downgraded: that trades a false
+positive for a false negative against the author, in the one direction they
+cannot correct by writing more. [ADR 033](../architecture/adr/033-what-the-matcher-cannot-represent.md)
+records why, and why summing `experience.start`/`end` is not available.
 
 ### F6. Two of four descriptions of the skill rule are inverted — FIXED
 
@@ -272,7 +288,7 @@ Still open, and deliberately separate: `src/app.tsx:431` passes only
 profile skills never reach the skill bank even though `check-content` gates
 them. That is a rendering decision, not a vocabulary defect.
 
-### F8. No gate measures time
+### F8. No gate measures time — PARTLY CLOSED
 
 **Severity: medium**
 
@@ -284,6 +300,17 @@ ADR 027 frames the open-ended `experience` entry as a feature — *"There is no
 field to leave stale, so a role cannot claim to have ended when it did not."*
 True of the *display*, and inverted for *truth*: an absent `end:` is the one
 field that silently becomes a lie.
+
+**Partly closed.** `bun run ready` now warns on work past an opt-in
+`freshness.stale_after_days`, and on an expired certification whether or not
+that key is set — a certification's `expires:` is the first machine-readable
+decay date the corpus has ever had. Both read the authored `date:` scalar, never
+mtime and never git history.
+
+**Still open, and it is the harder half:** an open-ended `experience` entry has
+no date to check at all, so nothing here notices a role that ended two years
+ago. Fixing that means either a field that can go stale — which is what ADR 027
+avoided — or parsing `start`/`end`, which ADR 033 declines for the same reason.
 
 ---
 
@@ -305,7 +332,7 @@ And one rule governs what any of them may publish:
 > **A skill may be published only when something the candidate published
 > demonstrates it.**
 
-### M1. Curriculum-derived skill vocabulary
+### M1. Curriculum-derived skill vocabulary — SHIPPED
 
 Parse learning outcomes from the syllabi of courses the candidate passed —
 `syllabi:` in `content/config/sources.yaml`, parser alongside
@@ -328,7 +355,15 @@ MIS 315 taught: SQL · data modelling · normalisation · transaction control
 That names what to write up next, drawn from work already done, phrased in the
 institution's own words rather than from a blank page.
 
-### M2. Certifications, where the evidence is reversed
+**Shipped**, with one change from the specification above. There is no PDF
+parser: syllabi have no common format, and a parser that guessed at structure
+would break ADR 018's drafting contract. `packages/ingest/from-syllabus-text.py`
+takes plain text, extracts the outcomes list verbatim and leaves `taught:` as
+TODO markers — naming the skill behind an outcome is a paraphrase, and the
+contract forbids paraphrasing a source. The output is
+`bun run skills:gap`.
+
+### M2. Certifications, where the evidence is reversed — SHIPPED
 
 A certification is the same kind of source with its evidential shape inverted. A
 syllabus publishes a checkable curriculum and an unverifiable pass. A
@@ -394,7 +429,11 @@ other content type forces you to infer decay from a date. A certification states
 it, which makes `expires:` the first legitimate consumer of the time gate F8 says
 we lack.
 
-### M3. The evidence gate
+**Shipped as specified**, including the recommendation: not citable. `expires:`
+is wired to `bun run ready`, which warns on a passed date whether or not the
+opt-in freshness window is configured.
+
+### M3. The evidence gate — SHIPPED
 
 > **A course or credential may only claim a skill that one of its own linked
 > projects already claims.**
@@ -411,10 +450,17 @@ That last property is this project's thesis applied to coursework: a transcript
 line is not a portfolio entry; a transcript line attached to a published artefact
 is.
 
-Implementation is four rules in `check-content.py`, three copy-pasted from
-existing loops; the fourth asserts the subset. Add one line to `fit-smoke.ts`
-asserting these corpora never enter the evidence pack — the safety property
-should be tested, not assumed.
+**Shipped, and in a better place than this specified.** The subset is derived in
+`packages/content/emit_site.py` rather than asserted in `check-content.py`, which
+turns the gate from a rule into a structural fact: an unevidenced label is
+absent from the artifact, so no rendering bug can publish one. `check-content.py`
+still blocks a visible entry with no published work attached, and warns when an
+entry's labels publish nothing — usually a spelling mismatch rather than an
+empty queue.
+
+`fit-smoke` asserts both halves, and both were verified by breaking them: the
+two corpora never become citable documents, and every skill they publish is
+claimed by a linked project. [ADR 032](../architecture/adr/032-curriculum-derived-skills-and-the-evidence-gate.md).
 
 ### M4. Profile draft export
 
@@ -431,7 +477,7 @@ The candidate reads it, edits it, pastes what they want. **The flow stops at the
 clipboard, not the credential** — and that boundary is the feature. See Part 3
 for why the write path is excluded rather than merely unbuilt.
 
-### M5. Self-audit and freshness — AUDIT SHIPPED
+### M5. Self-audit and freshness — SHIPPED
 
 Closes F2 and F8, and neither needs new matching logic or a change to the privacy
 posture, because neither involves a visitor.
@@ -454,6 +500,11 @@ both produce a working site, just a worse one."* Optional
 not filesystem mtime and not git history. A fresh clone rewrites every mtime and
 CI shallow-clones lose history — either would report "everything is stale" on a
 clean checkout.
+
+**Both halves shipped**, and the trap was heeded. One refinement found while
+building it: a `YYYY-MM` date is read as the *end* of that month rather than the
+start. Reading it as the start ages an entry by up to a month and warns early,
+and a gate that nags before it should is one an adopter learns to ignore.
 
 ---
 
@@ -493,19 +544,42 @@ it measures the corpus, not the visitor.
 
 ## Sequencing
 
-1. **F1** — decide whether a label-only citation may reach `aligned`. The only
-   critical item, and a decision rather than a patch. Everything else can wait
-   behind it.
-2. **F4, F6, F7** — one-line fixes and doc corrections. Clear the deck.
-3. **M5 `fit:audit`** — highest value per unit of work; no new engine, no privacy
-   cost.
-4. **F3** — `education.achievements[]` into the pack as claims, keeping
-   `institution`/`credential` out of the matchable text. Respects ADR 027's actual
-   objection.
-5. **M5 staleness warning** — needs an ADR only if `site.yaml` gains the key.
-6. **M1 + M3** — syllabus ingest and the courses corpus. Needs its own ADR, which
-   must record that it deliberately does *not* revisit ADR 027's exclusion of
-   education from the pack.
-7. **M2** — certifications, after M3, because it reuses that gate wholesale.
-8. **F5** — duration is a design question, not a fix. Worth an ADR about what the
-   matcher can and cannot represent, and whether a brief should say so.
+Items 1–7 are done. What remains is recorded here rather than deleted, because
+the reasons are the useful part.
+
+1. ~~**F1** — decide whether a label-only citation may reach `aligned`.~~ Done:
+   it may not, and an authored `skill_notes` entry is what earns it.
+2. ~~**F4, F6, F7** — one-line fixes and doc corrections.~~ Done.
+3. ~~**M5 `fit:audit`**~~ Done.
+4. ~~**F3** — `education.achievements[]` into the pack as claims.~~ Done, with
+   `titleText: ""` keeping the credential out of the matchable text.
+5. ~~**M5 staleness warning**~~ Done. `site.yaml` gained the key; no ADR was
+   needed, because it changes nothing about what publishes.
+6. ~~**M1 + M3** — syllabus ingest and the courses corpus.~~ Done.
+   [ADR 032](../architecture/adr/032-curriculum-derived-skills-and-the-evidence-gate.md)
+   records that it deliberately does not revisit ADR 027's exclusion of degree
+   names — and that education's *achievements* are a separate question, answered
+   separately in F3.
+7. ~~**M2** — certifications.~~ Done, reusing M3's gate wholesale as predicted.
+8. ~~**F5** — duration.~~ Done as an honesty fix rather than a matching one.
+   [ADR 033](../architecture/adr/033-what-the-matcher-cannot-represent.md).
+
+### Still open
+
+**M4, profile draft export.** The only mechanism in Part 2 not built. It needs a
+parser for the LinkedIn export archive, which is a real format with a real shape
+— unlike a syllabus — so the work is tractable; it is simply not done. The
+boundary is already decided and is not in question: the flow stops at the
+clipboard, never at a credential. See Part 3.
+
+**The second half of F8.** An open-ended `experience` entry has no date to
+check, so no gate notices a role that quietly ended. Closing it means either a
+field that can go stale, which ADR 027 avoided on purpose, or parsing free-text
+dates, which ADR 033 declines. Worth revisiting only with a third option.
+
+**Efficacy, still unmeasured.** Part 3 names this as a trade rather than a gap,
+and building all of the above has not changed it: every gate here is a negative
+assertion about the build, and none is a positive assertion about an outcome.
+`fit:audit` and `skills:gap` measure the corpus. Nothing measures whether any of
+it got anyone hired, and nothing can without the collection mechanism this
+project refuses to ship.

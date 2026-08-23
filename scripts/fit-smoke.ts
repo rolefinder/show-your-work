@@ -6,6 +6,7 @@
  * - Education cites through achievements, never through the credential name (F3)
  * - Courses and certifications never enter the pack, and never publish an
  *   unevidenced skill (the evidence gate)
+ * - A stated duration is never silently treated as verified (F5)
  * - Empty / nonsense JD must not invent aligned claims
  * - Tenant fit-config loads (extraStops / weights / extraCaveats)
  * - The browser's evidence pack and the Worker's dist/evidence.json agree
@@ -302,6 +303,59 @@ for (const [label, items] of [["course", COURSES], ["certification", CERTIFICATI
     }
   }
 }
+
+/*
+ * F5: the matcher reads words, not time.
+ *
+ * "years" and "experience" are stop words, so "5+ years building delivery
+ * pipelines" scores exactly like "building delivery pipelines" — a single
+ * project can answer it, with a real citation, against a requirement the author
+ * may not meet. The citation is not wrong; the row was reading as though the
+ * duration had been checked too.
+ *
+ * Built on a purpose-made corpus rather than the demo's, so the assertion
+ * cannot quietly stop asserting anything when the demo content changes. A row
+ * that matches is the precondition for the whole check.
+ */
+const durationDocs = buildEvidencePack(
+  { ...SITE_PROFILE, skills: [], summary: "", tagline: "" },
+  [
+    {
+      slug: "pipelines",
+      title: "Delivery pipelines",
+      summary: "Delivery pipelines, built and run.",
+      body: "Delivery pipelines built on GitHub Actions.",
+      skills: ["pipelines"],
+      skillNotes: { pipelines: "Every merge runs the same gates the release does." },
+      visible: true,
+    },
+  ] as unknown as typeof WORK,
+  [],
+  [],
+);
+const duration = matchFit(
+  "Requirements:\n- 5+ years building delivery pipelines\n",
+  durationDocs,
+  { ...fitCfg, showGaps: true },
+);
+const durationRow = duration.requirements.find(
+  (r) => r.status === "aligned" || r.status === "partial",
+);
+assert(durationRow, "the duration fixture must produce a cited row, or this asserts nothing");
+assert(
+  /5\+ years/.test(durationRow!.why) && /does not evaluate/.test(durationRow!.why),
+  `a cited row answering a duration requirement must say the duration was not evaluated: ${durationRow!.why}`,
+);
+assert(
+  duration.caveats.some((c) => /reads words, not time/.test(c)),
+  "a brief containing a duration requirement must carry the duration caveat",
+);
+assert(
+  !matchFit("Requirements:\n- Strong pipeline skills\n", durationDocs, fitCfg).caveats.some((c) =>
+    /reads words, not time/.test(c),
+  ),
+  "a brief with no duration requirement must not carry the duration caveat",
+);
 
 let citesMergeGate = false;
 if (SITE_CONFIG.demo) {
