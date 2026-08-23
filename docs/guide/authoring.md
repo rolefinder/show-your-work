@@ -135,6 +135,30 @@ It is entirely local — it reads files already on your machine and prints to
 your terminal, with no network and nothing stored. `./jds/` is gitignored,
 because a job description is someone else's document and your repo is public.
 
+## The profile you already have, still empty
+
+```bash
+bun run profile:draft ~/Downloads/Basic_LinkedIn_DataExport.zip
+```
+
+A platform profile sits empty not because there is no API but because you do not
+know what to put in it. The hard part was never the transport.
+
+LinkedIn will give you a data export, on request, as a member. It states exactly
+which sections are blank. This diffs that against your corpus, drafts copy for
+the blanks only — an About paragraph from your summary and your project
+outcomes, a role description from that role's highlights — prints it, and stops.
+
+Every sentence traces to something you already published. Where the corpus is
+silent you get a `TODO:` naming what is missing, never invented copy. Sections
+you have already written are left alone unless you pass `--all`.
+
+**It stops at the clipboard, not the credential.** That is deliberate: writing
+into your profile would need a stored credential, it would put your own account
+at terms-of-service risk during a job search, and the last review before
+something becomes a public claim about you should be done by you. No scrapers
+are supported and none ever will be — the official export or nothing.
+
 ## Coursework and certifications
 
 `content/courses/<slug>.yaml` and `content/certifications/<slug>.yaml`. Both

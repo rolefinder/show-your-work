@@ -15,6 +15,7 @@
     "ready": "node scripts/check-ready.mjs",
     "skills": "node scripts/skills.mjs",
     "skills:gap": "python scripts/skills-gap.py",
+    "profile:draft": "python packages/ingest/from-linkedin-export.py",
     "emit": "python scripts/emit-content.py",
     "emit:evidence": "python scripts/emit-evidence.py",
     "emit:fit-config": "python scripts/emit-fit-config.py",

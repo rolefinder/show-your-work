@@ -155,7 +155,8 @@ show-your-work/
 │   ├── content/emit_site.py       the YAML → TypeScript emitter, and the
 │   │                              evidence gate that drops an unevidenced
 │   │                              `taught:` label before it reaches the bundle
-│   └── ingest/                    resume / GitHub / syllabus → draft YAML for review
+│   └── ingest/                    resume · GitHub · syllabus · LinkedIn export
+│                                   → drafts for review; each writes to stdout
 │
 ├── graph/                       ▓ WebGL engine, bundled to a self-hosted file
 │   ├── index.mjs                  attaches window.SYWPortfolioGraph
@@ -755,6 +756,7 @@ exit 0 whatever they find, and neither is in `bun run test`:
 |---|---|
 | `fit:audit` | How much of each job description in `./jds/` your published work can cite, and which requirements nothing covers. `./jds/` is gitignored — a posting is somebody else's document and a portfolio repo is public |
 | `skills:gap` | What a course or credential taught that nothing published demonstrates, with the syllabus's own sentences to write from. The evidence gate drops these labels at emit; this is the only place they are visible |
+| `profile:draft` | Which sections of your LinkedIn profile are blank, with copy drafted from published work for those only. Reads the official export archive; writes nothing, sends nothing, holds no credential |
 
 Every one of these exists because it caught something real, not speculatively.
 

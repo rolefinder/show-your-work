@@ -462,7 +462,7 @@ empty queue.
 two corpora never become citable documents, and every skill they publish is
 claimed by a linked project. [ADR 032](../architecture/adr/032-curriculum-derived-skills-and-the-evidence-gate.md).
 
-### M4. Profile draft export
+### M4. Profile draft export — SHIPPED
 
 Platform profiles sit empty not because there is no API but because the candidate
 does not know what to put in them. The hard part was never the transport.
@@ -476,6 +476,14 @@ written and published; anything the corpus does not state emits a `TODO:`.
 The candidate reads it, edits it, pastes what they want. **The flow stops at the
 clipboard, not the credential** — and that boundary is the feature. See Part 3
 for why the write path is excluded rather than merely unbuilt.
+
+**Shipped** as `bun run profile:draft`
+(`packages/ingest/from-linkedin-export.py`), reading the export as a `.zip` or an
+unzipped directory. One design note worth keeping: no column name is hardcoded.
+LinkedIn has renamed export columns before, and a parser that silently found
+nothing would report "you have nothing to add" — the single most misleading
+output this could produce. Headers resolve from a candidate list, and a miss
+names the file, the candidates, and the columns that were actually present.
 
 ### M5. Self-audit and freshness — SHIPPED
 
@@ -544,8 +552,11 @@ it measures the corpus, not the visitor.
 
 ## Sequencing
 
-Items 1–7 are done. What remains is recorded here rather than deleted, because
-the reasons are the useful part.
+All eight are done. They are kept here rather than deleted, because the reasons
+are the useful part — and because two of them were resolved differently than
+this document first proposed.
+
+Every mechanism in Part 2 is now built.
 
 1. ~~**F1** — decide whether a label-only citation may reach `aligned`.~~ Done:
    it may not, and an authored `skill_notes` entry is what earns it.
@@ -565,12 +576,6 @@ the reasons are the useful part.
    [ADR 033](../architecture/adr/033-what-the-matcher-cannot-represent.md).
 
 ### Still open
-
-**M4, profile draft export.** The only mechanism in Part 2 not built. It needs a
-parser for the LinkedIn export archive, which is a real format with a real shape
-— unlike a syllabus — so the work is tractable; it is simply not done. The
-boundary is already decided and is not in question: the flow stops at the
-clipboard, never at a credential. See Part 3.
 
 **The second half of F8.** An open-ended `experience` entry has no date to
 check, so no gate notices a role that quietly ended. Closing it means either a
