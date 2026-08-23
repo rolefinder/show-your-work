@@ -21,10 +21,13 @@ export function buildEvidencePack(
 
   for (const w of work) {
     if (w.visible === false) continue;
-    // Outcome and evidence bullets are already whole, self-contained
+    // Outcome, evidence and decision bullets are already whole, self-contained
     // statements — exactly what a citation should be — so they are carried
-    // separately from the flattened text and preferred as quotes.
-    const claims = [w.outcome, ...(w.evidence || [])]
+    // separately from the flattened text and preferred as quotes. `decisions`
+    // used to score (it was in `text`) but could never be quoted, so the
+    // best-reasoned sentence on a project page was only ever citable as a
+    // truncated window.
+    const claims = [w.outcome, ...(w.evidence || []), ...(w.decisions || [])]
       .map((c) => String(c || "").replace(/\s+/g, " ").trim())
       .filter(Boolean);
     docs.push({
@@ -32,7 +35,7 @@ export function buildEvidencePack(
       kind: "work",
       title: w.title,
       url: `/work/${w.slug}`,
-      text: [w.title, w.summary, bodyText(w.body), w.problem, ...claims, ...(w.decisions || []), w.skills.join(" ")]
+      text: [w.title, w.summary, bodyText(w.body), w.problem, ...claims, w.skills.join(" ")]
         .filter(Boolean)
         .join(" "),
       skills: w.skills.slice(),

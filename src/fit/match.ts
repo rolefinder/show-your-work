@@ -6,7 +6,9 @@ import type { EvidenceDoc, FitBrief, FitEvidence, FitRequirement, FitStatus } fr
 
 /**
  * Deterministic Fit matcher.
- * Hard rule: status "aligned" requires ≥1 citation.
+ * Hard rule: status "aligned" requires ≥1 citation, and a bare skill label is
+ * not a citation — see QUOTE_KIND in ./index and F1 in
+ * docs/strategy/candidate-legibility-2026-08.md.
  * Optional cfg: tenant synonyms, extraStops, skillWeights, score thresholds.
  */
 export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig): FitBrief {
@@ -20,6 +22,11 @@ export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig):
 
   for (const req of requirements) {
     const hits = retrieveEvidence(req.text, docs, cfg);
+    // A hit whose only quote is the skill tag itself is lexical overlap, not
+    // evidence. It still scores, so such a row can reach `partial` — which is
+    // the honest verdict: the skill is genuinely tagged, and nothing published
+    // says anything about it.
+    const cited = hits.filter((h) => h.quote_kind !== "label");
     let status: FitStatus;
     let why: string;
     const evidence: FitEvidence[] = hits.slice(0, 3).map((h) => ({
@@ -32,9 +39,9 @@ export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig):
       status = "not_evidenced_on_site";
       why = "No published site evidence matched this requirement.";
       gaps.push(req.text);
-    } else if (hits[0].score >= weights.alignedMin && evidence.length >= 1) {
+    } else if (hits[0].score >= weights.alignedMin && cited.length >= 1) {
       status = "aligned";
-      why = `Matched published evidence (${hits[0].doc.title}).`;
+      why = `Matched published evidence (${cited[0].doc.title}).`;
     } else if (hits[0].score >= weights.partialMin) {
       status = "partial";
       why = `Partial overlap with ${hits[0].doc.title}; depth not fully evidenced.`;
@@ -44,8 +51,8 @@ export function matchFit(jd: string, docs: EvidenceDoc[], cfg?: FitMatchConfig):
       gaps.push(req.text);
     }
 
-    // Hard rule: aligned requires ≥1 citation
-    if (status === "aligned" && evidence.length < 1) {
+    // Hard rule, restated as a guard: aligned requires a real citation.
+    if (status === "aligned" && (evidence.length < 1 || cited.length < 1)) {
       status = "not_evidenced_on_site";
       why = "Aligned claims require at least one citation.";
     }

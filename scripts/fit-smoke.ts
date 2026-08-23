@@ -2,6 +2,7 @@
  * Fit smoke tests against the demo corpus.
  * - CI/CD JD must cite the merge-gate project and produce ≥1 aligned with citation
  * - Kubernetes must NOT be aligned
+ * - A bare skill label must never carry `aligned` (F1)
  * - Empty / nonsense JD must not invent aligned claims
  * - Tenant fit-config loads (extraStops / weights / extraCaveats)
  * - The browser's evidence pack and the Worker's dist/evidence.json agree
@@ -112,6 +113,42 @@ const cicdAligned = cicd.requirements.filter((r) => r.status === "aligned");
 for (const r of cicdAligned) {
   assert(r.evidence.length >= 1, `aligned requires citation: ${r.text}`);
 }
+
+/*
+ * F1: a bare skill label is not a citation.
+ *
+ * `bun run init` scaffolds `skill_notes: {}`, so the default new-adopter state
+ * is a corpus whose skills carry no authored sentence. Two skill hits score 28
+ * against alignedMin 20, which used to be enough to show a recruiter the word
+ * "TypeScript" as the evidence for a TypeScript requirement — the requirement
+ * restated, not answered. Such a row must land `partial` instead: the skill is
+ * genuinely tagged, and nothing published says anything about it.
+ */
+const bareLabelDocs: EvidenceDoc[] = [
+  {
+    id: "work:bare",
+    kind: "work",
+    title: "Untitled",
+    url: "/work/bare",
+    text: "Untitled a short summary about unrelated matters",
+    skills: ["TypeScript", "Kubernetes"],
+  },
+];
+const bareLabel = matchFit(
+  "Requirements:\n- Strong TypeScript and Kubernetes experience\n",
+  bareLabelDocs,
+  { ...fitCfg, showGaps: true },
+);
+for (const r of bareLabel.requirements) {
+  assert(
+    r.status !== "aligned",
+    `a bare skill label must not carry aligned: ${r.text}`,
+  );
+}
+assert(
+  bareLabel.requirements.some((r) => r.status === "partial"),
+  "a tagged-but-unevidenced skill should still reach partial",
+);
 
 let citesMergeGate = false;
 if (SITE_CONFIG.demo) {

@@ -193,9 +193,11 @@ typo silently forked the taxonomy: both spellings survived, the misspelling
 fell through to the `Other` category, and it split the skill bank, the graph,
 search, and matching — all while building green.
 
-`check-content` **warns** on near-duplicate labels rather than blocking,
-because a genuinely new skill is legitimate and only you can tell the
-difference. Read the warnings.
+`check-content` **blocks** on near-duplicate labels. Two labels that differ
+only in case or punctuation normalize to the same key — `TypeScript` and
+`Typescript`, or `CI/CD` and `ci-cd` — so keeping both is a typo, not a
+choice. Pick one and the build goes green. A genuinely new skill has a
+distinct key and is never flagged.
 
 Give each skill a category and a description in
 `content/config/skills.yaml`. A skill with no category falls into `fallback`.
@@ -228,7 +230,8 @@ project being an unreviewed draft — which would publish an empty site.
 | A malformed `date` | anything but `YYYY-MM` / `YYYY-MM-DD` |
 | A cross-link to a nonexistent slug | see above |
 
+| Near-duplicate skill labels | including between `profile.yaml` and a project |
+
 | Warns on | |
 |---|---|
-| Near-duplicate skill labels | including between `profile.yaml` and a project |
 | A skill missing from `skills.yaml` | it renders, it just lands in `fallback` |

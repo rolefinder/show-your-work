@@ -15,8 +15,10 @@ exists because the failure was reproduced against main:
   3. A missing required field raised a raw KeyError traceback from inside
      emit_site.py, for the most common authoring mistake there is.
 
-Blocks on (1) and (3), which are unambiguously broken. Warns on (2), because a
-genuinely new skill is legitimate and only the author can tell the difference.
+Blocks on all three. (2) blocks because a label differing only in case or
+punctuation is a typo, not a new skill: `TypeScript` and `Typescript` normalize
+to one key, so keeping both can only be a mistake. A genuinely new skill has a
+distinct key and is never flagged.
 
 Usage: python scripts/check-content.py [--help]
 Exit 0 = clean (warnings may still print) | 1 = content errors | 2 = setup.

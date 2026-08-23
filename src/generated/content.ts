@@ -29,7 +29,7 @@ export const SITE_PROFILE: SiteProfile = {
   location: "Fake City, XX",
   email: "fake.name@example.com",
   summary: "Fake Name is a placeholder persona for the show-your-work template — not a real person. The naming is deliberately obvious so a demo deploy can never be mistaken for someone's actual portfolio. Replace this file with your own.",
-  skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "YAML content pipelines"],
+  skills: ["CI/CD", "GitHub Actions", "Cloudflare Pages", "TypeScript", "Python", "pipelines"],
   links: { "github": "https://example.com/fake-github-profile", "linkedin": "https://example.com/fake-linkedin-profile", "youtube": "https://example.com/fake-youtube-channel" },
 };
 
@@ -41,14 +41,14 @@ export const WORK: WorkItem[] = [
     body: [
       "Fake Project: Content Emit reads content/about, content/work, and content/blog YAML, validates slugs, and writes a typed generated module (src/generated/content.ts) via packages/content. Humans edit YAML; the build owns the emitted module. Cross-links use {{work:fake-project-merge-gate|Fake Project: Merge Gate}} and {{blog:fake-post-cite-or-missing|cite or missing}} tokens rendered CSP-safe in the SPA."
     ],
-    skills: ["Python", "YAML", "content pipelines", "TypeScript"],
+    skills: ["Python", "YAML", "pipelines", "TypeScript"],
     visible: true,
     date: "2026-05",
     problem: "Portfolio copy lived inside a hand-edited bundle, so editing a sentence meant editing code and every content change carried the risk of a code change.",
     outcome: "Humans edit YAML and the build owns the emitted module, so a copy change can no longer break the application.",
     evidence: ["Slugs are validated against filenames, so a mistyped cross-link fails the build.", "The generated module is typed, so a content-shape change surfaces at compile time.", "Cross-links are rendered from tokens, keeping them CSP-safe with no inline HTML."],
     decisions: ["Emit a typed module rather than splicing strings into the bundle, so the compiler checks the content contract.", "Keep the generator in Python next to the YAML instead of adding a Node YAML dependency to the site build."],
-    skillNotes: { "Python": "The generator reads and validates the YAML corpus.", "YAML": "YAML is the authoring surface humans actually edit.", "content pipelines": "Content moves through one emit step with an explicit contract.", "TypeScript": "The emitted module is typed, so content shape is compiler-checked." },
+    skillNotes: { "Python": "The generator reads and validates the YAML corpus.", "YAML": "YAML is the authoring surface humans actually edit.", "pipelines": "Content moves through one emit step with an explicit contract.", "TypeScript": "The emitted module is typed, so content shape is compiler-checked." },
   },
   {
     slug: "fake-project-merge-gate",
@@ -141,8 +141,6 @@ export const SKILL_CATEGORIES: SkillCategoryConfig = {
     "TypeScript": "Languages & content",
     "Python": "Languages & content",
     "YAML": "Languages & content",
-    "content pipelines": "Languages & content",
-    "YAML content pipelines": "Languages & content",
     "Fit": "Fit & evidence",
     "evidence": "Fit & evidence",
     "CSS": "Interface",
@@ -157,7 +155,6 @@ export const SKILL_CATEGORIES: SkillCategoryConfig = {
     "TypeScript": "Typed application and tooling code.",
     "Python": "Content generation and verification tooling.",
     "YAML": "Structured, human-authored content and configuration.",
-    "content pipelines": "Turning authored content into typed, buildable artifacts.",
     "Fit": "Matching a job description against published evidence.",
     "evidence": "Claims that link back to something published rather than asserted.",
     "CSS": "Styling built from design tokens rather than literal values.",

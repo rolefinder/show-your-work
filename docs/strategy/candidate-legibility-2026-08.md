@@ -57,7 +57,7 @@ change that.
 Eight, in severity order. Five are live regardless of whether anything in Part 2
 is ever built.
 
-### F1. A bare skill label can satisfy the citation requirement
+### F1. A bare skill label can satisfy the citation requirement — FIXED
 
 **Severity: critical** — this is the guarantee the project rests on.
 
@@ -93,10 +93,18 @@ authored claim (outcome / evidence bullet) reads as a citation; a skill tag is a
 label."* It is correctly ordered; the threshold simply lets the label clear the
 bar.
 
-**This needs a decision, not a patch.** Either a label-only citation may not
-reach `aligned` (raise the bar, or require a claim or `skill_notes` for the top
-status), or it may and that is documented as intended. Both are defensible. The
-current state is neither.
+**Resolved: a label-only citation may not reach `aligned`.** `retrieveEvidence`
+now returns a `quote_kind` on every hit — `claim`, `skill_note`, `snippet` or
+`label` — and `matchFit` requires at least one non-`label` hit before it will
+assign `aligned`. Such a row lands `partial` instead, which is the honest
+verdict: the skill is genuinely tagged, and nothing published says anything
+about it. The bare label also dropped below a text snippet in the quote
+preference, since a truncated piece of real prose is more of a citation than
+the tag echoed back.
+
+`fit:smoke` asserts it on a synthetic corpus shaped like a fresh `init` —
+skills tagged, `skill_notes` empty — so the regression cannot return quietly.
+Measured before and after on that corpus: `aligned` → `partial`.
 
 ### F2. The matcher computes the author's to-do list, then discards it
 
@@ -146,7 +154,7 @@ That is structurally identical to a `work.evidence` bullet, carries none of the
 collision property the ADR objects to, renders on `/experience`, and is citable
 by nothing.
 
-### F4. `decisions` scores but cannot be quoted
+### F4. `decisions` scores but cannot be quoted — FIXED
 
 **Severity: medium** · cheap fix
 
@@ -155,8 +163,10 @@ by nothing.
 project's best-reasoned sentences are matchable but only citable as a 160-char
 `snippetAround()` window cut mid-sentence.
 
-Note the fix must land twice: `scripts/emit-evidence.py` re-implements the pack
-in Python for the Worker, and `fit:smoke` compares the two field by field.
+**Fixed** in both implementations — `evidence.ts` and `scripts/emit-evidence.py`
+— because `fit:smoke` compares the two packs field by field and would fail on
+either alone. `decisions` also left the flattened `text`, since claims are
+already spread into it and a duplicate would double-count in scoring.
 
 ### F5. The matcher cannot represent duration
 
@@ -172,7 +182,7 @@ ADR 027 added the `experience` corpus partly because such requirements were bein
 matched against project pages. That gave the matcher better documents to cite. It
 did not give it the ability to represent time.
 
-### F6. Two of four descriptions of the skill rule are inverted
+### F6. Two of four descriptions of the skill rule are inverted — FIXED
 
 **Severity: medium** (documented contract contradicts the code)
 
@@ -182,9 +192,14 @@ correctly. Two places do not:
 
 - `scripts/check-content.py:18`, its own docstring: *"Warns on (2)…"*
 - `docs/guide/authoring.md:196`: *"`check-content` **warns** on near-duplicate
-  labels rather than blocking"*, repeated in its table at `:231-233`.
+  labels rather than blocking"*, repeated in its table.
 
-### F7. The demo corpus ships the fragmentation its gate exists to prevent
+**Fixed.** Both now say it blocks, and both explain why that is right rather
+than harsh: two labels differing only in case or punctuation normalize to one
+key, so keeping both is a typo. A genuinely new skill has a distinct key and is
+never flagged. The table row moved from *Warns on* to *Blocks on*.
+
+### F7. The demo corpus ships the fragmentation its gate exists to prevent — FIXED
 
 **Severity: medium**
 
@@ -201,10 +216,14 @@ YAML content pipelines   content/demo/about/profile.yaml:15
 Three chips, three graph nodes, three search entries, three weight buckets — in
 the corpus that models good practice for every adopter.
 
-Related: `src/app.tsx:431` passes only `[...visibleWork, ...visibleBlog]` to
-`collectSkillCounts`, so experience and profile skills never reach the skill bank
-even though `check-content` gates them; and `scripts/skills.mjs` scans work +
-blog + profile only, so the advisory tool and the blocking gate disagree on scope.
+**Fixed.** The three labels are now one (`pipelines`), taking the demo
+vocabulary from 14 to 12. `scripts/skills.mjs` also grew `experience`, so the
+advisory tool and the blocking gate finally agree on scope.
+
+Still open, and deliberately separate: `src/app.tsx:431` passes only
+`[...visibleWork, ...visibleBlog]` to `collectSkillCounts`, so experience and
+profile skills never reach the skill bank even though `check-content` gates
+them. That is a rendering decision, not a vocabulary defect.
 
 ### F8. No gate measures time
 

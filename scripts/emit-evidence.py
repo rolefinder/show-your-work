@@ -57,9 +57,14 @@ def main() -> int:
         if w.get("visible") is False:
             continue
         # Whole authored statements, preferred over text windows as citations.
+        # `decisions` joins them: it always scored, but was never quotable.
         claims = [
             normalize(c)
-            for c in [w.get("outcome"), *(w.get("evidence") or [])]
+            for c in [
+                w.get("outcome"),
+                *(w.get("evidence") or []),
+                *(w.get("decisions") or []),
+            ]
             if normalize(c)
         ]
         docs.append(
@@ -76,7 +81,6 @@ def main() -> int:
                         body_text(w.get("body")),
                         str(w.get("problem") or "").strip(),
                         *claims,
-                        *[str(d).strip() for d in (w.get("decisions") or [])],
                         " ".join(w.get("skills") or []),
                     ]
                     if part
