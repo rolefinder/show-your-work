@@ -59,8 +59,19 @@ export function retrieveEvidence(
         score += weights.skill * mult;
         // "Delivery runs through merge gates…" is evidence; "CI/CD" is a
         // label. Keep them apart: only the note is quotable as a citation.
+        //
+        // An authored note also SCORES, and that is what makes the authoring
+        // contract true — writing one is the thing that turns a tag into an
+        // aligned claim. A tagged skill alone reaches `skill` (14), short of
+        // alignedMin (20); backed by a note it reaches 20. The points are for
+        // the note existing, not for it happening to repeat the requirement's
+        // wording: a note reading "every content shape is a compile error" is
+        // evidence for `TypeScript` whether or not it says "TypeScript".
         const note = doc.skillNotes?.[skillMatch];
-        if (note && !skillNoteQuote) skillNoteQuote = note;
+        if (note) {
+          score += weights.corpus;
+          if (!skillNoteQuote) skillNoteQuote = note;
+        }
         if (!labelQuote) labelQuote = skillMatch;
       }
       if (!claimQuote) {

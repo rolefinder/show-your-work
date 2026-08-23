@@ -169,6 +169,36 @@ assert(
   "a tagged-but-unevidenced skill should still reach partial",
 );
 
+/*
+ * The other half of the same contract, and it has to be gated too: the
+ * authoring guide tells people that writing a `skill_notes` entry is what
+ * turns a bare tag into an aligned claim. If that stops being true the guide
+ * is lying, and nothing else would notice.
+ *
+ * The note deliberately does NOT repeat the requirement's wording — an
+ * authored sentence about a skill is evidence for it whether or not it says
+ * the word again, and scoring it any other way would reward keyword echo.
+ */
+const notedWork = [
+  {
+    ...(bareWork[0] as unknown as Record<string, unknown>),
+    slug: "noted",
+    skills: ["TypeScript"],
+    skillNotes: {
+      TypeScript: "Every content shape is a compile error before it is a runtime blank.",
+    },
+  },
+] as unknown as typeof WORK;
+const noted = matchFit(
+  "Requirements:\n- Strong TypeScript experience\n",
+  buildEvidencePack({ ...SITE_PROFILE, skills: [], summary: "", tagline: "" }, notedWork, [], []),
+  { ...fitCfg, showGaps: true },
+);
+assert(
+  noted.requirements.some((r) => r.status === "aligned"),
+  "a skill backed by an authored skill_notes entry must reach aligned",
+);
+
 let citesMergeGate = false;
 if (SITE_CONFIG.demo) {
   assert(cicdAligned.length >= 1, "CI/CD JD should produce ≥1 aligned requirement");

@@ -121,10 +121,32 @@ production always adds, so it passed green while the shipping path still
 returned `aligned`. It now also asserts directly that no doc's `text` contains
 its own skill labels.
 
-Measured through the real builder: one skill term scored 20 and returned
-`aligned` before; it scores 14 and returns `partial` after. The demo corpus
-drops from three aligned rows to two — the third was aligned only because of
-the double-count.
+Removing the double-count then broke the other half of the contract, which a
+second review round caught. With skills out of `text`, a tagged skill scored 14
+whether or not the adopter had written a `skill_notes` entry — so the authoring
+guide's promise that writing one is what earns `aligned` became false, and
+nothing would have noticed.
+
+So an authored note now scores. A tagged skill alone reaches `skill` (14),
+short of `alignedMin` (20); backed by a note it reaches 20. The points are for
+the note *existing*, not for it repeating the requirement's wording — a note
+reading "every content shape is a compile error" is evidence for `TypeScript`
+whether or not it says "TypeScript", and scoring it any other way would reward
+keyword echo, which is the behaviour this whole finding exists to prevent.
+
+Measured through the real builder, all three cases:
+
+```
+no note at all               score=14 kind=label       -> partial
+note NOT repeating the term  score=20 kind=skill_note  -> aligned
+note repeating the term      score=20 kind=skill_note  -> aligned
+```
+
+Both directions are gated in `fit:smoke`, because a contract that is only
+documented is the one that quietly stops being true. The demo still produces
+three aligned rows for its CI/CD fixture — the same count as before this
+finding, now earned through the skill notes it actually authored rather than
+through a double-counted tag.
 
 ### F2. The matcher computes the author's to-do list, then discards it — FIXED
 
