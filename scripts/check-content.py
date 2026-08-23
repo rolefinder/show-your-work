@@ -150,28 +150,45 @@ for kind, items in (("experience", experience), ("courses", courses), ("certific
 for kind, items in (("courses", courses), ("certifications", certifications)):
     where = corpus_dir(kind).relative_to(ROOT).as_posix()
     for slug, data in items.items():
-        visible = data.get("visible", True)
+        if not data.get("visible", True):
+            continue
         projects = [str(t) for t in (data.get("projects") or [])]
-        if visible and not projects:
+        # PUBLISHED, not merely listed. A draft satisfies neither half of the
+        # design: the page filters `Built here:` to visible work, and the emit
+        # gate derives skills from visible work only. So an entry linking
+        # nothing but drafts renders as institution, date and outcomes — a bare
+        # transcript line, which is precisely what this rule refuses.
+        #
+        # Slugs that resolve to nothing are excluded rather than treated as
+        # drafts: the dangling-reference loop above already names those, and
+        # reporting a typo as "still a draft" would send the author to the wrong
+        # file. The two real cases get separate messages because they have
+        # different fixes — write something, versus publish what you wrote.
+        known = [t for t in projects if t in work]
+        published = [t for t in known if work[t].get("visible", True)]
+        if not projects:
             errors.append(
                 f"{where}/{slug}.yaml: a visible entry needs at least one `projects:` slug. "
                 "A transcript line is not a portfolio entry — attach it to published work, "
                 "or set `visible: false` and keep it as a writing-queue entry."
             )
             continue
-        if not visible:
+        if known and not published:
+            errors.append(
+                f"{where}/{slug}.yaml: every project it links is still a draft "
+                f"({', '.join(known)}). It would publish as a transcript line — no work "
+                "attached and no skills, because both the page and the evidence gate "
+                "ignore unpublished work. Publish one of them, or set `visible: false` here too."
+            )
             continue
         evidenced = {
-            str(s).lower()
-            for t in projects
-            for s in (work.get(t, {}).get("skills") or [])
-            if work.get(t, {}).get("visible", True)
+            str(s).lower() for t in published for s in (work[t].get("skills") or [])
         }
         claimed = [str(t) for t in (data.get("taught") or []) if str(t).lower() in evidenced]
         if (data.get("taught") or []) and not claimed:
             warnings.append(
                 f"{where}/{slug}.yaml publishes no skills: none of its `taught:` labels appear "
-                f"on {', '.join(projects)}. Either the label is spelled differently on the "
+                f"on {', '.join(published)}. Either the label is spelled differently on the "
                 "project, or that work is not written up yet (`bun run skills:gap`)."
             )
 

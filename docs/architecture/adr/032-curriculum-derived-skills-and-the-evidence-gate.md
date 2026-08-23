@@ -92,10 +92,19 @@ queue, printed by `bun run skills:gap`, which reads the YAML directly.
   project, which is the better citation anyway. `fit-smoke` asserts this rather
   than assuming it.
 - **No orphan entries.** A visible course or credential must link at least one
-  published project. This is the project's thesis applied to coursework: a
-  transcript line is not a portfolio entry; a transcript line attached to a
-  published artefact is. An entry with nothing to attach lives at
+  project that is itself **published**. This is the project's thesis applied to
+  coursework: a transcript line is not a portfolio entry; a transcript line
+  attached to a published artefact is. An entry with nothing to attach lives at
   `visible: false`, where it still feeds the writing queue.
+
+  *Published, not merely listed* — the distinction is load-bearing and the first
+  version of the gate got it wrong. Both the page and the emit gate ignore
+  unpublished work, so an entry linking nothing but drafts renders as
+  institution, date and outcomes with no work attached and no skills: a bare
+  transcript line, produced by the very rule meant to forbid one. The gate
+  therefore counts visible projects, and reports "every project it links is
+  still a draft" separately from "no projects at all", because the fixes differ
+  — publish what you wrote, versus write something.
 
 ### Certifications invert the evidence, and the schema says so
 

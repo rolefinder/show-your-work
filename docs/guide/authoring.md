@@ -246,6 +246,10 @@ same label, and the gate publishes it for you.
 A course you have not written up yet lives at `visible: false`. It still feeds
 this list; it just does not render.
 
+The project has to be published, not merely listed. If everything a visible
+course links is still a draft, nothing attaches to it and it would render as a
+bare transcript line — so the build stops and tells you which it is waiting on.
+
 ### Certifications run the other way
 
 A syllabus publishes a checkable curriculum and an unverifiable pass. A
@@ -414,6 +418,7 @@ project being an unreviewed draft — which would publish an empty site.
 | A cross-link to a nonexistent slug | see above |
 | A `projects:` slug that is not a real project | it would publish a link that 404s |
 | A visible course or credential with no `projects:` | a transcript line is not a portfolio entry — attach published work, or set `visible: false` |
+| A visible course or credential whose linked projects are all drafts | it would render as a transcript line: both the page and the evidence gate ignore unpublished work, so nothing would attach to it |
 | A certification `earned`/`expires` that is not `YYYY-MM` | the build reads these two, it does not only render them |
 | A `verify_url` that is not `https://` | a verification link over plaintext is not one |
 
