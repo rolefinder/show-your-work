@@ -1,4 +1,11 @@
-import type { BlogPost, EvidenceDoc, ExperienceItem, SiteProfile, WorkItem } from "../types";
+import type {
+  BlogPost,
+  EducationItem,
+  EvidenceDoc,
+  ExperienceItem,
+  SiteProfile,
+  WorkItem,
+} from "../types";
 import { bodyText } from "../content/bodyText";
 
 /*
@@ -21,6 +28,7 @@ export function buildEvidencePack(
   work: WorkItem[],
   blog: BlogPost[],
   experience: ExperienceItem[] = [],
+  education: EducationItem[] = [],
 ): EvidenceDoc[] {
   const docs: EvidenceDoc[] = [
     {
@@ -88,6 +96,37 @@ export function buildEvidencePack(
         .filter(Boolean)
         .join(" "),
       skills: e.skills.slice(),
+      claims,
+    });
+  }
+
+  // Education last, and narrowly: only `achievements`.
+  //
+  // ADR 027 kept education out of the pack over degree-name collisions, and
+  // that objection is upheld here rather than revisited — "BS, Information
+  // Systems" would hit a third of the postings in the industry on eight points
+  // of title weight alone. So the credential names the citation and matches
+  // nothing (`titleText: ""`), the institution never enters the text at all,
+  // and the only matchable content is the achievement bullets.
+  //
+  // Those are whole authored sentences — "Capstone built a content pipeline a
+  // department actually used" is structurally a work `evidence` bullet that
+  // happens to live on a degree — so they are claims, and a coursework
+  // citation is finally possible without the collision the ADR refused.
+  for (const e of education) {
+    if (e.visible === false) continue;
+    const claims = e.achievements
+      .map((a) => String(a || "").replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+    if (!claims.length) continue; // nothing citable; a bare degree line is not evidence
+    docs.push({
+      id: `education:${e.slug}`,
+      kind: "education",
+      title: e.credential,
+      titleText: "",
+      url: `/experience#${e.slug}`,
+      text: claims.join(" "),
+      skills: [],
       claims,
     });
   }

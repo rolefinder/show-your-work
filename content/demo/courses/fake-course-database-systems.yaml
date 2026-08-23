@@ -1,0 +1,39 @@
+slug: fake-course-database-systems
+institution: Fake State University
+code: FIS 315
+name: Database Management Systems
+completed: "2022-05"
+
+# Quoted from the syllabus, not paraphrased. This section — "upon successful
+# completion of this course, students will be able to…" — was written by the
+# faculty who teach the course and published before the semester started. It is
+# the institution's claim about the course, so it is reproduced as the
+# institution wrote it.
+outcomes:
+  - Design a normalized relational schema from a business narrative.
+  - Write queries that join, aggregate, and filter across several tables.
+  - Explain how a transaction boundary protects a multi-step write.
+
+# What the course taught, in your skill vocabulary. CANDIDATE labels only.
+#
+# A syllabus establishes what a course taught. It does not establish what you
+# did. So a label here publishes only when one of the projects below already
+# claims it — the build derives that subset and drops the rest. Nothing you
+# have not demonstrated ever reaches the site.
+#
+# The leftovers are the useful part: `bun run skills:gap` prints them as a
+# writing queue, phrased in the institution's own words rather than from a
+# blank page. Here, `normalisation` is taught and unevidenced — there is no
+# published project about it yet, so it stays off the page and on the list.
+taught:
+  - YAML
+  - pipelines
+  - TypeScript
+  - normalisation
+
+# Work produced in this course. Published projects only — a visible course
+# needs at least one, because a transcript line is not a portfolio entry.
+projects:
+  - fake-project-content-emit
+
+visible: true

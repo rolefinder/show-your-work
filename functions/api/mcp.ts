@@ -95,6 +95,8 @@ type EvidenceDoc = {
   kind: string;
   title: string;
   url: string;
+  /** Present, and empty, where the title must not be matchable — education. */
+  titleText?: string;
   text: string;
   skills: string[];
   claims?: string[];
@@ -103,7 +105,7 @@ type EvidenceDoc = {
 
 type EvidencePack = { version: number; docs: EvidenceDoc[] };
 
-const KINDS = ["about", "work", "blog", "experience"] as const;
+const KINDS = ["about", "work", "blog", "experience", "education"] as const;
 
 /* Public read-only data, so wildcard CORS is deliberate: the corpus IS the
    published site. There is no origin-gated state to protect and no session to

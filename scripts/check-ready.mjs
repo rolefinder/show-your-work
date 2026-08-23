@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEMO, corpusDir, isDemo, isOwn, rel, resolve } from "./lib/content-paths.mjs";
-import { scalar } from "./lib/yaml-lite.mjs";
+import { nested, scalar } from "./lib/yaml-lite.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (...p) => readFileSync(join(root, ...p), "utf8");
@@ -158,6 +158,91 @@ const workDrafts = auditCorpus("content/work", workDir, work);
 auditCorpus("content/blog", blogDir, blog);
 if (workDrafts && workDrafts === work.length) {
   blockers.push("content/work/: every project is an unreviewed draft — nothing would be published");
+}
+
+// ---------- freshness ----------
+/*
+ * Every other gate in this repo is a structural assertion: shapes, links,
+ * spellings. None of them notices that the corpus has gone quiet. A project
+ * dated 2026-06 stays published, and stays citable, and gets quoted with
+ * exactly the same confidence in 2029.
+ *
+ * A WARNING, never a blocker, and ADR 018's precedent is exact: missing
+ * Playwright and a missing outcome/evidence warn because both produce a
+ * working site, just a worse one. Stale work produces a working site too. It
+ * is also the one thing here the adopter cannot fix by editing a file — they
+ * have to go and do something — so failing a build over it would be nonsense.
+ *
+ * Opt-in: no `freshness.stale_after_days` in site.yaml, no staleness warnings.
+ * An expired credential is checked regardless, because that is not a policy
+ * anybody chose — it is a fact the issuer published.
+ *
+ * THE TRAP, worth naming: this reads the `date:` scalar out of the YAML. Not
+ * filesystem mtime — a fresh clone rewrites every one of those. Not git
+ * history — CI shallow-clones and loses it. Either would report "everything is
+ * stale" on a clean checkout, which is the most reliable way to teach somebody
+ * to ignore a warning.
+ */
+const DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * A `YYYY-MM` or `YYYY-MM-DD` scalar as the LAST instant it could mean.
+ *
+ * A month-only date is read as the end of that month rather than the start,
+ * deliberately: the author said "June", and treating that as June 1st would
+ * age the entry by up to a month and warn early. A gate that nags before it
+ * should is one an adopter learns to ignore. NaN for anything else — free-text
+ * dates exist elsewhere in the corpus and must not be guessed at.
+ */
+function dateEnd(text) {
+  const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(String(text).trim());
+  if (!m) return NaN;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), m[3] ? Number(m[3]) : 0];
+  // Day 0 of the next month is the last day of this one, leap years included.
+  return Date.UTC(y, d ? mo - 1 : mo, d || 0, 23, 59, 59);
+}
+
+const staleAfter = Number(nested(site, "freshness", "stale_after_days"));
+const now = Date.now();
+
+if (Number.isFinite(staleAfter) && staleAfter > 0) {
+  for (const [label, dir, files] of [
+    ["content/work", workDir, work],
+    ["content/blog", blogDir, blog],
+  ]) {
+    for (const f of files) {
+      const text = readFileSync(join(dir, f), "utf8");
+      if (HIDDEN_RE.test(text)) continue; // a draft is not stale, it is unfinished
+      const when = dateEnd(scalar(text, "date"));
+      if (!Number.isFinite(when)) continue;
+      const age = Math.floor((now - when) / DAY);
+      if (age > staleAfter) {
+        warnings.push(
+          `${label}/${f}: last dated ${scalar(text, "date")}, ${age} days ago — past the ` +
+            `${staleAfter}-day freshness window in ${rel(resolve("config", "site.yaml"))}. ` +
+            "Still published, still " +
+            "cited with the same confidence as everything else.",
+        );
+      }
+    }
+  }
+}
+
+/* Certifications carry the one machine-readable decay date in the corpus.
+   Every other content type makes you infer staleness from a date; this one
+   states it, so an expired credential can be caught instead of quietly
+   continuing to render as an accolade. */
+const certDir = corpusDir("certifications");
+for (const f of listYaml(certDir)) {
+  const text = readFileSync(join(certDir, f), "utf8");
+  if (HIDDEN_RE.test(text)) continue;
+  const when = dateEnd(scalar(text, "expires"));
+  if (Number.isFinite(when) && when < now) {
+    warnings.push(
+      `content/certifications/${f}: expired ${scalar(text, "expires")} — it still renders ` +
+        "with a verification link. Renew it, or set `visible: false`.",
+    );
+  }
 }
 
 // ---------- dependencies ----------

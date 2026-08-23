@@ -32,7 +32,7 @@ import { fileURLToPath } from "node:url";
 import { buildEvidencePack } from "../src/fit/evidence";
 import { matchFit } from "../src/fit/match";
 import type { FitMatchConfig } from "../src/fit/config";
-import { BLOG, EXPERIENCE, SITE_PROFILE, WORK } from "../src/generated/content";
+import { BLOG, EDUCATION, EXPERIENCE, SITE_PROFILE, WORK } from "../src/generated/content";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -84,7 +84,7 @@ if (existsSync(cfgPath)) cfg = JSON.parse(readFileSync(cfgPath, "utf8")) as FitM
 
 // showGaps is the whole point: the discarded rows are what this reports.
 const auditCfg: FitMatchConfig = { ...cfg, showGaps: true };
-const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE);
+const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE, EDUCATION);
 
 /* A path inside the repo reads better relative; one outside it (a scratch
    directory, an absolute path) reads better as just the filename than as a

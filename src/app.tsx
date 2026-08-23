@@ -1,6 +1,6 @@
 import type { WorkItem } from "./types";
 import { linkLabel } from "./profile-links";
-import { BLOG, EDUCATION, EXPERIENCE, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
+import { BLOG, CERTIFICATIONS, COURSES, EDUCATION, EXPERIENCE, SITE_CONFIG, SITE_ORIGIN, SITE_PROFILE, SKILL_CATEGORIES, WORK } from "./generated/content";
 import { Body } from "./content/Body";
 import { buildEvidencePack } from "./fit/evidence";
 import { FitPage } from "./fit/FitPage";
@@ -257,7 +257,7 @@ function App() {
   const visibleWork = WORK.filter((w) => w.visible !== false);
   const visibleBlog = BLOG.filter((b) => b.visible !== false);
   const docs = React.useMemo(
-    () => buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE),
+    () => buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE, EDUCATION),
     [],
   );
   const kg = React.useMemo(
@@ -417,6 +417,54 @@ function App() {
     );
   }
 
+  /**
+   * "Built here: A, B" — the published work behind a role, a course or a
+   * credential.
+   *
+   * Filtered against WORK rather than trusted: `projects:` is a curated list
+   * of slugs, and an unpublished draft must not leak a dangling link onto the
+   * page. Local to this component because Link is.
+   */
+  function builtHere(slugs: string[]) {
+    const linked = slugs
+      .map((slug) => WORK.find((w) => w.slug === slug && w.visible !== false))
+      .filter(Boolean) as WorkItem[];
+    if (!linked.length) return null;
+    return React.createElement(
+      "p",
+      { className: "muted" },
+      "Built here: ",
+      linked.map((w, i) =>
+        React.createElement(
+          React.Fragment,
+          { key: w.slug },
+          i ? ", " : null,
+          React.createElement(Link, { href: "/work/" + w.slug }, w.title),
+        ),
+      ),
+    );
+  }
+
+  /**
+   * Skill chips.
+   *
+   * On a course or a credential every label here survived the evidence gate in
+   * packages/content/emit_site.py: it is claimed by one of the projects linked
+   * beside it. The syllabus vocabulary that did NOT survive is not hidden by
+   * this function — it never reached the bundle at all. `bun run skills:gap`
+   * reads the YAML to print it.
+   */
+  function skillTags(skills: string[]) {
+    if (!skills.length) return null;
+    return React.createElement(
+      "ul",
+      { className: "tags" },
+      skills.map((s) =>
+        React.createElement("li", { key: s }, React.createElement("span", { className: "tag" }, s)),
+      ),
+    );
+  }
+
   function setWorkSkills(next: string[]) {
     navigate("/work" + searchFromSkills(next));
   }
@@ -542,6 +590,8 @@ function App() {
   } else if (view.name === "experience") {
     const roles = EXPERIENCE.filter((e) => e.visible !== false);
     const credentials = EDUCATION.filter((e) => e.visible !== false);
+    const courses = COURSES.filter((c) => c.visible !== false);
+    const certifications = CERTIFICATIONS.filter((c) => c.visible !== false);
     body = React.createElement(
       "section",
       { className: "page" },
@@ -579,42 +629,9 @@ function App() {
                       ),
                     )
                   : null,
-                // Curated, not date-inferred (ADR 027). Only links to work that
-                // is actually published, so an unpublished draft cannot leak a
-                // dangling link onto the career page.
-                (() => {
-                  const linked = e.projects
-                    .map((slug) => WORK.find((w) => w.slug === slug && w.visible !== false))
-                    .filter(Boolean) as WorkItem[];
-                  return linked.length
-                    ? React.createElement(
-                        "p",
-                        { className: "muted" },
-                        "Built here: ",
-                        linked.map((w, i) =>
-                          React.createElement(
-                            React.Fragment,
-                            { key: w.slug },
-                            i ? ", " : null,
-                            React.createElement(Link, { href: "/work/" + w.slug }, w.title),
-                          ),
-                        ),
-                      )
-                    : null;
-                })(),
-                e.skills.length
-                  ? React.createElement(
-                      "ul",
-                      { className: "tags" },
-                      e.skills.map((s) =>
-                        React.createElement(
-                          "li",
-                          { key: s },
-                          React.createElement("span", { className: "tag" }, s),
-                        ),
-                      ),
-                    )
-                  : null,
+                // Curated, not date-inferred (ADR 027).
+                builtHere(e.projects),
+                skillTags(e.skills),
               ),
             ),
           )
@@ -646,6 +663,104 @@ function App() {
                         ),
                       )
                     : null,
+                ),
+              ),
+            ),
+          )
+        : null,
+      /*
+       * Coursework, and the rule that makes it worth publishing.
+       *
+       * The outcomes are the institution's words, quoted from the syllabus.
+       * The chips beneath them are not: every one is a label the course taught
+       * AND a linked project already claims. What the course taught and
+       * nothing here demonstrates is absent from this page and from the
+       * bundle — it is a writing queue, not a credential.
+       */
+      courses.length
+        ? React.createElement(
+            React.Fragment,
+            null,
+            React.createElement("h2", null, "Coursework"),
+            React.createElement(
+              "ul",
+              { className: "card-list" },
+              courses.map((c) =>
+                React.createElement(
+                  "li",
+                  { key: c.slug, id: c.slug, className: "card" },
+                  React.createElement("h3", null, `${c.code} — ${c.name}`),
+                  React.createElement(
+                    "p",
+                    { className: "muted" },
+                    [c.institution, c.completed].filter(Boolean).join(" · "),
+                  ),
+                  c.outcomes.length
+                    ? React.createElement(
+                        "ul",
+                        { className: "prose" },
+                        c.outcomes.map((o, i) =>
+                          React.createElement("li", { key: i }, richText(o, navigate)),
+                        ),
+                      )
+                    : null,
+                  builtHere(c.projects),
+                  skillTags(c.skills),
+                ),
+              ),
+            ),
+          )
+        : null,
+      /*
+       * Certifications, where the evidence runs the other way.
+       *
+       * The credential is the one fact on this site that does not rest on the
+       * author's word — a reader can check it with the issuer and never trust
+       * them at all. The capability is the opposite: an exam assumes hands-on
+       * experience rather than verifying it. So the ID is rendered and the
+       * skills are gated, exactly as a course's are.
+       */
+      certifications.length
+        ? React.createElement(
+            React.Fragment,
+            null,
+            React.createElement("h2", null, "Certifications"),
+            React.createElement(
+              "ul",
+              { className: "card-list" },
+              certifications.map((c) =>
+                React.createElement(
+                  "li",
+                  { key: c.slug, id: c.slug, className: "card" },
+                  React.createElement("h3", null, c.name),
+                  React.createElement(
+                    "p",
+                    { className: "muted" },
+                    [c.issuer, c.earned, c.expires ? `expires ${c.expires}` : ""]
+                      .filter(Boolean)
+                      .join(" · "),
+                  ),
+                  c.credentialId || c.verifyUrl
+                    ? React.createElement(
+                        "p",
+                        { className: "muted" },
+                        c.credentialId ? `Credential ${c.credentialId}` : null,
+                        c.credentialId && c.verifyUrl ? " · " : null,
+                        c.verifyUrl
+                          ? React.createElement(
+                              "a",
+                              {
+                                href: c.verifyUrl,
+                                target: "_blank",
+                                rel: "noopener noreferrer",
+                              },
+                              "Verify with the issuer",
+                            )
+                          : null,
+                      )
+                    : null,
+                  builtHere(c.projects),
+                  skillTags(c.skills),
                 ),
               ),
             ),

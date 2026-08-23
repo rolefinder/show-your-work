@@ -143,6 +143,29 @@ def main() -> int:
             }
         )
 
+    # Mirrors the education block in src/fit/evidence.ts — last, achievements
+    # only, `titleText` empty so the credential names the citation without
+    # matching. ADR 027's degree-name objection is upheld, not revisited.
+    for path in corpus_files("education"):
+        e = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if e.get("visible") is False:
+            continue
+        claims = [normalize(a) for a in (e.get("achievements") or []) if normalize(a)]
+        if not claims:
+            continue
+        docs.append(
+            {
+                "id": f"education:{e['slug']}",
+                "kind": "education",
+                "title": str(e.get("credential") or "").strip(),
+                "titleText": "",
+                "url": f"/experience#{e['slug']}",
+                "text": " ".join(claims),
+                "skills": [],
+                "claims": claims,
+            }
+        )
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({"version": 1, "docs": docs}, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)} ({len(docs)} docs)")

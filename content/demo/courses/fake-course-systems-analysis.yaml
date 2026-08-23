@@ -1,0 +1,23 @@
+slug: fake-course-systems-analysis
+institution: Fake State University
+code: FIS 306
+name: Systems Analysis and Design
+completed: "2022-12"
+
+outcomes:
+  - Model an existing process as a data flow diagram and identify where it loses information.
+  - Specify a system's requirements from interviews with the people who would use it.
+  - Evaluate a proposed design against the constraints of the organization that would run it.
+
+# `requirements analysis` is the whole course and still does not publish: no
+# project on this site claims it. That is not a gap in the resume — it is the
+# next thing to write up.
+taught:
+  - CI/CD
+  - GitHub Actions
+  - requirements analysis
+
+projects:
+  - fake-project-merge-gate
+
+visible: true

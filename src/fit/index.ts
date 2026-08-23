@@ -36,6 +36,9 @@ export function retrieveEvidence(
 
   for (const doc of docs) {
     const corpus = doc.text.toLowerCase();
+    // A doc may name its own citation without that name being matchable — see
+    // EvidenceDoc.titleText. Absent means the title matches, as it always did.
+    const titleLc = (doc.titleText ?? doc.title).toLowerCase();
     const skillLc = doc.skills.map((s) => s.toLowerCase());
     let score = 0;
 
@@ -82,7 +85,7 @@ export function retrieveEvidence(
         score += weights.corpus;
         if (!snippetQuote) snippetQuote = snippetAround(doc.text, term);
       }
-      if (doc.title.toLowerCase().includes(term)) score += weights.title;
+      if (titleLc && titleLc.includes(term)) score += weights.title;
     }
 
     let quote = "";

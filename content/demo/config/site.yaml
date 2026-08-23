@@ -47,6 +47,21 @@ ai_crawlers:
   search: true
   training: true
 
+# Optional. How long a project or post stays "fresh" before `bun run ready`
+# says so. Unset means no staleness warnings at all — this is opt-in, because
+# how fast your field moves is your call, not the template's.
+#
+# It is a WARNING and never a blocker: stale work still builds a working site,
+# and it is the one finding here you cannot fix by editing a file. Read from
+# the `date:` scalar you authored — never file mtime (a fresh clone rewrites
+# every one) and never git history (CI shallow-clones and loses it).
+#
+# A certification's `expires:` is checked whether or not this is set. That one
+# is not a policy anybody chose; it is a date the issuer published.
+#
+# freshness:
+#   stale_after_days: 365
+
 # Demo mode. TRUE ships the "this corpus is fictional" chrome (home eyebrow,
 # footer line). Set to false — and clear extraCaveats in config/fit.yaml — the
 # moment content/ holds your real work.

@@ -126,6 +126,79 @@ export type EducationItem = {
   visible: boolean;
 };
 
+/**
+ * One course you passed. `content/courses/<slug>.yaml`.
+ *
+ * The authority already wrote the skill list. A syllabus's learning-outcomes
+ * section — "upon successful completion of this course, students will be able
+ * to…" — is written by the faculty who teach it, reviewed through curriculum
+ * approval, and published before the semester starts. Nobody has to invent a
+ * taxonomy; it has to be read.
+ *
+ * But a syllabus establishes what a course TAUGHT, not what a student DID.
+ * Passing a database course is not evidence of having modelled a schema. So
+ * `taught` is candidate vocabulary and never publishes on its own: `skills`
+ * below is DERIVED at emit time as the subset of `taught` that a linked
+ * project already claims. The remainder never reaches this type at all — see
+ * `bun run skills:gap`, which reads the YAML instead.
+ */
+export type CourseItem = {
+  slug: string;
+  institution: string;
+  /** Catalogue code, e.g. "MIS 315". Rendered; deliberately not matchable. */
+  code: string;
+  /** Course title as the institution publishes it. */
+  name: string;
+  /** Free text, e.g. "2022-05" or "Spring 2022". Rendered verbatim. */
+  completed: string;
+  /** Learning outcomes, quoted from the syllabus rather than paraphrased. */
+  outcomes: string[];
+  /** The gated subset of `taught` — every label here is claimed by a linked
+      project. Emitted, not authored: `taught:` is what the YAML carries. */
+  skills: string[];
+  /** Work slugs produced in this course. A visible course needs at least one:
+      a transcript line is not a portfolio entry. */
+  projects: string[];
+  visible: boolean;
+};
+
+/**
+ * One professional certification. `content/certifications/<slug>.yaml`.
+ *
+ * The same kind of source as a course with its evidential shape inverted. A
+ * syllabus publishes a checkable curriculum and an unverifiable pass; a
+ * certification publishes a **verifiable pass** — a credential ID anyone can
+ * check with the issuer, the only fact on the site that does not rest on the
+ * candidate's word — and an unverifiable capability. Issuers say so plainly:
+ * AWS frames a year of hands-on experience as something its exam assumes
+ * rather than something it verifies.
+ *
+ * So `skills` is gated exactly as a course's is, and the credential itself is
+ * an accolade rather than evidence.
+ */
+export type CertificationItem = {
+  slug: string;
+  /** Awarding body, e.g. "Amazon Web Services". */
+  issuer: string;
+  /** Certification name as the issuer publishes it. */
+  name: string;
+  /** YYYY-MM or YYYY-MM-DD. */
+  earned: string;
+  /** YYYY-MM or YYYY-MM-DD. The one machine-readable decay date in the whole
+      corpus — every other content type makes you infer staleness from a date.
+      `bun run ready` warns when it has passed. */
+  expires?: string;
+  /** Public verification number printed on the certificate. Not a secret: it
+      exists to be handed to someone who wants to check it with the issuer. */
+  credentialId?: string;
+  /** Where the issuer verifies it. https only. */
+  verifyUrl?: string;
+  /** Gated subset of `taught` — same rule as a course. */
+  skills: string[];
+  projects: string[];
+  visible: boolean;
+};
+
 export type FitStatus =
   | "aligned"
   | "partial"
@@ -158,9 +231,18 @@ export type FitBrief = {
 
 export type EvidenceDoc = {
   id: string;
-  kind: "about" | "work" | "blog" | "experience";
+  kind: "about" | "work" | "blog" | "experience" | "education";
   title: string;
   url: string;
+  /** The matchable half of `title`, when the two differ.
+   *
+   *  `title` is what a citation is labelled with, and it normally scores too.
+   *  A credential name cannot: "BS, Information Systems" is a bag of generic
+   *  tokens that would hit half the postings in the industry, which is the
+   *  collision ADR 027 refused education over. Education therefore names its
+   *  own citation and matches on nothing but its achievements — `titleText: ""`.
+   *  Absent means the title is matchable, which is every other kind. */
+  titleText?: string;
   text: string;
   skills: string[];
   /** Self-contained statements (outcome + evidence bullets) preferred as quotes. */

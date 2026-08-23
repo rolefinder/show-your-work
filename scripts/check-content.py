@@ -52,6 +52,8 @@ REQUIRED = {
     "blog": ["slug", "title", "summary", "body", "skills"],
     "experience": ["slug", "organization", "role", "start", "summary", "highlights"],
     "education": ["slug", "institution", "credential", "date"],
+    "courses": ["slug", "institution", "code", "name", "completed", "outcomes", "taught"],
+    "certifications": ["slug", "issuer", "name", "earned", "taught"],
 }
 PROFILE_REQUIRED = ["name", "tagline", "location", "email", "summary", "skills"]
 
@@ -119,19 +121,78 @@ work = collect("work")
 blog = collect("blog")
 experience = collect("experience")
 education = collect("education")
+courses = collect("courses")
+certifications = collect("certifications")
 
-# ---------- experience -> work references resolve ----------
+# ---------- `projects:` references resolve ----------
 # Same failure as a dangling cross-link, by a different route: `projects:` is a
-# curated list of slugs, so a renamed or unpublished project leaves the career
-# page advertising work that is not there.
-for slug, data in experience.items():
-    for target in data.get("projects") or []:
-        if str(target) not in work:
+# curated list of slugs, so a renamed or unpublished project leaves the page
+# advertising work that is not there. Three corpora carry the field now, and it
+# means the same thing in each.
+for kind, items in (("experience", experience), ("courses", courses), ("certifications", certifications)):
+    for slug, data in items.items():
+        for target in data.get("projects") or []:
+            if str(target) not in work:
+                errors.append(
+                    f"{corpus_dir(kind).relative_to(ROOT).as_posix()}/{slug}.yaml: projects lists "
+                    f"{str(target)!r} but no {target}.yaml exists in "
+                    f"{corpus_dir('work').relative_to(ROOT).as_posix()}/ "
+                    "- this publishes a link that 404s"
+                )
+
+# ---------- the evidence gate ----------
+# A course or credential may only claim a skill that one of its own linked
+# projects already claims. packages/content/emit_site.py derives that subset, so
+# an unevidenced label cannot reach the site whatever this gate says — nothing
+# here needs to block on one. What DOES need saying out loud is the two ways
+# the derivation ends up empty, because both look identical on the page (a
+# course with no skills) and have opposite fixes.
+for kind, items in (("courses", courses), ("certifications", certifications)):
+    where = corpus_dir(kind).relative_to(ROOT).as_posix()
+    for slug, data in items.items():
+        visible = data.get("visible", True)
+        projects = [str(t) for t in (data.get("projects") or [])]
+        if visible and not projects:
             errors.append(
-                f"content/experience/{slug}.yaml: projects lists {str(target)!r} but no "
-                f"{target}.yaml exists in {corpus_dir('work').relative_to(ROOT).as_posix()}/ "
-                "- the role would link to a page that 404s"
+                f"{where}/{slug}.yaml: a visible entry needs at least one `projects:` slug. "
+                "A transcript line is not a portfolio entry — attach it to published work, "
+                "or set `visible: false` and keep it as a writing-queue entry."
             )
+            continue
+        if not visible:
+            continue
+        evidenced = {
+            str(s).lower()
+            for t in projects
+            for s in (work.get(t, {}).get("skills") or [])
+            if work.get(t, {}).get("visible", True)
+        }
+        claimed = [str(t) for t in (data.get("taught") or []) if str(t).lower() in evidenced]
+        if (data.get("taught") or []) and not claimed:
+            warnings.append(
+                f"{where}/{slug}.yaml publishes no skills: none of its `taught:` labels appear "
+                f"on {', '.join(projects)}. Either the label is spelled differently on the "
+                "project, or that work is not written up yet (`bun run skills:gap`)."
+            )
+
+# ---------- certification shape ----------
+# `earned:`/`expires:` are the only machine-read dates in the corpus — `bun run
+# ready` warns off `expires`. A free-text date there would silently never warn.
+for slug, data in certifications.items():
+    where = f"{corpus_dir('certifications').relative_to(ROOT).as_posix()}/{slug}.yaml"
+    for field in ("earned", "expires"):
+        value = data.get(field)
+        if value is not None and not DATE.match(str(value)):
+            errors.append(
+                f"{where}: {field} {value!r} is not YYYY-MM or YYYY-MM-DD. "
+                "These two are read by the build, not just rendered."
+            )
+    verify = str(data.get("verify_url") or "").strip()
+    if verify and not verify.startswith("https://"):
+        errors.append(
+            f"{where}: verify_url must be https:// - a verification link served over "
+            f"http is not one, got {verify!r}"
+        )
 
 def link_scan_text(data: dict, field: str) -> str:
     """The text a link check should scan, for one field.
@@ -189,17 +250,32 @@ for kind, items in (("work", work), ("blog", blog), ("experience", experience)):
             used.setdefault(str(s), []).append(
                 f"{corpus_dir(kind).relative_to(ROOT).as_posix()}/{slug}.yaml"
             )
+
+# A course's `taught:` labels are the same vocabulary and fork it the same way,
+# so they are spell-checked below — but they are held apart from `used` on
+# purpose. `used` drives the skills.yaml `map` warning, which is about which
+# CATEGORY a chip renders under, and a taught-but-unevidenced label renders
+# nowhere. Warning that it lacks a category would ask the author to file
+# something that has no page to appear on.
+vocab: dict[str, list[str]] = {k: list(v) for k, v in used.items()}
+for kind, items in (("courses", courses), ("certifications", certifications)):
+    for slug, data in items.items():
+        for s in data.get("taught") or []:
+            vocab.setdefault(str(s), []).append(
+                f"{corpus_dir(kind).relative_to(ROOT).as_posix()}/{slug}.yaml"
+            )
 # profile.yaml's skills are part of the same vocabulary: they render on /about
 # AND become the `about` doc's skills in the Fit evidence pack. A typo split
 # between the profile and a project would otherwise pass this gate and still
 # fork Fit's matching.
 for s in (profile or {}).get("skills") or []:
     used.setdefault(str(s), []).append(rel(profile_path))
+    vocab.setdefault(str(s), []).append(rel(profile_path))
 
 # Near-duplicates: same skill differing only by case or punctuation is almost
 # always a typo, and it forks the taxonomy silently.
 buckets: dict[str, set[str]] = {}
-for label in used:
+for label in vocab:
     key = re.sub(r"[^a-z0-9]", "", label.lower())
     buckets.setdefault(key, set()).add(label)
 for key, variants in sorted(buckets.items()):
@@ -233,7 +309,8 @@ if errors:
 
 print(
     f"check-content: ok ({len(work)} work, {len(blog)} blog, {len(experience)} experience, "
-    f"{len(education)} education, {len(used)} skills"
+    f"{len(education)} education, {len(courses)} courses, {len(certifications)} certifications, "
+    f"{len(vocab)} skills"
     + (f", {len(warnings)} warning(s)" if warnings else "")
     + ")"
 )

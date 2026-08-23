@@ -1,0 +1,35 @@
+slug: fake-cert-platform-associate
+issuer: Fake Cloud
+name: Fake Cloud Certified Platform Engineer – Associate
+earned: "2026-03"
+
+# The one machine-readable decay date in the corpus. Every other content type
+# makes you infer staleness from a date; this one states it, so `bun run ready`
+# can warn once it has passed.
+expires: "2029-03"
+
+# Public verification. The number is printed on the certificate and exists to
+# be handed to someone who wants to check it — it is not a secret, and nothing
+# here ever holds one.
+credential_id: FAKE-0000-0000
+verify_url: https://example.com/verify
+
+# Gated exactly as a course is, and for a sharper reason. A certification
+# publishes a verifiable PASS and an unverifiable CAPABILITY: issuers are candid
+# that a year of hands-on work is what their exam assumes rather than what it
+# verifies. So the credential is an accolade, and the skills still have to be
+# earned by something published.
+#
+# `incident response` is on the exam guide and on nothing published here.
+taught:
+  - Cloudflare Pages
+  - CI/CD
+  - incident response
+
+# A certification earned by BUILDING arrives with this list populated. One
+# earned by revising does not, and the schema shows the difference rather than
+# flattening it.
+projects:
+  - fake-project-merge-gate
+
+visible: true
