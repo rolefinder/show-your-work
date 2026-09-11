@@ -50,7 +50,7 @@ type GraphCanvasProps = {
   forces?: PortfolioGraphForces;
   compact?: boolean;
   onNavigate?: (meta: KgNode) => void;
-  graphRef?: React.MutableRefObject<PortfolioGraphHandle | null>;
+  graphRef?: { current: PortfolioGraphHandle | null };
 };
 
 export function GraphCanvas(props: GraphCanvasProps) {
