@@ -50,6 +50,7 @@ type GraphCanvasProps = {
   forces?: PortfolioGraphForces;
   compact?: boolean;
   onNavigate?: (meta: KgNode) => void;
+  graphRef?: React.MutableRefObject<PortfolioGraphHandle | null>;
 };
 
 export function GraphCanvas(props: GraphCanvasProps) {
@@ -69,6 +70,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
       forces: props.forces,
       onNavigate: props.onNavigate,
     });
+    if (props.graphRef) props.graphRef.current = engineRef.current;
 
     const onResize = () => engineRef.current?.resize();
     window.addEventListener("resize", onResize);
@@ -76,6 +78,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
       window.removeEventListener("resize", onResize);
       engineRef.current?.destroy();
       engineRef.current = null;
+      if (props.graphRef) props.graphRef.current = null;
     };
     // Remount when topology identity changes; forces via update below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,12 +154,7 @@ type GraphPageProps = {
 };
 
 export function GraphPage(props: GraphPageProps) {
-  const [gravity, setGravity] = React.useState(0.55);
-  const forces = React.useMemo(
-    () => ({ gravity, scalingRatio: 12, hubPull: 0.38, macroRingBase: 180 }),
-    [gravity],
-  );
-
+  const graphRef = React.useRef<PortfolioGraphHandle | null>(null);
   const ready = typeof window !== "undefined" && !!window.SYWPortfolioGraph?.create;
 
   return React.createElement(
@@ -167,7 +165,7 @@ export function GraphPage(props: GraphPageProps) {
     React.createElement(
       "p",
       { className: "lede" },
-      "CSP-safe Sigma + Graphology engine. Forces come from typed opts.forces (no window globals).",
+      "How published work, skills, and writing connect. Click a node to open the page.",
     ),
     !ready
       ? React.createElement(
@@ -180,25 +178,19 @@ export function GraphPage(props: GraphPageProps) {
       "div",
       { className: "graph-toolbar" },
       React.createElement(
-        "label",
-        null,
-        "Gravity ",
-        React.createElement("input", {
-          type: "range",
-          min: 0.2,
-          max: 1.2,
-          step: 0.05,
-          value: gravity,
-          onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-            setGravity(Number(e.target.value)),
-        }),
-        React.createElement("span", { className: "muted" }, String(gravity)),
+        "button",
+        {
+          type: "button",
+          className: "btn secondary",
+          onClick: () => graphRef.current?.fitView(),
+        },
+        "Fit",
       ),
     ),
     React.createElement(GraphCanvas, {
       nodes: props.nodes,
       edges: props.edges,
-      forces,
+      graphRef,
       onNavigate: (meta) => {
         if (meta.href) props.onNavigate(meta.href);
       },
@@ -206,7 +198,7 @@ export function GraphPage(props: GraphPageProps) {
     React.createElement(
       "p",
       { className: "muted graph-hint" },
-      `${props.nodes.length} nodes · ${props.edges.length} edges · drag nodes · double-click canvas to fit`,
+      `${props.nodes.length} nodes · ${props.edges.length} edges · drag nodes · Fit shows everything`,
     ),
   );
 }

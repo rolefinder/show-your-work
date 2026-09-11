@@ -7,6 +7,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveForces, DEFAULT_FORCES } from "../graph/forces.mjs";
+import { framedFitState, FIT_PAD_FULL, FIT_PAD_COMPACT } from "../graph/camera-fit.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bundle = join(root, "assets", "graph-engine.js");
@@ -44,8 +45,24 @@ if (plain.gravity !== DEFAULT_FORCES.gravity) {
   process.exit(1);
 }
 
+const fullFit = framedFitState(false);
+if (fullFit.x !== 0.5 || fullFit.y !== 0.5 || fullFit.angle !== 0) {
+  console.error("FAIL: framed fit must center the framed bbox", fullFit);
+  process.exit(1);
+}
+if (fullFit.ratio !== FIT_PAD_FULL || fullFit.ratio <= 1) {
+  console.error("FAIL: full-graph fit ratio must zoom out past 1 for padding", fullFit);
+  process.exit(1);
+}
+const compactFit = framedFitState(true);
+if (compactFit.ratio !== FIT_PAD_COMPACT || compactFit.ratio <= fullFit.ratio) {
+  console.error("FAIL: compact fit needs more padding than the full page", compactFit);
+  process.exit(1);
+}
+
 console.log("graph-smoke ok", {
   bundleBytes: src.length,
   gravity: custom.gravity,
   compactScaling: compact.scalingRatio,
+  fitRatio: fullFit.ratio,
 });

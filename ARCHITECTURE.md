@@ -161,6 +161,7 @@ show-your-work/
 ├── graph/                       ▓ WebGL engine, bundled to a self-hosted file
 │   ├── index.mjs                  attaches window.SYWPortfolioGraph
 │   ├── engine.mjs                 Sigma lifecycle, interaction, camera
+│   ├── camera-fit.mjs             Sigma v3 framed camera: show the whole graph
 │   ├── layout.mjs                 Graphology build, node color/size, view filter
 │   ├── forces.mjs                 ForceAtlas2 presets (default vs compact)
 │   └── theme.mjs                  reads pg-* CSS vars via canvas readback

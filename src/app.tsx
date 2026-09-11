@@ -563,7 +563,7 @@ function App() {
         : null,
       React.createElement(SkillBank, {
         groups: homeSkillGroups,
-        intro: "Every skill across work and blog, grouped by tenant config. Click one to open Work filtered to that skill.",
+        intro: "Every skill across work and writing. Click one to open Work filtered to that skill.",
       }),
     );
   } else if (view.name === "about") {

@@ -7,43 +7,18 @@ import { NodeCircleProgram, EdgeLineProgram } from "sigma/rendering";
 import { buildGraphology, PG_LAYER_IDS } from "./layout.mjs";
 import { readTheme } from "./theme.mjs";
 import { resolveForces } from "./forces.mjs";
+import { framedFitState } from "./camera-fit.mjs";
 
+/**
+ * Show every node. Returns false when the canvas has no size yet so the
+ * caller can retry after layout.
+ */
 function fitCamera(sigma, graph, compact) {
-  if (!sigma || !graph || graph.order === 0) return;
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  graph.forEachNode((id) => {
-    const x = graph.getNodeAttribute(id, "x");
-    const y = graph.getNodeAttribute(id, "y");
-    if (x < minX) minX = x;
-    if (x > maxX) maxX = x;
-    if (y < minY) minY = y;
-    if (y > maxY) maxY = y;
-  });
-  const cx = (minX + maxX) / 2;
-  const cy = (minY + maxY) / 2;
-  const w = Math.max(maxX - minX, 40);
-  const h = Math.max(maxY - minY, 40);
-  const camera = sigma.getCamera();
+  if (!sigma || !graph || graph.order === 0) return false;
   const { width, height } = sigma.getDimensions();
-  const pad = compact ? 1.35 : 1.2;
-  const ratio = Math.max((w * pad) / Math.max(width, 1), (h * pad) / Math.max(height, 1));
-  // Sigma v3 framed space: normalize graph coords into camera x/y ∈ ~[0,1]
-  camera.setState({ x: 0.5, y: 0.5, ratio: Math.max(ratio, 0.08), angle: 0 });
-  // Re-center using graph→viewport mapping after first paint
-  try {
-    const gp = sigma.graphToViewport({ x: cx, y: cy });
-    const midX = width / 2;
-    const midY = height / 2;
-    const dx = (midX - gp.x) / width;
-    const dy = (midY - gp.y) / height;
-    const cur = camera.getState();
-    camera.setState({ ...cur, x: cur.x - dx * cur.ratio, y: cur.y - dy * cur.ratio });
-  } catch {
-    /* ignore */
-  }
+  if (width < 2 || height < 2) return false;
+  sigma.getCamera().setState(framedFitState(compact));
+  return true;
 }
 
 /**
@@ -142,6 +117,18 @@ export function createPortfolioGraph(container, opts) {
     sigma.refresh();
   };
 
+  let fitRetry = 0;
+  const tryFit = () => {
+    if (!sigma) return;
+    if (fitCamera(sigma, graph, state.compact)) {
+      fitRetry = 0;
+      return;
+    }
+    if (fitRetry++ < 12 && typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(tryFit);
+    }
+  };
+
   function nodeColorSafe(meta, th, hot) {
     if (hot) return th.here;
     if (meta.orphan) return th.orphan;
@@ -221,7 +208,7 @@ export function createPortfolioGraph(container, opts) {
 
   sigma.on(
     "doubleClickStage",
-    guard("dbl", () => fitCamera(sigma, graph, state.compact)),
+    guard("dbl", () => tryFit()),
   );
 
   sigma.on(
@@ -260,7 +247,7 @@ export function createPortfolioGraph(container, opts) {
   );
 
   applyReducers();
-  fitCamera(sigma, graph, state.compact);
+  tryFit();
 
   const rebuild = () => {
     state.hovered = null;
@@ -284,13 +271,19 @@ export function createPortfolioGraph(container, opts) {
     viewMeta.viewEdges = built.viewEdges.length;
     sigma.setGraph(graph);
     applyReducers();
-    fitCamera(sigma, graph, state.compact);
+    fitRetry = 0;
+    tryFit();
   };
 
   const refit = () => {
+    if (!sigma) return;
     sigma.resize();
-    fitCamera(sigma, graph, state.compact);
+    tryFit();
   };
+
+  const ro =
+    typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => refit()) : null;
+  if (ro) ro.observe(container);
 
   return {
     stats: () => ({ ...viewMeta, forces: { ...state.forces } }),
@@ -340,6 +333,7 @@ export function createPortfolioGraph(container, opts) {
       else applyReducers();
     },
     destroy() {
+      if (ro) ro.disconnect();
       try {
         [...container.querySelectorAll("canvas")].forEach((c) => {
           const gl = c.getContext("webgl") || c.getContext("webgl2");
