@@ -89,6 +89,12 @@ if (engineSrc.includes("pg-node-glow") || engineSrc.includes("graphToViewport"))
   process.exit(1);
 }
 
+const graphCss = readFileSync(join(root, "tokens", "graph.css"), "utf8");
+if (!graphCss.includes("canvas.sigma-mouse") || !graphCss.includes("position: absolute")) {
+  console.error("FAIL: graph.css must overlay Sigma canvases; inline styles are CSP-blocked");
+  process.exit(1);
+}
+
 console.log("graph-smoke ok", {
   bundleBytes: src.length,
   gravity: custom.gravity,

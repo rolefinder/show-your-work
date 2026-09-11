@@ -50,6 +50,20 @@
 
 .pg-host canvas {
   display: block;
+  /* Sigma sizes canvases with element.style, which style-src 'self'
+     strips. Without this overlay the mouse layer sits below the fold and
+     hover never hits a node. */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.pg-host canvas.sigma-mouse {
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
 }
 
 /* Legend swatches live on the page, not the canvas, but they name the
