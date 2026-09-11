@@ -39,6 +39,9 @@ export function readTheme(host) {
     post: v("--pg-post", "#bb9af7"),
     here: v("--pg-here", "#f7768e"),
     orphan: v("--pg-orphan", "#565f89"),
+    dim: v("--pg-dim", "#3a3f4a"),
     link: v("--pg-link", "#414868"),
+    linkHot: v("--pg-link-hot", "#f7768e"),
+    label: v("--pg-label", "#c0caf5"),
   };
 }

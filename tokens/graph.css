@@ -19,12 +19,17 @@
   --pg-orphan: oklch(0.55 0.02 250);
   /* Dull charcoal edges — never light/white, or the hubs disappear. */
   --pg-link: rgb(88 92 100 / 0.42);
+  /* Hovered neighborhood; dim is everyone else, not the orphan hue. */
+  --pg-dim: oklch(0.42 0.02 250);
+  --pg-link-hot: var(--pg-here);
+  --pg-label: oklch(0.86 0.04 250);
   /* Accent marks the current page node; shape still carries the kind. */
   --pg-here: var(--brand);
 }
 
 .pg-page .pg-host,
 .work-graph-viewport.pg-host {
+  position: relative;
   width: 100%;
   height: min(70vh, 560px);
   min-height: 320px;
@@ -45,4 +50,16 @@
 
 .pg-host canvas {
   display: block;
+}
+
+/* Legend swatches live on the page, not the canvas, but they name the
+   same hues the engine reads — one palette, two surfaces. */
+.graph-legend__swatch--work {
+  background: var(--pg-pro);
+}
+.graph-legend__swatch--writing {
+  background: var(--pg-post);
+}
+.graph-legend__swatch--skill {
+  background: var(--pg-skill);
 }

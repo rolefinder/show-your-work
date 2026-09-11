@@ -209,6 +209,53 @@
   color: var(--fg);
 }
 
+.breadcrumb {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.breadcrumb__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.breadcrumb__item:not(:last-child)::after {
+  content: "/";
+  color: var(--fg-muted);
+}
+
+.breadcrumb a {
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover,
+.breadcrumb a:focus-visible {
+  color: var(--fg);
+}
+
+.breadcrumb [aria-current="page"] {
+  color: var(--fg);
+}
+
+.page-byline {
+  margin: calc(var(--space-2) * -1) 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
 .lede {
   max-width: var(--measure-reading);
   font-size: var(--text-lead);
@@ -486,6 +533,13 @@ button.linkish:active {
   font-size: var(--text-h3);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-tight);
+}
+
+.card-link__meta {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
 }
 
 .card-link__summary {
@@ -881,6 +935,16 @@ a.tag:hover {
   gap: var(--space-4);
 }
 
+.graph-layers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .graph-toolbar label {
   display: flex;
   align-items: center;
@@ -888,6 +952,29 @@ a.tag:hover {
   min-height: var(--touch-min);
   font-size: var(--text-body);
   color: var(--fg-muted);
+}
+
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-xs);
+  color: var(--fg-muted);
+}
+
+.graph-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.graph-legend__swatch {
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--radius-pill);
 }
 
 .graph-hint {

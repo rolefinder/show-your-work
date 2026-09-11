@@ -20,8 +20,10 @@ function nodeColor(meta, theme, hot) {
 function nodeSize(meta, degree, compact) {
   const u = compact ? 0.9 : 1.15;
   const r = degree || 0;
-  const minS = 3.2;
-  const maxS = 9.6;
+  /* Pixel sizes: engine uses itemSizesReference "screen", so these stay
+     hoverable after camera fit. Smaller values were graph-space leftovers. */
+  const minS = 6;
+  const maxS = 14;
   const f = Math.min(1, Math.log(1 + r) / Math.log(13));
   return (minS + (maxS - minS) * f) * u;
 }

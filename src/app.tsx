@@ -155,6 +155,56 @@ function ProjectBrief({ item }: { item: WorkItem }) {
   );
 }
 
+type CrumbLink = (props: {
+  href: string;
+  className?: string;
+  children?: React.ReactNode;
+}) => React.ReactElement;
+
+/**
+ * Authored date as a `<time>`. The template never reformats a date it did not
+ * generate — the visible text is the YAML scalar. `dateTime` is set only when
+ * that scalar is already machine-readable.
+ */
+function authoredTime(date?: string): React.ReactElement | null {
+  if (!date) return null;
+  const dateTime = /^\d{4}-\d{2}(-\d{2})?$/.test(date) ? date : undefined;
+  return React.createElement("time", { dateTime }, date);
+}
+
+function Breadcrumb({
+  items,
+  Link,
+}: {
+  items: { href?: string; label: string }[];
+  Link: CrumbLink;
+}) {
+  return React.createElement(
+    "nav",
+    { className: "breadcrumb", "aria-label": "Breadcrumb" },
+    React.createElement(
+      "ol",
+      { className: "breadcrumb__list" },
+      items.map((item, i) => {
+        const last = i === items.length - 1;
+        return React.createElement(
+          "li",
+          { key: `${item.label}-${i}`, className: "breadcrumb__item" },
+          last || !item.href
+            ? React.createElement("span", { "aria-current": last ? "page" : undefined }, item.label)
+            : React.createElement(Link, { href: item.href }, item.label),
+        );
+      }),
+    ),
+  );
+}
+
+function PageByline({ date }: { date?: string }) {
+  const time = authoredTime(date);
+  if (!time) return null;
+  return React.createElement("p", { className: "page-byline" }, time);
+}
+
 /**
  * Skill chip with a native tooltip: the site-wide description, plus how the
  * skill applied on this page when the work item supplies a note. `title` keeps
@@ -547,6 +597,9 @@ function App() {
                     Link,
                     { href: "/work/" + w.slug, className: "card-link u-card-link" },
                     React.createElement("span", { className: "card-link__title" }, w.title),
+                    w.date
+                      ? React.createElement("span", { className: "card-link__meta" }, authoredTime(w.date))
+                      : null,
                     React.createElement("span", { className: "card-link__summary" }, w.summary),
                   ),
                 ),
@@ -803,6 +856,9 @@ function App() {
                   Link,
                   { href: "/work/" + w.slug, className: "card-link u-card-link" },
                   React.createElement("span", { className: "card-link__title" }, w.title),
+                  w.date
+                    ? React.createElement("span", { className: "card-link__meta" }, authoredTime(w.date))
+                    : null,
                   React.createElement("span", { className: "card-link__summary" }, w.summary),
                 ),
               ),
@@ -829,8 +885,16 @@ function App() {
       ? React.createElement(
           "section",
           { className: "page" },
-          React.createElement(Link, { href: "/work", className: "page-back" }, "← Work"),
+          React.createElement(Breadcrumb, {
+            Link,
+            items: [
+              { href: "/", label: "Home" },
+              { href: "/work", label: "Work" },
+              { label: w.title },
+            ],
+          }),
           React.createElement("h1", null, w.title),
+          React.createElement(PageByline, { date: w.date }),
           React.createElement("p", { className: "lede" }, w.summary),
           React.createElement(ProjectBrief, { item: w }),
           React.createElement(Body, { blocks: w.body, navigate }),
@@ -854,6 +918,9 @@ function App() {
               Link,
               { href: "/blog/" + b.slug, className: "card-link u-card-link" },
               React.createElement("span", { className: "card-link__title" }, b.title),
+              b.date
+                ? React.createElement("span", { className: "card-link__meta" }, authoredTime(b.date))
+                : null,
               React.createElement("span", { className: "card-link__summary" }, b.summary),
             ),
           ),
@@ -866,8 +933,16 @@ function App() {
       ? React.createElement(
           "section",
           { className: "page" },
-          React.createElement(Link, { href: "/blog", className: "page-back" }, "← Blog"),
+          React.createElement(Breadcrumb, {
+            Link,
+            items: [
+              { href: "/", label: "Home" },
+              { href: "/blog", label: "Blog" },
+              { label: b.title },
+            ],
+          }),
           React.createElement("h1", null, b.title),
+          React.createElement(PageByline, { date: b.date }),
           React.createElement("p", { className: "lede" }, b.summary),
           React.createElement(Body, { blocks: b.body, navigate }),
         )

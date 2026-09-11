@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveForces, DEFAULT_FORCES } from "../graph/forces.mjs";
 import { framedFitState, FIT_PAD_FULL, FIT_PAD_COMPACT } from "../graph/camera-fit.mjs";
+import { glowDiameter, colorWithAlpha, GLOW_MIN_PX, HOVER_SCALE } from "../graph/hover.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const bundle = join(root, "assets", "graph-engine.js");
@@ -57,6 +58,34 @@ if (fullFit.ratio !== FIT_PAD_FULL || fullFit.ratio <= 1) {
 const compactFit = framedFitState(true);
 if (compactFit.ratio !== FIT_PAD_COMPACT || compactFit.ratio <= fullFit.ratio) {
   console.error("FAIL: compact fit needs more padding than the full page", compactFit);
+  process.exit(1);
+}
+
+if (glowDiameter(0) !== GLOW_MIN_PX || glowDiameter(-1) !== GLOW_MIN_PX) {
+  console.error("FAIL: glow diameter must floor at GLOW_MIN_PX", glowDiameter(0));
+  process.exit(1);
+}
+if (glowDiameter(8) < GLOW_MIN_PX) {
+  console.error("FAIL: typical node glow must be at least the min hit halo", glowDiameter(8));
+  process.exit(1);
+}
+if (HOVER_SCALE <= 1) {
+  console.error("FAIL: hover scale must enlarge the focused node", HOVER_SCALE);
+  process.exit(1);
+}
+const rgba = colorWithAlpha("#f7768e", 0.55);
+if (!rgba.startsWith("rgba(") || !rgba.includes("0.55")) {
+  console.error("FAIL: colorWithAlpha must emit rgba for canvas fill", rgba);
+  process.exit(1);
+}
+
+const engineSrc = readFileSync(join(root, "graph", "engine.mjs"), "utf8");
+if (!engineSrc.includes('itemSizesReference: "screen"')) {
+  console.error("FAIL: graph engine must keep node hit targets screen-sized after fit");
+  process.exit(1);
+}
+if (engineSrc.includes("pg-node-glow") || engineSrc.includes("graphToViewport")) {
+  console.error("FAIL: DOM glow / graphToViewport hover path returned — use canvas drawNodeGlow");
   process.exit(1);
 }
 

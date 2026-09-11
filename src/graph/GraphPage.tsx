@@ -49,6 +49,7 @@ type GraphCanvasProps = {
   edges: KgEdge[];
   forces?: PortfolioGraphForces;
   compact?: boolean;
+  layers?: Partial<Record<"related" | "skills" | "writing", boolean>>;
   onNavigate?: (meta: KgNode) => void;
   graphRef?: { current: PortfolioGraphHandle | null };
 };
@@ -56,6 +57,7 @@ type GraphCanvasProps = {
 export function GraphCanvas(props: GraphCanvasProps) {
   const hostRef = React.useRef<HTMLDivElement | null>(null);
   const engineRef = React.useRef<PortfolioGraphHandle | null>(null);
+  const layersRef = React.useRef(props.layers);
 
   React.useEffect(() => {
     const host = hostRef.current;
@@ -67,6 +69,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
       nodes: props.nodes,
       edges: props.edges,
       compact: props.compact,
+      layers: props.layers,
       forces: props.forces,
       onNavigate: props.onNavigate,
     });
@@ -80,7 +83,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
       engineRef.current = null;
       if (props.graphRef) props.graphRef.current = null;
     };
-    // Remount when topology identity changes; forces via update below.
+    // Remount when topology identity changes; forces/layers via update below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.nodes, props.edges, props.compact, props.onNavigate]);
 
@@ -89,20 +92,28 @@ export function GraphCanvas(props: GraphCanvasProps) {
     engineRef.current.update({ forces: props.forces });
   }, [props.forces]);
 
+  React.useEffect(() => {
+    const prev = layersRef.current;
+    layersRef.current = props.layers;
+    if (!engineRef.current || !props.layers || prev === props.layers) return;
+    engineRef.current.update({ layers: props.layers });
+  }, [props.layers]);
+
   return React.createElement("div", {
     ref: hostRef,
     className: props.compact
       ? "pg-host pg-host--lens work-graph-viewport"
       : "pg-host work-graph-viewport",
     role: "img",
-    "aria-label": "Portfolio knowledge graph",
+    "aria-label":
+      "Portfolio knowledge graph. Hover a node to see its neighbors; click to open the page.",
   });
 }
 
 /**
  * Compact graph embedded on content pages — how the work connects, shown
- * rather than described, with the full view one link away. Labels are
- * suppressed at this size by the engine; the link carries the affordance.
+ * rather than described, with the full view one link away. Labels appear on
+ * hover; the link carries the full-graph affordance.
  *
  * The prerenderer blocks graph-engine.js on non-/graph routes, so this
  * snapshots as an empty host: crawlers get the heading and the link, not a
@@ -153,9 +164,32 @@ type GraphPageProps = {
   onNavigate: (href: string) => void;
 };
 
+type GraphLayerId = "related" | "skills" | "writing";
+
+const LAYER_LABELS: Record<GraphLayerId, string> = {
+  related: "Related work",
+  skills: "Skills",
+  writing: "Writing",
+};
+
+const DEFAULT_LAYERS: Record<GraphLayerId, boolean> = {
+  related: true,
+  skills: true,
+  writing: true,
+};
+
 export function GraphPage(props: GraphPageProps) {
   const graphRef = React.useRef<PortfolioGraphHandle | null>(null);
+  const [layers, setLayers] = React.useState(DEFAULT_LAYERS);
   const ready = typeof window !== "undefined" && !!window.SYWPortfolioGraph?.create;
+
+  const toggleLayer = (id: GraphLayerId) => {
+    setLayers((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      if (!next.related && !next.skills && !next.writing) return prev;
+      return next;
+    });
+  };
 
   return React.createElement(
     "section",
@@ -165,7 +199,7 @@ export function GraphPage(props: GraphPageProps) {
     React.createElement(
       "p",
       { className: "lede" },
-      "How published work, skills, and writing connect. Click a node to open the page.",
+      "How published work, skills, and writing connect. Hover a node to see its neighbors. Click a node to open the page.",
     ),
     !ready
       ? React.createElement(
@@ -178,6 +212,23 @@ export function GraphPage(props: GraphPageProps) {
       "div",
       { className: "graph-toolbar" },
       React.createElement(
+        "fieldset",
+        { className: "graph-layers" },
+        React.createElement("legend", { className: "visually-hidden" }, "Edge layers"),
+        (Object.keys(LAYER_LABELS) as GraphLayerId[]).map((id) =>
+          React.createElement(
+            "label",
+            { key: id },
+            React.createElement("input", {
+              type: "checkbox",
+              checked: layers[id],
+              onChange: () => toggleLayer(id),
+            }),
+            LAYER_LABELS[id],
+          ),
+        ),
+      ),
+      React.createElement(
         "button",
         {
           type: "button",
@@ -187,9 +238,29 @@ export function GraphPage(props: GraphPageProps) {
         "Fit",
       ),
     ),
+    React.createElement(
+      "ul",
+      { className: "graph-legend" },
+      [
+        ["work", "Work"],
+        ["writing", "Writing"],
+        ["skill", "Skill"],
+      ].map(([kind, label]) =>
+        React.createElement(
+          "li",
+          { key: kind, className: "graph-legend__item" },
+          React.createElement("span", {
+            className: `graph-legend__swatch graph-legend__swatch--${kind}`,
+            "aria-hidden": true,
+          }),
+          label,
+        ),
+      ),
+    ),
     React.createElement(GraphCanvas, {
       nodes: props.nodes,
       edges: props.edges,
+      layers,
       graphRef,
       onNavigate: (meta) => {
         if (meta.href) props.onNavigate(meta.href);
@@ -198,7 +269,7 @@ export function GraphPage(props: GraphPageProps) {
     React.createElement(
       "p",
       { className: "muted graph-hint" },
-      `${props.nodes.length} nodes · ${props.edges.length} edges · drag nodes · Fit shows everything`,
+      `${props.nodes.length} nodes · ${props.edges.length} edges · hover for labels · Fit shows everything`,
     ),
   );
 }

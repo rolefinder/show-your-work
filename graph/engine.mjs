@@ -8,6 +8,11 @@ import { buildGraphology, PG_LAYER_IDS } from "./layout.mjs";
 import { readTheme } from "./theme.mjs";
 import { resolveForces } from "./forces.mjs";
 import { framedFitState } from "./camera-fit.mjs";
+import {
+  HOVER_SCALE,
+  LABEL_HIDE_THRESHOLD,
+  drawNodeGlow,
+} from "./hover.mjs";
 
 /**
  * Show every node. Returns false when the canvas has no size yet so the
@@ -42,14 +47,13 @@ export function createPortfolioGraph(container, opts) {
   container.classList.add("pg-host");
   container.innerHTML = "";
   let theme = readTheme(container);
-  container.style.background = theme.canvas;
-  container.style.position = container.style.position || "relative";
 
-  const glow = document.createElement("div");
-  glow.className = "pg-node-glow";
-  glow.style.cssText =
-    "position:absolute;pointer-events:none;opacity:0;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:radial-gradient(circle,rgba(247,118,142,0.55),transparent 70%);z-index:2;transition:opacity .12s";
-  container.appendChild(glow);
+  const labelFont = () => {
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue("--font-sans")
+      .trim();
+    return raw || "system-ui, sans-serif";
+  };
 
   const hostAspect = () => {
     const r = container.getBoundingClientRect();
@@ -77,12 +81,21 @@ export function createPortfolioGraph(container, opts) {
 
   let sigma = new Sigma(graph, container, {
     allowInvalidContainer: true,
-    renderLabels: !state.compact,
-    labelFont: "Segoe UI, sans-serif",
-    labelSize: 11,
-    labelWeight: "500",
-    labelColor: { color: "#c0caf5" },
-    defaultDrawNodeHover: () => {},
+    renderLabels: true,
+    labelFont: labelFont(),
+    labelSize: state.compact ? 11 : 14,
+    labelWeight: "600",
+    labelColor: { color: theme.label },
+    labelRenderedSizeThreshold: LABEL_HIDE_THRESHOLD,
+    hideLabelsOnMove: true,
+    /* Screen-referenced sizes keep hit targets large after camera fit.
+       Default "positions" sizing shrinks every node when ratio > 1. */
+    itemSizesReference: "screen",
+    zoomToSizeRatioFunction: Math.sqrt,
+    enableCameraRotation: false,
+    zIndex: true,
+    stagePadding: state.compact ? 12 : 28,
+    defaultDrawNodeHover: (context, data) => drawNodeGlow(context, data, theme.here),
     nodeProgramClasses: { circle: NodeCircleProgram },
     edgeProgramClasses: { line: EdgeLineProgram },
   });
@@ -97,22 +110,26 @@ export function createPortfolioGraph(container, opts) {
     sigma.setSetting("nodeReducer", (node, data) => {
       const meta = data.meta || {};
       const isHot = hot && (node === hot || neighbor.has(node));
+      const isFocus = hot && node === hot;
       const dim = hot && !isHot;
       return {
         ...data,
-        color: dim ? theme.orphan : nodeColorSafe(meta, theme, isHot && node === hot),
-        label: state.compact && !isHot ? "" : data.label,
-        zIndex: isHot ? 4 : 2,
-        size: data.size * (isHot && node === hot ? 1.25 : 1),
+        color: dim ? theme.dim : nodeColorSafe(meta, theme, isFocus),
+        /* Labels only for the hovered/selected neighborhood — a fitted
+           graph has no readable default labels at this density. */
+        label: isHot ? data.label : "",
+        zIndex: isFocus ? 5 : isHot ? 4 : 2,
+        size: data.size * (isFocus ? HOVER_SCALE : 1),
         hidden: false,
         forceLabel: !!isHot,
+        highlighted: !!isFocus,
       };
     });
     sigma.setSetting("edgeReducer", (edge, data) => {
       if (!hot) return data;
       const [a, b] = graph.extremities(edge);
       const keep = neighbor.has(a) && neighbor.has(b);
-      return { ...data, hidden: !keep, color: keep ? theme.here : data.color };
+      return { ...data, hidden: !keep, color: keep ? theme.linkHot : data.color };
     });
     sigma.refresh();
   };
@@ -138,22 +155,6 @@ export function createPortfolioGraph(container, opts) {
     return meta.pro ? th.pro : th.personal;
   }
 
-  function positionGlow(nodeId) {
-    if (!nodeId || !graph.hasNode(nodeId)) {
-      glow.style.opacity = "0";
-      return;
-    }
-    try {
-      const attrs = graph.getNodeAttributes(nodeId);
-      const p = sigma.graphToViewport({ x: attrs.x, y: attrs.y });
-      glow.style.left = p.x + "px";
-      glow.style.top = p.y + "px";
-      glow.style.opacity = "1";
-    } catch {
-      glow.style.opacity = "0";
-    }
-  }
-
   const guard = (name, fn) => (ev) => {
     try {
       fn(ev);
@@ -171,21 +172,14 @@ export function createPortfolioGraph(container, opts) {
     guard("enterNode", ({ node }) => {
       state.hovered = node;
       applyReducers();
-      positionGlow(node);
     }),
   );
   sigma.on(
     "leaveNode",
     guard("leaveNode", () => {
+      if (isDragging) return;
       state.hovered = null;
       applyReducers();
-      glow.style.opacity = "0";
-    }),
-  );
-  sigma.getCamera().on(
-    "updated",
-    guard("camera", () => {
-      if (state.hovered) positionGlow(state.hovered);
     }),
   );
 
@@ -248,12 +242,21 @@ export function createPortfolioGraph(container, opts) {
 
   applyReducers();
   tryFit();
+  if (typeof requestAnimationFrame === "function") {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!sigma) return;
+        sigma.resize();
+        tryFit();
+      });
+    });
+  }
 
   const rebuild = () => {
     state.hovered = null;
-    glow.style.opacity = "0";
     theme = readTheme(container);
-    container.style.background = theme.canvas;
+    sigma.setSetting("labelColor", { color: theme.label });
+    sigma.setSetting("labelFont", labelFont());
     built = buildGraphology(opts.nodes || [], opts.edges || [], {
       compact: state.compact,
       contextId: state.contextId,
@@ -343,7 +346,6 @@ export function createPortfolioGraph(container, opts) {
       } catch {
         /* ignore */
       }
-      glow.remove();
       sigma.kill();
       sigma = null;
       graph = null;
