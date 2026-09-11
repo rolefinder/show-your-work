@@ -45,7 +45,6 @@ def main() -> int:
                 [
                     str(profile.get("summary") or "").strip(),
                     str(profile.get("tagline") or "").strip(),
-                    " ".join(profile.get("skills") or []),
                 ]
             ),
             "skills": list(profile.get("skills") or []),
@@ -57,9 +56,14 @@ def main() -> int:
         if w.get("visible") is False:
             continue
         # Whole authored statements, preferred over text windows as citations.
+        # `decisions` joins them: it always scored, but was never quotable.
         claims = [
             normalize(c)
-            for c in [w.get("outcome"), *(w.get("evidence") or [])]
+            for c in [
+                w.get("outcome"),
+                *(w.get("evidence") or []),
+                *(w.get("decisions") or []),
+            ]
             if normalize(c)
         ]
         docs.append(
@@ -76,8 +80,6 @@ def main() -> int:
                         body_text(w.get("body")),
                         str(w.get("problem") or "").strip(),
                         *claims,
-                        *[str(d).strip() for d in (w.get("decisions") or [])],
-                        " ".join(w.get("skills") or []),
                     ]
                     if part
                 ),
@@ -106,7 +108,6 @@ def main() -> int:
                         str(b.get("title") or ""),
                         str(b.get("summary") or "").strip(),
                         body_text(b.get("body")),
-                        " ".join(b.get("skills") or []),
                     ]
                 ),
                 "skills": list(b.get("skills") or []),
@@ -134,11 +135,33 @@ def main() -> int:
                         str(e.get("organization") or "").strip(),
                         str(e.get("summary") or "").strip(),
                         *claims,
-                        " ".join(e.get("skills") or []),
                     ]
                     if part
                 ),
                 "skills": list(e.get("skills") or []),
+                "claims": claims,
+            }
+        )
+
+    # Mirrors the education block in src/fit/evidence.ts — last, achievements
+    # only, `titleText` empty so the credential names the citation without
+    # matching. ADR 027's degree-name objection is upheld, not revisited.
+    for path in corpus_files("education"):
+        e = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if e.get("visible") is False:
+            continue
+        claims = [normalize(a) for a in (e.get("achievements") or []) if normalize(a)]
+        if not claims:
+            continue
+        docs.append(
+            {
+                "id": f"education:{e['slug']}",
+                "kind": "education",
+                "title": str(e.get("credential") or "").strip(),
+                "titleText": "",
+                "url": f"/experience#{e['slug']}",
+                "text": " ".join(claims),
+                "skills": [],
                 "claims": claims,
             }
         )

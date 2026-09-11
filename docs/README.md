@@ -43,6 +43,8 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
 | [029](architecture/adr/029-long-form-body-grammar.md) | **Long-form body grammar** — blocks, and why code is not citable |
 | [030](architecture/adr/030-mcp-2026-07-28-conformance.md) | `/api/mcp` speaks **MCP 2026-07-28**, and the era before it — supersedes 024's protocol choice |
 | [031](architecture/adr/031-aeo-crawler-policy.md) | **AEO crawler policy** — per-class robots.txt, llms-full.txt, and the Cloudflare default that blocks it all |
+| [032](architecture/adr/032-curriculum-derived-skills-and-the-evidence-gate.md) | **Curriculum-derived skills and the evidence gate** — a course may only claim what its own published work claims |
+| [033](architecture/adr/033-what-the-matcher-cannot-represent.md) | **What the matcher cannot represent** — duration, and saying so on the row rather than downgrading it |
 
 > ADRs are dated records. Some name file paths from the layout at the time of
 > the decision — the HTML templates moved into `public/`, for instance. The
@@ -65,6 +67,12 @@ Read 015–017 first; they cover most of what you would otherwise have to infer.
   standardization and adopter-UX findings, each with a repro
 - [Design review, 2026-08](strategy/design-review-2026-08.md) — where the visual
   and editorial layer falls short of the dogfood site, each with a repro
+- [Candidate legibility, 2026-08](strategy/candidate-legibility-2026-08.md) —
+  eight defects found in this tree, each with a repro, and the mechanisms that
+  close them: curriculum-derived skills, certifications, the evidence gate,
+  profile draft export, self-audit and freshness. Most are now built — see
+  ADR [032](architecture/adr/032-curriculum-derived-skills-and-the-evidence-gate.md)
+  and [033](architecture/adr/033-what-the-matcher-cannot-represent.md)
 
 ## There is no project-history section
 

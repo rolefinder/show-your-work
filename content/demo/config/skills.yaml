@@ -15,8 +15,6 @@ map:
   TypeScript: Languages & content
   Python: Languages & content
   YAML: Languages & content
-  content pipelines: Languages & content
-  YAML content pipelines: Languages & content
   Fit: Fit & evidence
   evidence: Fit & evidence
   CSS: Interface
@@ -34,7 +32,6 @@ descriptions:
   TypeScript: Typed application and tooling code.
   Python: Content generation and verification tooling.
   YAML: Structured, human-authored content and configuration.
-  content pipelines: Turning authored content into typed, buildable artifacts.
   Fit: Matching a job description against published evidence.
   evidence: Claims that link back to something published rather than asserted.
   CSS: Styling built from design tokens rather than literal values.

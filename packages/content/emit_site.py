@@ -23,6 +23,8 @@ WORK_DIR = corpus_dir("work")
 BLOG_DIR = corpus_dir("blog")
 EXPERIENCE_DIR = corpus_dir("experience")
 EDUCATION_DIR = corpus_dir("education")
+COURSE_DIR = corpus_dir("courses")
+CERTIFICATION_DIR = corpus_dir("certifications")
 OUT = ROOT / "src" / "generated" / "content.ts"
 
 
@@ -317,6 +319,105 @@ def emit_education(items: list[dict[str, Any]]) -> str:
     return f"export const EDUCATION: EducationItem[] = [\n{body}\n];"
 
 
+# ---------------------------------------------------------------------------
+# The evidence gate
+#
+#   A course or credential may only claim a skill that one of its own linked
+#   projects already claims.
+#
+# This is the project's thesis applied to coursework: a transcript line is not
+# a portfolio entry; a transcript line attached to a published artefact is.
+#
+# It runs HERE, at the emit boundary, for two reasons. Deriving it at render
+# time would put the ungated `taught:` list in the browser bundle, where an
+# unevidenced label is one rendering bug away from being published — and the
+# whole point is that it cannot be. And the unevidenced remainder never reaches
+# a build artefact at all: it is the author's writing queue, printed by
+# `bun run skills:gap`, which reads the YAML directly.
+#
+# Three consequences fall out with no further machinery. Courses and
+# certifications introduce no NEW labels, so the one-spelling rule in
+# check-content.py covers them for free. They introduce no new DOCUMENTS into
+# the Fit evidence pack, so no citation can ever resolve to a syllabus or a
+# credential — the citation is always the project. And neither can appear at
+# all unless it produced something published.
+# ---------------------------------------------------------------------------
+
+
+def claimable(taught: Any, project_slugs: Any, work: list[dict[str, Any]]) -> list[str]:
+    """The subset of `taught` that a linked, visible project already claims.
+
+    Case-insensitive, because check-content.py already blocks two spellings of
+    one label — so a case difference here is the same label, not a new one.
+    Authoring order is preserved and the course's own spelling is the one
+    emitted; the project's spelling only has to agree case-insensitively.
+    """
+    linked = {str(s).strip() for s in (project_slugs or [])}
+    evidenced = {
+        str(skill).strip().lower()
+        for w in work
+        if w.get("slug") in linked and w.get("visible", True)
+        for skill in (w.get("skills") or [])
+    }
+    seen: set[str] = set()
+    out: list[str] = []
+    for label in taught or []:
+        text = str(label).strip()
+        key = text.lower()
+        if text and key in evidenced and key not in seen:
+            seen.add(key)
+            out.append(text)
+    return out
+
+
+def emit_course_item(c: dict[str, Any], work: list[dict[str, Any]]) -> str:
+    visible = "true" if c.get("visible", True) else "false"
+    outcomes = [" ".join(str(o).split()) for o in (c.get("outcomes") or []) if str(o).strip()]
+    projects = [str(s).strip() for s in (c.get("projects") or []) if str(s).strip()]
+    return (
+        "  {\n"
+        f"    slug: {ts_string(c['slug'])},\n"
+        f"    institution: {ts_string(str(c.get('institution') or '').strip())},\n"
+        f"    code: {ts_string(str(c.get('code') or '').strip())},\n"
+        f"    name: {ts_string(str(c.get('name') or '').strip())},\n"
+        f"    completed: {ts_string(str(c.get('completed') or '').strip())},\n"
+        f"    outcomes: {ts_string_array(outcomes)},\n"
+        f"    skills: {ts_string_array(claimable(c.get('taught'), projects, work))},\n"
+        f"    projects: {ts_string_array(projects)},\n"
+        f"    visible: {visible},\n"
+        "  }"
+    )
+
+
+def emit_courses(items: list[dict[str, Any]], work: list[dict[str, Any]]) -> str:
+    body = ",\n".join(emit_course_item(c, work) for c in items)
+    return f"export const COURSES: CourseItem[] = [\n{body}\n];"
+
+
+def emit_certification_item(c: dict[str, Any], work: list[dict[str, Any]]) -> str:
+    visible = "true" if c.get("visible", True) else "false"
+    projects = [str(s).strip() for s in (c.get("projects") or []) if str(s).strip()]
+    return (
+        "  {\n"
+        f"    slug: {ts_string(c['slug'])},\n"
+        f"    issuer: {ts_string(str(c.get('issuer') or '').strip())},\n"
+        f"    name: {ts_string(str(c.get('name') or '').strip())},\n"
+        f"    earned: {ts_string(str(c.get('earned') or '').strip())},\n"
+        f"{opt_string('expires', c.get('expires'))}"
+        f"{opt_string('credentialId', c.get('credential_id'))}"
+        f"{opt_string('verifyUrl', c.get('verify_url'))}"
+        f"    skills: {ts_string_array(claimable(c.get('taught'), projects, work))},\n"
+        f"    projects: {ts_string_array(projects)},\n"
+        f"    visible: {visible},\n"
+        "  }"
+    )
+
+
+def emit_certifications(items: list[dict[str, Any]], work: list[dict[str, Any]]) -> str:
+    body = ",\n".join(emit_certification_item(c, work) for c in items)
+    return f"export const CERTIFICATIONS: CertificationItem[] = [\n{body}\n];"
+
+
 def emit_skill_categories(data: dict[str, Any]) -> str:
     order = list(data.get("order") or ["Other"])
     fallback = str(data.get("fallback") or "Other")
@@ -385,6 +486,8 @@ def load_corpus() -> dict[str, Any]:
         "blog": load_yaml_dir(BLOG_DIR),
         "experience": load_yaml_dir(EXPERIENCE_DIR),
         "education": load_yaml_dir(EDUCATION_DIR),
+        "courses": load_yaml_dir(COURSE_DIR),
+        "certifications": load_yaml_dir(CERTIFICATION_DIR),
         "skills_cfg": skills_cfg,
         "site_cfg": site_cfg,
     }
@@ -394,10 +497,20 @@ def render_module(corpus: dict[str, Any]) -> str:
     header = (
         "/* AUTO-GENERATED by packages/content — do not edit by hand.\n"
         "   Source: content/about, content/work, content/blog, content/experience,\n"
-        "   content/education, content/config/skills.yaml, content/config/site.yaml\n"
+        "   content/education, content/courses, content/certifications,\n"
+        "   content/config/skills.yaml, content/config/site.yaml\n"
         "   Regenerate: bun run emit\n"
         "*/\n"
-        'import type { BlogPost, EducationItem, ExperienceItem, SiteConfig, SiteProfile, WorkItem } from "../types";\n'
+        "import type {\n"
+        "  BlogPost,\n"
+        "  CertificationItem,\n"
+        "  CourseItem,\n"
+        "  EducationItem,\n"
+        "  ExperienceItem,\n"
+        "  SiteConfig,\n"
+        "  SiteProfile,\n"
+        "  WorkItem,\n"
+        '} from "../types";\n'
         'import type { SkillCategoryConfig } from "../skills/SkillBank";\n'
         "\n"
     )
@@ -419,6 +532,10 @@ def render_module(corpus: dict[str, Any]) -> str:
         "",
         emit_education(corpus["education"]),
         "",
+        emit_courses(corpus["courses"], corpus["work"]),
+        "",
+        emit_certifications(corpus["certifications"], corpus["work"]),
+        "",
         emit_skill_categories(corpus["skills_cfg"]),
         "",
     ]
@@ -435,5 +552,6 @@ def emit_generated_module(*, dry_run: bool = False) -> str:
     return (
         f"emitted profile + {len(corpus['work'])} work + {len(corpus['blog'])} blog "
         f"+ {len(corpus['experience'])} experience + {len(corpus['education'])} education "
+        f"+ {len(corpus['courses'])} courses + {len(corpus['certifications'])} certifications "
         f"+ skill categories -> {OUT.relative_to(ROOT)}"
     )

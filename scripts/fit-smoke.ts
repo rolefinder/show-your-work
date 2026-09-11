@@ -2,6 +2,11 @@
  * Fit smoke tests against the demo corpus.
  * - CI/CD JD must cite the merge-gate project and produce ≥1 aligned with citation
  * - Kubernetes must NOT be aligned
+ * - A bare skill label must never carry `aligned` (F1)
+ * - Education cites through achievements, never through the credential name (F3)
+ * - Courses and certifications never enter the pack, and never publish an
+ *   unevidenced skill (the evidence gate)
+ * - A stated duration is never silently treated as verified (F5)
  * - Empty / nonsense JD must not invent aligned claims
  * - Tenant fit-config loads (extraStops / weights / extraCaveats)
  * - The browser's evidence pack and the Worker's dist/evidence.json agree
@@ -10,10 +15,20 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildEvidencePack } from "../src/fit/evidence";
+import { retrieveEvidence } from "../src/fit/index";
 import { matchFit } from "../src/fit/match";
 import type { FitMatchConfig } from "../src/fit/config";
 import type { EvidenceDoc } from "../src/types";
-import { BLOG, EXPERIENCE, SITE_CONFIG, SITE_PROFILE, WORK } from "../src/generated/content";
+import {
+  BLOG,
+  CERTIFICATIONS,
+  COURSES,
+  EDUCATION,
+  EXPERIENCE,
+  SITE_CONFIG,
+  SITE_PROFILE,
+  WORK,
+} from "../src/generated/content";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -29,7 +44,7 @@ function assert(cond: unknown, msg: string): asserts cond {
    dist/evidence.json, built independently by scripts/emit-evidence.py. Two
    implementations of one contract, so compare them directly — otherwise the
    two Fit paths can quietly answer differently for the same JD. */
-const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE);
+const docs = buildEvidencePack(SITE_PROFILE, WORK, BLOG, EXPERIENCE, EDUCATION);
 const workerPack = loadJson<{ docs: EvidenceDoc[] }>("dist", "evidence.json");
 
 assert(
@@ -45,6 +60,16 @@ for (const mine of docs) {
       `evidence drift on ${mine.id}.${field}:\n  browser: ${JSON.stringify(mine[field]).slice(0, 160)}\n  worker:  ${JSON.stringify(theirs[field]).slice(0, 160)}`,
     );
   }
+  /* Absent and empty are DIFFERENT here — absent means the title matches,
+     empty means it deliberately does not — so they are compared through a
+     sentinel rather than coalesced. Coalescing would let one implementation
+     forget `titleText` on an education doc and still pass, which is the exact
+     drift this loop exists to catch. */
+  const titleText = (d: EvidenceDoc) => (d.titleText === undefined ? "<absent>" : d.titleText);
+  assert(
+    titleText(theirs) === titleText(mine),
+    `evidence drift on ${mine.id}.titleText: browser ${titleText(mine)}, worker ${titleText(theirs)}`,
+  );
   assert(
     JSON.stringify(theirs.claims || []) === JSON.stringify(mine.claims || []),
     `evidence drift on ${mine.id}.claims`,
@@ -112,6 +137,225 @@ const cicdAligned = cicd.requirements.filter((r) => r.status === "aligned");
 for (const r of cicdAligned) {
   assert(r.evidence.length >= 1, `aligned requires citation: ${r.text}`);
 }
+
+/*
+ * F1: a bare skill label is not a citation.
+ *
+ * `bun run init` scaffolds `skill_notes: {}`, so the default new-adopter state
+ * is a corpus whose skills carry no authored sentence. Such a row must land
+ * `partial`, not `aligned`: the skill is genuinely tagged, and nothing
+ * published says anything about it.
+ *
+ * Built through buildEvidencePack rather than by hand, deliberately. A
+ * hand-written EvidenceDoc can omit things the real builder always does, and
+ * the first version of this check did exactly that — it left skills out of
+ * `text`, so it passed while production still returned `aligned` by quoting
+ * the skill list back through snippetAround. Test the shape that ships.
+ */
+const bareWork = [
+  {
+    slug: "bare-label",
+    title: "Untitled",
+    summary: "A short summary about unrelated matters.",
+    body: "Nothing here mentions those skills by name.",
+    skills: ["TypeScript", "Kubernetes"],
+    skillNotes: {},
+    visible: true,
+  },
+] as unknown as typeof WORK;
+const bareDocs = buildEvidencePack(
+  { ...SITE_PROFILE, skills: [], summary: "", tagline: "" },
+  bareWork,
+  [],
+  [],
+);
+for (const d of bareDocs) {
+  for (const skill of d.skills) {
+    assert(
+      !d.text.toLowerCase().includes(skill.toLowerCase()),
+      `skills must stay out of doc.text, or a skill match manufactures a snippet citation: ${d.id} / ${skill}`,
+    );
+  }
+}
+const bareLabel = matchFit(
+  "Requirements:\n- Strong TypeScript and Kubernetes experience\n",
+  bareDocs,
+  { ...fitCfg, showGaps: true },
+);
+for (const r of bareLabel.requirements) {
+  assert(
+    r.status !== "aligned",
+    `a bare skill label must not carry aligned: ${r.text}`,
+  );
+}
+assert(
+  bareLabel.requirements.some((r) => r.status === "partial"),
+  "a tagged-but-unevidenced skill should still reach partial",
+);
+
+/*
+ * The other half of the same contract, and it has to be gated too: the
+ * authoring guide tells people that writing a `skill_notes` entry is what
+ * turns a bare tag into an aligned claim. If that stops being true the guide
+ * is lying, and nothing else would notice.
+ *
+ * The note deliberately does NOT repeat the requirement's wording — an
+ * authored sentence about a skill is evidence for it whether or not it says
+ * the word again, and scoring it any other way would reward keyword echo.
+ */
+const notedWork = [
+  {
+    ...(bareWork[0] as unknown as Record<string, unknown>),
+    slug: "noted",
+    skills: ["TypeScript"],
+    skillNotes: {
+      TypeScript: "Every content shape is a compile error before it is a runtime blank.",
+    },
+  },
+] as unknown as typeof WORK;
+const noted = matchFit(
+  "Requirements:\n- Strong TypeScript experience\n",
+  buildEvidencePack({ ...SITE_PROFILE, skills: [], summary: "", tagline: "" }, notedWork, [], []),
+  { ...fitCfg, showGaps: true },
+);
+assert(
+  noted.requirements.some((r) => r.status === "aligned"),
+  "a skill backed by an authored skill_notes entry must reach aligned",
+);
+
+/*
+ * F3: education is citable through its achievements, and ONLY through them.
+ *
+ * Both directions are gated because the two failure modes are opposite. If the
+ * credential became matchable, "BS, Information Systems" would answer a third
+ * of the postings in the industry on title weight alone — the collision ADR 027
+ * refused education over, arriving through the back door. If the achievements
+ * were not matchable, a capstone that is structurally a work `evidence` bullet
+ * stays uncitable, which is the defect itself.
+ */
+const eduDocs = buildEvidencePack(
+  { ...SITE_PROFILE, skills: [], summary: "", tagline: "" },
+  [],
+  [],
+  [],
+  [
+    {
+      slug: "degree",
+      institution: "Fictional Institute of Technology",
+      credential: "BS, Fictional Information Systems",
+      date: "2022",
+      achievements: ["Capstone shipped a schema migration the department kept running."],
+      visible: true,
+    },
+  ] as unknown as typeof EDUCATION,
+);
+const eduDoc = eduDocs.find((d) => d.kind === "education");
+assert(eduDoc, "education must reach the evidence pack (F3)");
+assert(eduDoc!.titleText === "", "an education doc's title must not be matchable");
+for (const term of ["information systems", "technology", "fictional"]) {
+  assert(
+    !eduDoc!.text.toLowerCase().includes(term),
+    `credential and institution must stay out of an education doc's text: found ${term}`,
+  );
+}
+assert(
+  retrieveEvidence("Bachelor of Science in Information Systems", eduDocs, fitCfg).length === 0,
+  "a degree name must not retrieve its own education doc (ADR 027's collision)",
+);
+const eduHit = retrieveEvidence("schema migration", eduDocs, fitCfg);
+assert(eduHit.length === 1 && eduHit[0].quote_kind === "claim", "an achievement must cite as a whole claim");
+
+/*
+ * The evidence gate, asserted rather than assumed — both halves.
+ *
+ * SAFETY: no citation may ever resolve to a syllabus or a credential. That is
+ * what makes ADR 027's collision hazard structurally impossible for these two
+ * corpora rather than merely mitigated: they are not documents in the pack, so
+ * there is nothing to collide with. Only a change to buildEvidencePack could
+ * break it, and nothing else would notice.
+ *
+ * LIVENESS: every skill a course or credential publishes is claimed by one of
+ * its own linked projects. packages/content/emit_site.py derives that subset at
+ * emit time; this checks the derivation against the generated module, so an
+ * emitter regression cannot quietly start publishing the ungated `taught:`
+ * list. Checked here rather than in check-content.py because that gate reads
+ * YAML before the build and this is a fact about what the build produced.
+ */
+for (const doc of docs) {
+  assert(
+    doc.kind !== "courses" && doc.kind !== "certifications" && !/^(course|certification):/.test(doc.id),
+    `a course or credential must never become a citable document: ${doc.id}`,
+  );
+}
+for (const [label, items] of [["course", COURSES], ["certification", CERTIFICATIONS]] as const) {
+  for (const item of items) {
+    const evidenced = new Set(
+      item.projects
+        .flatMap((slug) => WORK.find((w) => w.slug === slug && w.visible !== false)?.skills || [])
+        .map((s) => s.toLowerCase()),
+    );
+    for (const skill of item.skills) {
+      assert(
+        evidenced.has(skill.toLowerCase()),
+        `${label} ${item.slug} publishes ${JSON.stringify(skill)}, which none of its linked projects claims — ` +
+          "the evidence gate in packages/content/emit_site.py is not holding",
+      );
+    }
+  }
+}
+
+/*
+ * F5: the matcher reads words, not time.
+ *
+ * "years" and "experience" are stop words, so "5+ years building delivery
+ * pipelines" scores exactly like "building delivery pipelines" — a single
+ * project can answer it, with a real citation, against a requirement the author
+ * may not meet. The citation is not wrong; the row was reading as though the
+ * duration had been checked too.
+ *
+ * Built on a purpose-made corpus rather than the demo's, so the assertion
+ * cannot quietly stop asserting anything when the demo content changes. A row
+ * that matches is the precondition for the whole check.
+ */
+const durationDocs = buildEvidencePack(
+  { ...SITE_PROFILE, skills: [], summary: "", tagline: "" },
+  [
+    {
+      slug: "pipelines",
+      title: "Delivery pipelines",
+      summary: "Delivery pipelines, built and run.",
+      body: "Delivery pipelines built on GitHub Actions.",
+      skills: ["pipelines"],
+      skillNotes: { pipelines: "Every merge runs the same gates the release does." },
+      visible: true,
+    },
+  ] as unknown as typeof WORK,
+  [],
+  [],
+);
+const duration = matchFit(
+  "Requirements:\n- 5+ years building delivery pipelines\n",
+  durationDocs,
+  { ...fitCfg, showGaps: true },
+);
+const durationRow = duration.requirements.find(
+  (r) => r.status === "aligned" || r.status === "partial",
+);
+assert(durationRow, "the duration fixture must produce a cited row, or this asserts nothing");
+assert(
+  /5\+ years/.test(durationRow!.why) && /does not evaluate/.test(durationRow!.why),
+  `a cited row answering a duration requirement must say the duration was not evaluated: ${durationRow!.why}`,
+);
+assert(
+  duration.caveats.some((c) => /reads words, not time/.test(c)),
+  "a brief containing a duration requirement must carry the duration caveat",
+);
+assert(
+  !matchFit("Requirements:\n- Strong pipeline skills\n", durationDocs, fitCfg).caveats.some((c) =>
+    /reads words, not time/.test(c),
+  ),
+  "a brief with no duration requirement must not carry the duration caveat",
+);
 
 let citesMergeGate = false;
 if (SITE_CONFIG.demo) {

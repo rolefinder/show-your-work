@@ -12,7 +12,7 @@ skills:
   - Cloudflare Pages
   - TypeScript
   - Python
-  - YAML content pipelines
+  - pipelines
 
 # Profile URLs for the contact row, and for sameAs in the emitted JSON-LD.
 # Keyed by platform, in the order you want them rendered. Add any platform you

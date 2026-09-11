@@ -51,6 +51,8 @@ const FIXTURES = [
   { name: "config + profile", add: ["config/site.yaml", "about/profile.yaml"] },
   { name: "first project added", add: ["about/profile.yaml", "work/mine.yaml"] },
   { name: "project + post", add: ["about/profile.yaml", "work/mine.yaml", "blog/post.yaml"] },
+  { name: "first course added (demo courses vanish, demo work stays)", add: ["about/profile.yaml", "courses/mine.yaml"] },
+  { name: "course + certification", add: ["about/profile.yaml", "courses/mine.yaml", "certifications/mine.yaml"] },
   { name: "every config overridden", add: [
     "about/profile.yaml", "config/site.yaml", "config/skills.yaml",
     "config/fit.yaml", "config/sources.yaml", "work/mine.yaml",
@@ -73,6 +75,10 @@ function buildFixture(add) {
     "content/demo/work/fake-one.yaml",
     "content/demo/work/fake-two.yaml",
     "content/demo/blog/fake-post.yaml",
+    "content/demo/experience/fake-role.yaml",
+    "content/demo/education/fake-degree.yaml",
+    "content/demo/courses/fake-course.yaml",
+    "content/demo/certifications/fake-cert.yaml",
   ]) {
     write(rel, "# demo\n");
   }
@@ -92,7 +98,7 @@ for (const p of [["about","profile.yaml"],["config","site.yaml"],["config","skil
   out["resolve:" + p.join("/")] = rel(resolve(...p));
   out["isOwn:" + p.join("/")] = isOwn(...p);
 }
-for (const k of ["work","blog"]) {
+for (const k of ["work","blog","experience","education","courses","certifications"]) {
   out["corpusDir:" + k] = rel(corpusDir(k));
   out["corpusFiles:" + k] = corpusFiles(k).slice().sort();
 }
@@ -107,7 +113,7 @@ out = {"isDemo": is_demo()}
 for p in [("about","profile.yaml"),("config","site.yaml"),("config","skills.yaml"),("config","fit.yaml"),("config","sources.yaml")]:
     out["resolve:" + "/".join(p)] = rel(resolve(*p))
     out["isOwn:" + "/".join(p)] = is_own(*p)
-for k in ("work","blog"):
+for k in ("work","blog","experience","education","courses","certifications"):
     out["corpusDir:" + k] = rel(corpus_dir(k))
     out["corpusFiles:" + k] = sorted(f.name for f in corpus_files(k))
 print(json.dumps(out))

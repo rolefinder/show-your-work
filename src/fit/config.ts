@@ -56,6 +56,11 @@ const CAVEAT_AUDIT = "Absence of evidence is not proof of absence of skill.";
 const CAVEAT_HIGHLIGHT =
   "Shows the requirements covered by published work; it is not an exhaustive review of the role.";
 
+/* Added by match.ts only when a requirement actually states one, so a brief
+   that never mentions time never carries it. */
+export const CAVEAT_DURATION =
+  "Some requirements state a length of experience. This matcher reads words, not time — those rows are matched on substance only.";
+
 export const ENGINE_CAVEATS: readonly string[] = [CAVEAT_ENGINE, CAVEAT_AUDIT];
 
 export function showGaps(cfg?: FitMatchConfig): boolean {

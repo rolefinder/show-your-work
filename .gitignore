@@ -44,3 +44,8 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Job descriptions you save to audit your corpus against (`bun run fit:audit`).
+# These are someone else's document — a posting you were sent, or one you found
+# — and a portfolio repo is public. They stay on your machine.
+/jds/

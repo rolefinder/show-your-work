@@ -34,7 +34,10 @@ function skillsIn(text) {
 
 const counts = new Map();
 const where = new Map();
-for (const kind of ["work", "blog"]) {
+// Every corpus check-content gates, so this advisory tool and the blocking
+// gate agree on scope. Experience skills count too — they split the same
+// vocabulary even though they do not render in the skill bank.
+for (const kind of ["work", "blog", "experience"]) {
   const dir = corpusDir(kind);
   if (!existsSync(dir)) continue;
   for (const f of readdirSync(dir).filter((x) => x.endsWith(".yaml"))) {
@@ -55,7 +58,7 @@ if (existsSync(profile)) {
 }
 
 if (!counts.size) {
-  console.log("skills: none found in content/work or content/blog");
+  console.log("skills: none found in content/work, content/blog or content/experience");
   process.exit(0);
 }
 

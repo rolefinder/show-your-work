@@ -11,7 +11,7 @@ body: >
 skills:
   - Python
   - YAML
-  - content pipelines
+  - pipelines
   - TypeScript
 
 problem: >
@@ -35,7 +35,7 @@ decisions:
 skill_notes:
   Python: The generator reads and validates the YAML corpus.
   YAML: YAML is the authoring surface humans actually edit.
-  content pipelines: Content moves through one emit step with an explicit contract.
+  pipelines: Content moves through one emit step with an explicit contract.
   TypeScript: The emitted module is typed, so content shape is compiler-checked.
 
 visible: true
