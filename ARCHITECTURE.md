@@ -161,6 +161,8 @@ show-your-work/
 ├── graph/                       ▓ WebGL engine, bundled to a self-hosted file
 │   ├── index.mjs                  attaches window.SYWPortfolioGraph
 │   ├── engine.mjs                 Sigma lifecycle, interaction, camera
+│   ├── hover.mjs                  Canvas glow + hover size (CSP-safe; no DOM style)
+│   ├── camera-fit.mjs             Sigma v3 framed camera: show the whole graph
 │   ├── layout.mjs                 Graphology build, node color/size, view filter
 │   ├── forces.mjs                 ForceAtlas2 presets (default vs compact)
 │   └── theme.mjs                  reads pg-* CSS vars via canvas readback
@@ -665,6 +667,14 @@ properties off the nearest `.pg-page` / `.work-graph-viewport` ancestor and
 resolves any color syntax — including `oklch()` — through a 1×1 canvas
 readback, because WebGL needs concrete hex. The palette is scoped to those
 containers so the dark canvas never leaks into page chrome.
+
+**Hover is painted on the canvas.** A DOM glow with inline styles is stripped
+by `style-src 'self'`. `hover.mjs` draws a radial halo on Sigma's hover
+layer, and `itemSizesReference: "screen"` keeps node hit targets large after
+the camera fits the whole graph. Sigma also sizes its stacked canvases with
+`element.style`; those writes are blocked too, so `tokens/graph.css` overlays
+`.pg-host canvas` itself — otherwise the mouse layer is not on top of the
+nodes and `enterNode` never fires.
 
 > **Known wart:** the knowledge graph uses `proj:` / `blog:` / `skill:` id
 > prefixes while Fit evidence uses `work:` / `blog:`. Two id namespaces for one
